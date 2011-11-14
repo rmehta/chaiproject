@@ -11,6 +11,8 @@ def make():
 	import os
 	import conf
 	import database
+	messages = []
+	
 	container = '<div class="main container">'
 
 	db = database.Database()
@@ -20,9 +22,7 @@ def make():
 	index_html = index_html.split(container)
 
 	if len(index_html)!=2:
-		print "%s not found" % container
-		print "did nothing!"
-		return
+		return "%s not found" % container
 	
 	for page in db.sql("select * from page", as_dict=1):
 		html = index_html[0] + container +\
@@ -43,7 +43,9 @@ def make():
 		out = open(os.path.join(pages_path, page['name'] + '.html'), 'w')
 		out.write(html)
 		out.close()
-		print "wrote %s %sk" % (page['name'] + '.html', len(html)/1024)
+		messages.append("wrote %s %sk" % (page['name'] + '.html', len(html)/1024))
+
+	return messages
 
 if __name__=='__main__':
 	make()

@@ -119,6 +119,9 @@
 							.html('<span class="label important">'+data.error+'</span>');
 							console.log(data.traceback);
 					}
+					if(data.log) {
+						console.log(data.log);
+					}
 				});
 			}
 		}
