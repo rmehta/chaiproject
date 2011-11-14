@@ -1,7 +1,7 @@
 <div class="topbar">
 	<div class="topbar-inner">
 		<div class="container">
-			<a class="brand" href="#index">chaiproject</a>
+			<a class="brand" href="#index"></a>
 			<ul class="nav">
 			</ul>
 			<ul class="nav secondary-nav">
@@ -13,7 +13,7 @@
 <script>
 $.require('lib/js/bootstrap/bootstrap-dropdown.js');
 $(document).ready(function() {
-	
+	$('.topbar .brand').html($.app_name);
 	
 	$.getJSON('lib/py/session.py', function(session) {
 		$.session = session

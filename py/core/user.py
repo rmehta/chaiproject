@@ -7,7 +7,7 @@ class User(model.Model):
 	def before_post(self):
 		"""save password as sha256 hash"""		
 		import hashlib
-		if 'password' in self.obj and len(self.obj['password']!=64):
+		if 'password' in self.obj and len(self.obj['password'])!=64:
 			self.obj['password'] = hashlib.sha256(self.obj['password']).hexdigest()
 		
 		# clear re-entered password

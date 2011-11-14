@@ -8,4 +8,5 @@ class Page(model.Model):
 		"""generated html pages"""
 		import pages
 		ret = pages.make()
-		http_request.req.out['log'] = ret
+		if http_request.req:
+			http_request.req.out['log'] = ret

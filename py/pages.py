@@ -11,11 +11,16 @@ def make():
 	import os
 	import conf
 	import database
+	import http_request
+	
 	messages = []
 	
 	container = '<div class="main container">'
 
-	db = database.Database()
+	if http_request.req:
+		db = http_request.req.db
+	else:
+		db = database.Database()
 	pages_path = os.path.join(os.path.dirname(__file__), '../..')
 	
 	index_html = open(os.path.join(os.path.dirname(__file__), '../..', 'index_template.html'),'r').read()

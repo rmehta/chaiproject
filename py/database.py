@@ -28,6 +28,12 @@ class Database:
 			return out
 
 		return res
-	def close(self):
+		
+	def commit(self):
+		self.conn.commit()
+		
+	def close(self, commit=False):
 		"""close connection"""
+		if commit:
+			self.commit()
 		self.conn.close()

@@ -13,7 +13,7 @@ class ObjStore:
 			if not db:
 				import database
 				db = database.Database()
-				self.db = db
+			self.db = db
 
 		self.sql = self.db.sql
 		
