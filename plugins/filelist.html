@@ -1,0 +1,43 @@
+<button class="btn primary small" onclick="location.href='#upload'" style="float: right">
+	New</button>
+<h2>Files</h2>
+<br>
+<table class="bordered-table zebra-striped" id="filelist_table">
+	<thead>
+		<tr>
+			<th width="80%">File</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+	</tbody>
+</table>
+<script>
+// get list of pages
+$.require('lib/js/prettydate.js');
+$.require('lib/js/common.js');
+
+// delete
+$("#filelist").delete_table_row({
+	url:'lib/py/files.py'
+});
+
+$.getJSON('lib/py/files.py', function(data) {
+
+	// render
+	$.each(data.files, function(i, f) {		
+		$('#filelist_table tbody').append($.rep('<tr>\
+			<td>\
+				<a href="files/%(name)s" target="_blank"><b>files/%(name)s</b></a>\
+				<div class="help-block">%(size)sk | %(ts)s</div>\
+			</td>\
+			<td><button data-name="%(name)s" class="btn small delete-row-btn">Delete</button></td>\
+			</tr>', {
+				name: f[0],
+				size: (f[2] / 1024).toFixed(2),
+				ts: prettyDate(f[1])
+			}))
+	});
+});
+
+</script>

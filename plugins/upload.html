@@ -1,0 +1,66 @@
+<!-- type: modal -->
+<div class="modal hide fade" id="upload">
+	<div class="modal-header">
+		<a href="#" class="close">&times;</a>
+		<h3>Upload a File</h3>
+	</div>
+	<div class="modal-body">
+		<form class="form-stacked" method="POST" action="lib/py/files.py" enctype="multipart/form-data">
+			<input name="mimetype" type="hidden" value="json">
+			<div class="clearfix">
+				<input name="filedata" type="file" />
+			</div>
+			<div class="message"></div>
+			<br><br>
+		</form>
+	</div>
+	<div class="modal-footer">
+		<span class="message"></span>
+		<button class="btn primary">Upload</button>
+		<button class="btn secondary" onclick="$('#upload').modal('hide')">Close</button>
+	</div>
+</div>
+<script>
+$.require('lib/js/bootstrap/bootstrap-modal.js');
+$.require('lib/js/jquery/jquery.form.js');
+
+// activate as modal
+$('#upload form input[name=filedata]').change(function() {
+	if($(this).val()) {
+		$('#upload button.primary').attr('disabled', false);		
+	} else {
+		$('#upload button.primary').attr('disabled', true);
+	}
+})
+
+$('#upload').bind('_show', function() {
+	$('#upload form .message').html('');
+	$('#upload form input[name=filedata]').css('display', 'inline').val('');
+	$('#upload button.primary').attr('disabled', true).css('display','inline');
+	$('#upload').modal({backdrop:'static', show:true});
+});
+
+$('#upload form').ajaxForm({
+	beforeSubmit: function() {
+		$('#upload button.primary').attr('disabled', true);
+		$('#upload form input[name=filedata]').css('display', 'none');
+		$('#upload form .message').html('<span class="label">Sending...</span>');
+	},
+	success: function(data) {
+		data = JSON.parse(data);
+		$('#upload button.primary').css('display','none');
+		if(data.message && data.message=='ok') {
+			$('#upload form .message').html('<span class="label success">'+
+				data.fname + ' uploaded</span>');
+		} else {
+			$('#upload form .message').html('<span class="label important">'+
+				data.error + '</span>');			
+		}
+	}
+});
+
+$('#upload button.btn.primary').click(function() {
+	$('#upload form').trigger('submit');
+})
+
+</script>

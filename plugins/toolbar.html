@@ -1,0 +1,71 @@
+<div class="topbar">
+	<div class="topbar-inner">
+		<div class="container">
+			<a class="brand" href="#index">chaiproject</a>
+			<ul class="nav">
+			</ul>
+			<ul class="nav secondary-nav">
+			</ul>
+		</div>
+	</div>
+</div>
+
+<script>
+$.require('lib/js/bootstrap/bootstrap-dropdown.js');
+$(document).ready(function() {
+	
+	
+	$.getJSON('lib/py/session.py', function(session) {
+		$.session = session
+		if(!session.user || session.user=='guest') {
+			$('.topbar .nav.secondary-nav').append('\
+				<li><a href="#signin">Login</a></li>\
+			')
+		}
+		if(session.user && session.user!='guest') {
+			$('.topbar .nav.secondary-nav').append('\
+			<li class="dropdown">\
+				<a class="dropdown-toggle" href="#">Admin</a>\
+				<ul class="dropdown-menu">\
+					<li><a href="#pagelist">Pages</a></li>\
+					<li><a href="#filelist">Files</a></li>\
+					<li><a href="#userlist">Users</a></li>\
+					<li><a href="#" id="topbar_edit">Edit</a></li>\
+				</ul>\
+			<li>\
+			<li class="dropdown">\
+				<a class="dropdown-toggle" href="#">'
+					+(session.userobj.full_name || 'User')+'</a>\
+				<ul class="dropdown-menu">\
+					<li><a href="#editprofile">Edit Profile</a></li>\
+					<li><a href="#" id="topbar_logout">Logout</a></li>\
+				</ul>\
+			<li>')
+
+			// logout
+			$('#topbar_logout').click(function() {
+				$.ajax({
+					url:'lib/py/session.py', 
+					type:'DELETE', 
+					success: function(data) {
+						window.location.reload(true);
+					}
+				});
+				return false;
+			})
+			
+			// edit
+			$('#topbar_edit').click(function() {
+				var curpage = $('.content.active').attr('id');
+				if(curpage!='editpage') {
+					location.hash='!editpage/' + $('.content.active').attr('id');
+				}
+				return false;							
+			})
+		}
+		
+		$('.topbar').dropdown();
+	})
+})
+
+</script>

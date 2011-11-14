@@ -1,0 +1,72 @@
+<button class="btn primary small" id="btn-new-profile" style="float: right">
+	New</button>
+<h2>Users</h2>
+<br>
+<table class="bordered-table zebra-striped" id="userlist-table">
+	<thead>
+		<tr>
+			<th width="60%">User</th>
+			<th width="20%"></th>
+			<th width="20%"></th>
+		</tr>
+	</thead>
+	<tbody>
+	</tbody>
+</table>
+<script>
+$.require('lib/js/prettydate.js');
+$.require('lib/js/common.js');
+
+// delete
+$("#userlist").delete_table_row({
+	data: {type:'user'}
+})
+
+// new profile
+$('#btn-new-profile').click(function() {
+	$.require('lib/js/form.js');
+	$.modal_form({
+		label:'New User',
+		id:'newuser',
+		fields:[
+			{name:'name', label:'User Name',mandatory:true},
+			{name:'email', label:'Email', defaultval:'not set'},
+			{name:'type', type:'hidden', defaultval:'user'}
+		]
+	});
+	$('#newuser').modal('show');
+});
+
+
+// get list of pages
+$.getJSON('lib/py/query.py', {"json": JSON.stringify({
+		type:"user", 
+		columns:"name, full_name, email, is_admin",
+		order_by: "full_name asc"
+	})}, function(data) {
+
+	// render
+	$.each(data.result, function(i, user) {
+		if(!user.full_name) user.full_name = user.name;
+		if(!user.email) user.email = '[not set]';
+		$('#userlist-table tbody').append($.rep('<tr>\
+			<td>\
+				<b>%(full_name)s</b></a>\
+				<div class="help-block">id: %(name)s | email: %(email)s</div>\
+			</td>\
+			<td><input type="checkbox" />\
+				<span class="check-help">Set as admin</span></td>\
+			<td><button data-name="%(name)s" class="btn small delete-row-btn">Delete</button></td>\
+			</tr>', user));
+			
+		$tr = $('#userlist-table tbody tr:last');
+		// disable current user
+		if(user.name==$.session.user) {
+			$tr.find(':input').attr('disabled', true);
+			$tr.find('.check-help').css('color','#777');
+		}
+	});
+	
+});
+
+</script>

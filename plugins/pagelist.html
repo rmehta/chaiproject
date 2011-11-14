@@ -1,0 +1,47 @@
+<button class="btn primary small" onclick="location.href='#editpage'" style="float: right">
+	New</button>
+<h2>Pages</h2>
+<br>
+<table class="bordered-table zebra-striped" id="pagelist_table">
+	<thead>
+		<tr>
+			<th width="80%">Page Name</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+	</tbody>
+</table>
+<script>
+$.require('lib/js/prettydate.js');
+$.require('lib/js/common.js');
+
+// delete
+$("#pagelist").delete_table_row({
+	data: {type:'page'}
+})
+
+// get list of pages
+$.getJSON('lib/py/query.py', {"json": JSON.stringify({
+		type:"page", 
+		columns:"name, label, _updated",
+		order_by: "label asc"
+	})}, function(data) {
+
+	// render
+	$.each(data.result, function(i, p) {
+		if(!p.label) p.label = p.name;
+		p.ts = prettyDate(p._updated);
+		
+		$('#pagelist_table tbody').append($.rep('<tr>\
+			<td>\
+				<a href="#%(name)s"><b>%(label)s</b></a>\
+				<div class="help-block">%(ts)s</div>\
+			</td>\
+			<td><button data-name="%(name)s" class="btn small delete-row-btn">Delete</button></td>\
+			</tr>', p))
+	});
+	
+});
+
+</script>

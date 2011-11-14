@@ -1,0 +1,105 @@
+<form action="lib/py/objstore.py" method="post">
+	<div class="clearfix">
+		<input type="hidden" name="type" value="page" />
+		<input type="text" name="label" />
+		<span class="help-block">Title</span>
+	</div>
+	<div class="clearfix">
+		<input type="text" name="name" />
+		<button class="btn primary">Save</button>
+		<span class="alert-area"></span>
+	</div>
+	<div>
+		<ul class="pills">
+			<li class="active"><a href="#page_edit_html">HTML</a></li>
+			<li><a href="#page_edit_md">Markdown</a></li>
+			<li><a href="#page_edit_css">CSS</a></li>
+			<li><a href="#page_edit_js">Javascript</a></li>
+		</ul>
+	</div>
+	<div class="tab-content">
+		<div id="page_edit_html" class="tab-pane active">
+			<textarea name="html" 
+			class="xlarge code" spellcheck="false"></textarea>
+		</div>
+		<div id="page_edit_md" class="tab-pane">
+			<textarea name="markdown" 
+			class="xlarge code" spellcheck="false"></textarea>
+			<span class="help-block">Editing this will over-write the HTML</span>
+		</div>
+		<div id="page_edit_css" class="tab-pane">
+			<textarea name="css"
+			class="xlarge code" spellcheck="false"></textarea>
+		</div>
+		<div id="page_edit_js" class="tab-pane">
+			<textarea name="js"
+			class="xlarge code" spellcheck="false"></textarea>
+		</div>
+	</div>
+</form>
+
+
+<script>
+// required libs
+$.require('lib/js/bootstrap/bootstrap-tabs.js');
+$.require('lib/js/jquery/jquery.form.js');
+
+// make tabs
+$(".container .pills").tabs();
+
+// convert markdown
+$('#page_edit_md textarea').change(function() {
+	var md = $(this).val();
+	if(md) {
+		$.require('lib/js/showdown.js');
+		if(!this.converter)
+			this.converter = new Showdown.converter();
+			
+		// write html
+		$('#page_edit_html textarea')
+			.val(this.converter.makeHtml($(this).val()));
+			
+		// label
+		$('#editpage .alert-area')
+			.html('<span class="label">HTML overwritten</span>');
+		$('#editpage .label')
+			.delay(1000)
+			.fadeOut();
+	}
+})
+
+// save
+$("#editpage form").ajaxForm({
+	success: function(data) {
+		if(data.message=='ok') {
+			$('#editpage .alert-area')
+				.html('<span class="label success">Saved</span>');
+			$('#editpage .label')
+				.delay(1000)
+				.fadeOut();
+		} else {
+			alert(data.error);
+		}
+	},
+	beforeSubmit: function() {
+		$('#editpage .alert-area')
+			.html('<span class="label">Saving...</span>');		
+	}
+});
+
+// load 
+$("#editpage").bind('_show', function() {
+	$("#editpage form").clearForm();
+
+	var editing = location.hash.split('/');
+	if(editing.length>1) {
+		editing = editing.slice(-1)[0];
+		$.objstore.get("page", editing, function(obj) {
+			$.each(obj, function(key, val) {
+				if(key!="type")
+					$('#editpage form [name='+key+']').val(val);
+			});
+		});
+	}
+})
+</script>
