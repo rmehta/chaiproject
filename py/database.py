@@ -86,23 +86,24 @@ class Database:
 				database.get().sql("desc `%s`" % table, as_dict=False)]
 		return self._columns[table]
 
-	def sync_tables(self):
+	def sync_tables(self, table=None):
 		"""make / update tables from models"""
 		import model, objstore
 
 		tables = self.table_list()
 		for modelclass in model.all():
 			m = modelclass({})
-			if not m._name in tables:
-				self.sql(m._create_table)
-			else:
-				self.repair_table(m._name, m._create_table)
+			if (not table) or (table==m._name):
+				if not m._name in tables:
+					self.sql(m._create_table)
+				else:
+					self.repair_table(m._name, m._create_table)
 				
-			# update parent-child map
-			if hasattr(m, '_parent'):
-				self.begin()
-				objstore.post(type="_parent_child", parent=m._parent, child=m._name)
-				self.commit()
+				# update parent-child map
+				if hasattr(m, '_parent'):
+					self.begin()
+					objstore.post(type="_parent_child", parent=m._parent, child=m._name)
+					self.commit()
 
 conn = None	
 def create_db(rootuser, rootpass):

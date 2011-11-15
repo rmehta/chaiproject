@@ -115,12 +115,31 @@ class ObjStore:
 							raise Exception, "child %s must be dict or literal" % str(child)	
 		modelobj and modelobj.after_post()
 
+	def exists(self, obj):
+		"""check exists by name"""
+		if obj.get('name') and obj.get('type'):
+			return self.db.sql("select name from `%s` where name=%s" % \
+			 	(obj['type'],'%s'), obj['name'])
+
+	def post_action(self, obj):
+		"""identify post action"""
+		if obj.get('_new'):
+			return 'insert'
+		elif obj.get('_replace'):
+			return 'replace'
+		elif not obj.get('name'):
+			return 'replace'
+		elif not self.exists(obj):
+			return 'replace'
+		else:
+			return 'update'
+
 	def post_single(self, obj):
 		"""post an object in db, ignore extra columns"""
-		import MySQLdb, database
+		import MySQLdb
 		obj_copy = {}
 		
-		columns = database.get().columns(obj['type'])
+		columns = self.db.columns(obj['type'])
 		# copy valid columns
 		for c in columns:
 			if obj.get(c):
@@ -128,14 +147,18 @@ class ObjStore:
 
 		parts = {
 			'tab': obj['type'],
-			'cols': '`, `'.join(obj_copy.keys()),
-			'vals': ('%s,'*len(obj_copy))[:-1]
+			'cmd': self.post_action(obj)
 		}
 
-		parts['insert'] = obj.get('_new') and 'insert' or 'replace'
-
-		query = """%(insert)s into `%(tab)s`(`%(cols)s`) 
-			values (%(vals)s)""" % parts
+		if parts['cmd'] in ('insert', 'replace'):
+			parts['cols'] = '`, `'.join(obj_copy.keys())
+			parts['vals'] = ('%s,'*len(obj_copy))[:-1]
+			query = """%(cmd)s into `%(tab)s`(`%(cols)s`) 
+				values (%(vals)s)""" % parts
+		else:
+			parts['set'] = ', '.join(['`%s`=%s' % (key, '%s') for key in obj_copy.keys()])
+			parts['name'] = obj['name'].replace("'", "\'")
+			query = """update `%(tab)s` set %(set)s where name='%(name)s'""" % parts
 		
 		self.db.sql(query, tuple(obj_copy.values()))
 	

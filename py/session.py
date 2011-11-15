@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import http_request, json
 import objstore
+import database
 
 user = None
 
@@ -20,15 +21,18 @@ class Session:
 		else:
 			self.user = 'guest'
 			self.new_sid()
-			obstore.post(type="session", user=self.user, name=self.name)
+			database.get()
+			database.conn.begin()
+			objstore.post(type="session", user=self.user, name=self.name)
+			database.conn.commit()
 
 			user = self.user
 	
 	def password_okay(self):
 		"""check passwords"""
 		import hashlib
-		pwd = self.req.db.sql("select password from user where name=?", (self.req.form['user'],))
-		if pwd: pwd = pwd[0][0]
+		pwd = self.req.db.sql("select password from user where name=%s", (self.req.form['user'],))
+		if pwd: pwd = pwd[0]['password']
 		
 		return pwd == hashlib.sha256(self.req.form.get("password")).hexdigest()
 	
@@ -45,7 +49,7 @@ class Session:
 			self.req.out["message"] = "ok"	
 			self.new_sid()
 			self.user = self.req.form['user']
-			obstore.post(type="session", user=self.user, name=self.name)
+			objstore.post(type="session", user=self.user, name=self.name)
 			user = self.user
 
 	def new_sid(self):
@@ -55,7 +59,6 @@ class Session:
 
 	def logout(self):
 		"""logout sessions"""
-		import database
 		if 'user' in self.req.cookies:
 			database.get().sql("delete from session where user=%s", (self.req.cookies['user'],))
 			self.name = ''
@@ -66,14 +69,17 @@ def get(**args):
 	req = http_request.req
 	req.session = Session(req)
 	if req.form.get('user'):
+		database.get()
+		database.conn.begin()
 		req.session.new()
+		database.conn.commit()
 	else:
 		req.session.load()
 
 	return {
 		"user":req.session.user, 
 		"sid":req.session.name, 
-		"userobj":objstore.get('user',req.session.user)
+		"userobj":objstore.get(type='user', name=req.session.user)
 	}
 
 def delete(**args):

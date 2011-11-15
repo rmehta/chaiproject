@@ -5,6 +5,7 @@ class Page(model.Model):
 	_create_table = """
 	create table `page` (
 		name varchar(180) primary key,
+		label varchar(240) not null default "No Label",
 		html text,
 		markdown text,
 		css text,

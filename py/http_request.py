@@ -69,7 +69,10 @@ class Request:
 		self.session = Session(self)
 		self.session.load()
 	
-	
+	def type_handler(self, obj):
+		if hasattr(obj, 'strftime'):
+			return str(obj)
+					
 	def close(self):
 		"""print json"""
 		self.db.conn.commit()
@@ -84,7 +87,7 @@ class Request:
 		self.print_cookies()
 		print "Content-Type: " + ctype
 		print
-		print self.out_text or json.dumps(self.out)
+		print self.out_text or json.dumps(self.out, default = self.type_handler)
 
 def get_traceback():
 	import sys, traceback, string
