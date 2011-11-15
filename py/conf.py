@@ -1,5 +1,7 @@
 # db saved here
-db_path = 'temp.db'
+dbuser = 'chaiproject'
+dbpassword = 'test'
+dbname = 'chaiproject'
 
 # files are uploaded here
 files_path = 'files'

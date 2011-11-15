@@ -1,21 +1,24 @@
 #!/usr/bin/python
+
+"""
+Objectstore add, update and remove objects from the db
+
+Methods:
+
+get
+post
+delete
+
+Takes db connection from the session (if present) or opens a new connection from the conf
+"""
 import http_request, model
 
 db = None
 
 class ObjStore:
 	def __init__(self, req=None):
-		global db
-		if req:
-			self.req = req
-			self.db = req.db
-		else:
-			if not db:
-				import database
-				db = database.Database()
-				self.db = db
-
-		self.sql = self.db.sql
+		import database
+		self.db = database.get()
 		
 	def get(self, ttype, name):
 		"""get an object"""
@@ -222,4 +225,8 @@ def delete(**args):
 
 # request handling
 if __name__=="__main__":
-	http_request.main()
+	import sys
+	if len(sys.argv)>0 and sys.argv[1]=='test':
+		unittest.main()
+	else
+		http_request.main()

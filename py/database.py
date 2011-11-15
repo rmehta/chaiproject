@@ -1,14 +1,13 @@
 class Database:
 	def __init__(self):
 		"""connect to db"""
-		import sqlite3
+		import MySQLdb
 		import conf
 		import os
-
-		db_path = os.path.join(os.path.dirname(__file__), '../..', conf.db_path)
 		
-		self.conn = sqlite3.connect(db_path)
-		self.cur = self.conn.cursor()		
+		self.conn = MySQLdb.connect(localhost, conf.dbuser, conf.dbpassword)
+		self.cur = self.conn.cursor()
+		self.cur.execute("use %s" % conf.dbname)
 		
 	def sql(self, query, values=(), as_dict=None, debug=None):
 		"""like webnotes.db.sql"""
@@ -31,3 +30,12 @@ class Database:
 	def close(self):
 		"""close connection"""
 		self.conn.close()
+	
+conn = None	
+def get():
+	"""return a new connection"""
+	global conn
+	if not conn:
+		conn = Database()
+	return conn
+	

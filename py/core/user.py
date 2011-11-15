@@ -1,6 +1,15 @@
 import model
 
 class User(model.Model):
+	create_table = """
+	create table `user` (
+		name varchar(180) primary key,
+		fullname, varchar(240),
+		email varchar(180),
+		_updated timestamp,
+	) engine=InnoDB
+	"""	
+	
 	def __init__(self, obj):
 		super(User, self).__init__(obj)
 		

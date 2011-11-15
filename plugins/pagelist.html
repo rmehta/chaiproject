@@ -38,7 +38,10 @@ $.getJSON('lib/py/query.py', {"json": JSON.stringify({
 				<a href="#%(name)s"><b>%(label)s</b></a>\
 				<div class="help-block">%(ts)s</div>\
 			</td>\
-			<td><button data-name="%(name)s" class="btn small delete-row-btn">Delete</button></td>\
+			<td>\
+				<button class="btn small primary" onclick="location.hash=\'editpage/%(name)s\'" >Edit</button>\
+				<button data-name="%(name)s" class="btn small delete-row-btn">Delete</button>\
+			</td>\
 			</tr>', p))
 	});
 	

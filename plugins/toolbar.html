@@ -30,7 +30,6 @@ $(document).ready(function() {
 					<li><a href="#pagelist">Pages</a></li>\
 					<li><a href="#filelist">Files</a></li>\
 					<li><a href="#userlist">Users</a></li>\
-					<li><a href="#" id="topbar_edit">Edit</a></li>\
 				</ul>\
 			<li>\
 			<li class="dropdown">\
@@ -52,16 +51,7 @@ $(document).ready(function() {
 					}
 				});
 				return false;
-			})
-			
-			// edit
-			$('#topbar_edit').click(function() {
-				var curpage = $('.content.active').attr('id');
-				if(curpage!='editpage') {
-					location.hash='!editpage/' + $('.content.active').attr('id');
-				}
-				return false;							
-			})
+			});
 		}
 		
 		$('.topbar').dropdown();

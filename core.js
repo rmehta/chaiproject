@@ -160,7 +160,9 @@ $.view = {
 		if(obj.js)
 			$.set_script(obj.js);
 		if(obj.css)
-			$.set_style(obj.css);	
+			$.set_style(obj.css);
+		$("#"+name).trigger('_render');
+
 	},
 	show: function(name, path, type) {
 		$.view.load(name, path, type, function() {
@@ -170,6 +172,7 @@ $.view = {
 				$("#"+name).addClass('active');
 			}
 			$("#"+name).trigger('_show');
+			window.scroll(0, 0);
 		});
 	}
 }
