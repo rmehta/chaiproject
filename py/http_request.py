@@ -13,7 +13,7 @@ class Request:
 		self.out_text = '' # if not json
 		self.form = {}
 		self.method = None
-		self.db = database.Database()
+		self.db = database.get()
 		
 		if os.environ.get('REQUEST_METHOD'):
 			self.load_env()
@@ -100,6 +100,10 @@ def main(module='__main__'):
 	global req
 	req = Request()
 	
+	import database
+	if req.method in ('post', 'delete'):
+		req.db.begin()
+	
 	if isinstance(module, basestring):
 		moduleobj = __import__(module)
 		if hasattr(moduleobj, req.method):
@@ -110,5 +114,8 @@ def main(module='__main__'):
 			except Exception, e:
 				req.out['traceback'] = get_traceback()
 				req.out['error'] = str(e.args[0])
+
+	if req.method in ('post', 'delete'):
+		req.db.commit()
 		
 	req.close()

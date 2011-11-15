@@ -1,7 +1,7 @@
 // standard form actions
 (function($) {
 	// make a stacked form
-	$.fn.stacked_form = function(opts) {
+	$.fn.stacked_form = function(opts) {		
 		this.append('<form class="form-stacked"></form>');
 		var me = this;
 		$.each(opts, function(i, f) {

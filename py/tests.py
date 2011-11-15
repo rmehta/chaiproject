@@ -14,23 +14,6 @@ class TestObjStore(unittest.TestCase):
 		import os, conf
 		if os.path.exists(conf.db_path):
 			os.remove(conf.db_path)
-				
-	def test_objstore(self):
-		obs = objstore.ObjStore()
-		obs.post({"type":"user", "name":"test"})
-		obs.post({"type":"user", "name":"test", "email":"test2"})
-				
-		obj = obs.get("user","test")
-		self.assertTrue(obj['name']=='test' and obj['email']=='test2')
-	
-	def test_parent_child_created(self):
-		obs = objstore.ObjStore()
-		obs.post({"type":"user", "name":"test", "user_role":["admin", "guest"]})
-		r = obs.sql("select * from _parent_child", as_dict=1)[0]
-		self.assertTrue(r['parent']=="user" and r['child']=="user_role")
-
-		r = obs.get("user", "test")
-		self.assertTrue("admin" in r["user_role"])
 
 	
 	def test_vector_variations(self):

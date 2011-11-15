@@ -1,13 +1,12 @@
 #!/usr/bin/python
 import http_request, json
+import objstore
 
 user = None
 
 class Session:
 	def __init__(self, req):
 		"""load session"""
-		from objstore import ObjStore
-		self.obs = ObjStore(req)
 		self.req = req
 		self.user = ''
 		self.name = ''
@@ -15,12 +14,13 @@ class Session:
 	def load(self):
 		"""resume session via cookie or start a new guest session"""
 		global user
+		
 		if 'sid' in self.req.cookies:
-			self.__dict__.update(self.obs.get("session", self.req.cookies['sid']))
+			self.__dict__.update(objstore.get(type="session", name=self.req.cookies['sid']))
 		else:
 			self.user = 'guest'
 			self.new_sid()
-			self.obs.post({"type":"session", "user":self.user, "name":self.name})
+			obstore.post(type="session", user=self.user, name=self.name)
 
 			user = self.user
 	
@@ -45,7 +45,7 @@ class Session:
 			self.req.out["message"] = "ok"	
 			self.new_sid()
 			self.user = self.req.form['user']
-			self.obs.post({"type":"session", "user":self.user, "name":self.name})
+			obstore.post(type="session", user=self.user, name=self.name)
 			user = self.user
 
 	def new_sid(self):
@@ -55,8 +55,9 @@ class Session:
 
 	def logout(self):
 		"""logout sessions"""
+		import database
 		if 'user' in self.req.cookies:
-			self.req.db.sql("delete from session where user=?", (self.req.cookies['user'],))
+			database.get().sql("delete from session where user=%s", (self.req.cookies['user'],))
 			self.name = ''
 			self.user = 'guest'
 
@@ -68,10 +69,11 @@ def get(**args):
 		req.session.new()
 	else:
 		req.session.load()
+
 	return {
 		"user":req.session.user, 
 		"sid":req.session.name, 
-		"userobj":req.session.obs.get('user',req.session.user)
+		"userobj":objstore.get('user',req.session.user)
 	}
 
 def delete(**args):

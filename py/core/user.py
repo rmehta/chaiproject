@@ -1,12 +1,14 @@
 import model
 
 class User(model.Model):
-	create_table = """
+	_name = 'user'
+	_create_table = """
 	create table `user` (
 		name varchar(180) primary key,
-		fullname, varchar(240),
+		fullname varchar(240),
 		email varchar(180),
-		_updated timestamp,
+		password varchar(100),
+		_updated timestamp
 	) engine=InnoDB
 	"""	
 	
@@ -16,7 +18,7 @@ class User(model.Model):
 	def before_post(self):
 		"""save password as sha256 hash"""		
 		import hashlib
-		if 'password' in self.obj and len(self.obj['password']!=64):
+		if 'password' in self.obj and len(self.obj['password'])!=64:
 			self.obj['password'] = hashlib.sha256(self.obj['password']).hexdigest()
 		
 		# clear re-entered password

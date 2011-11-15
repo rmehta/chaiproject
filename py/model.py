@@ -8,11 +8,10 @@ class Model(object):
 	
 	def __init__(self, obj):
 		self.obj = obj
-			
+				
 	def validate(self):
 		"""check permissions, mandatory and update timestamp"""
 		self.check_allow('post')
-		self.check_mandatory()
 		import datetime
 		self.obj["_updated"] = datetime.datetime.now()
 
@@ -33,13 +32,7 @@ class Model(object):
 		if method in ('post','delete'):
 			if session.user=='guest':
 				raise PermissionError, 'Not allowed'
-	
-	def check_mandatory(self):
-		"""check mandatory"""
-		for m in self.mandatory:
-			if not self.obj.get(m):
-				raise MandatoryError, "%s is mandatory" % m
-				
+
 def get(obj):
 	"""get model instance for object"""
 	if not 'type' in obj:
@@ -54,12 +47,38 @@ def get(obj):
 			return Model(obj)
 	
 	# find subclass of "Model"
-	submodule = getattr(module, obj['type'])
-	for name in dir(submodule):
-		o = getattr(submodule, name)
-		if isinstance(o, type) and issubclass(o, Model):
-			return o(obj)
+	modelclass = model_class(getattr(module, obj['type']))
+	if modelclass: 
+		return modelclass(obj)
+	else:
+		# did not find
+		return Model(obj)
+
+def model_class(moduleobj):
+	"""find first subclass of model.Model"""
+	for name in dir(moduleobj):
+		attr = getattr(moduleobj, name)
+		if isinstance(attr, type) and issubclass(attr, Model):
+			return attr
 			
-	# did not find
-	return Model(obj)
-	
+def all():
+	"""get all model objects from 'core' and 'models' folders"""
+	import os, common
+	common.update_path()
+	dr = common.directory_root()
+	ml = find_models(os.path.join(dr, 'models'), 'models')
+	ml += find_models(os.path.join(dr, 'lib/py/core'), 'core')
+	return filter(lambda x: x, ml)
+
+def find_models(path, package):
+	"""find models from this folder"""
+	models = []
+	import os
+	for fname in os.listdir(path):
+		if fname.endswith('.py'):
+			modulename = fname[:-3]
+			if not modulename.startswith('__'):
+				moduleobj = __import__(package + '.' + modulename)
+				moduleobj = getattr(moduleobj, modulename)
+				models.append(model_class(moduleobj))
+	return models	

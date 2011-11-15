@@ -1,14 +1,15 @@
 import model, http_request
 
 class Page(model.Model):
-	create_table = """
+	_name = 'page'
+	_create_table = """
 	create table `page` (
 		name varchar(180) primary key,
 		html text,
 		markdown text,
 		css text,
 		js text,
-		_updated timestamp,
+		_updated timestamp
 	) engine=InnoDB
 	"""
 	
@@ -19,4 +20,5 @@ class Page(model.Model):
 		"""generated html pages"""
 		import pages
 		ret = pages.make()
-		http_request.req.out['log'] = ret
+		if http_request.req:
+			http_request.req.out['log'] = ret
