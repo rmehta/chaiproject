@@ -168,8 +168,10 @@ $.view = {
 		$.view.load(name, path, type, function() {
 			// make page active
 			if($("#"+name).length) {
-				$(".main.container .content.active").removeClass('active');
-				$("#"+name).addClass('active');
+				if($(".main.container .content#" + name).length) {
+					$(".main.container .content.active").removeClass('active');
+					$("#"+name).addClass('active');					
+				}
 			}
 			$("#"+name).trigger('_show');
 			window.scroll(0, 0);

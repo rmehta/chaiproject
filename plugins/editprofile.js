@@ -8,7 +8,7 @@ $.require('lib/js/form.js');
 		fields: [
 			{name:'type', type:'hidden', value:'user'},
 			{name:'name', type:'hidden'},
-			{name:'full_name', label:'Full Name'},
+			{name:'fullname', label:'Full Name'},
 			{name:'email', label:'Email'},
 			{name:'password', label:'Password', type:'password',
 				help:'Must be at least 6 characters'},
