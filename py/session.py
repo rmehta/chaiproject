@@ -18,7 +18,7 @@ class Session:
 		
 		if 'sid' in self.req.cookies:
 			self.__dict__.update(objstore.get(type="session", name=self.req.cookies['sid']))
-		else:
+		if not self.user:
 			self.user = 'guest'
 			self.new_sid()
 			database.get()

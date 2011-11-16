@@ -1,6 +1,44 @@
+
 // standard form actions
 (function($) {
 	// make a stacked form
+	$.fn.validate_input = function() {
+		var err = false;
+		var f = this[0].fieldinfo;
+		if(!f) return;
+		if(f.type=='hidden') return;
+		var val = this.val();
+		
+		if(f.mandatory && !val) {
+			err = true;
+		}
+		if(f.min_length && val.length < f.min_length) {
+			err = true;
+		}
+		if(f.no_special && val.search(/[^\w\d]/)!=-1) {
+			err = true;
+		}
+		if(f.data_type) {
+			if(f.data_type=='email' && !$.is_email(val)) err = true;
+		}
+		this.parent().toggleClass('error', err);
+	}
+	
+	// return true if txt is
+	// a valid email
+	$.is_email = function(txt) {
+		return txt.search("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")!=-1;
+	}
+	
+	// call the validate_input method on
+	// all inputs in the form
+	$.fn.validate_form = function() {
+		this.find(':input').each(function(idx, input) {
+			$(input).validate_input();
+		});
+	}
+	
+	// make a stacked form from options
 	$.fn.stacked_form = function(opts) {		
 		this.append('<form class="form-stacked"></form>');
 		var me = this;
@@ -23,17 +61,10 @@
 			}
 
 			var $input = me.find(' [name="'+f.name+'"]');
-			// mandatory
-			if(f.mandatory) {
-				$input.keyup(function() {
-					$(this).parent().toggleClass('error', !$(this).val());
-				});
-			}
-			
-			// default
-			if(f.defaultval) {
-				$input.attr('default-val', f.defaultval);
-			}
+
+			// store field information for
+			// validations
+			$input[0].fieldinfo = f;
 		});
 		
 		// clear all
@@ -44,12 +75,13 @@
 		var me = this;
 		// clear form first (to defaults)
 		me.find(':input').each(function() {
-			$(this).val($(this).attr('default-val') || '').trigger('keyup');
+			var defval = this.fieldinfo ? this.fieldinfo.defaultval : '';
+			$(this).val(defval || '');
 		});
 		
 		// set values
 		$.each(obj, function(k,v) {
-			me.find(' [name="'+k+'"]').val(v).trigger('keyup');
+			me.find(' [name="'+k+'"]').val(v);
 		});
 	}
 	
@@ -104,12 +136,24 @@
 				$(id+' button.btn.primary').click(me.saveobj);
 				
 				// enable / disable primary input based on form
+				// only do it on keyup if the field is already
+				// in error state
 				$(id).delegate(':input', 'keyup', function() {
+					// re-evaluate each input that is in
+					// error state
+					if($(this).parent().hasClass('error')) {
+						$(this).validate_input();			
+					}
 					$(id+' button.btn.primary').attr('disabled',
 						$(id+' .error').length ? true : false);
-				});				
+				});
 			},
 			saveobj: function() {
+				$(id+' form').validate_form();
+				// found errors
+				if($(id+ ' .error').length) {
+					return;
+				}
 				$.objstore.post($(id+' form').serialize(), function(data) {
 					if(data.message && data.message=='ok') {
 						$(id+' .message')

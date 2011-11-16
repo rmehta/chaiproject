@@ -230,6 +230,7 @@ $(document).ready(function() {
 $._plugins = {
 	'editpage': {path:'lib/plugins/'},
 	'editprofile': {path:'lib/plugins/', type:'script'},
+	'register': {path:'lib/plugins/', type:'script'},
 	'signin': {path:'lib/plugins/'},
 	'upload': {path:'lib/plugins/'},
 	'pagelist': {path:'lib/plugins/'},
