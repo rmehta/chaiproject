@@ -1,7 +1,5 @@
 """handle http request"""
-
 import cgi, cgitb
-cgitb.enable()
 
 class Request:
 	def __init__(self):
@@ -100,6 +98,8 @@ def get_traceback():
 req = None
 def main(module='__main__'):
 	"""run methods on main class"""
+	cgitb.enable()
+	
 	global req
 	req = Request()
 	

@@ -1,5 +1,6 @@
 import MySQLdb
 import conf
+import MySQLdb.constants.ER as ER
 
 class Database:
 	_columns = {}
@@ -68,9 +69,11 @@ class Database:
 		
 		self.sql("rename table `%s` to `_tmp_%s`" % (ttype, ttype))
 		self.sql(create_table)
+		self.begin()
 		for obj in self.sql("select * from `_tmp_%s`" % (ttype)):
 			obj['type'] = ttype
 			obs.post_single(obj)
+		self.commit()
 			
 		self.sql("drop table `_tmp_%s`" % ttype)
 	
@@ -90,6 +93,7 @@ class Database:
 		"""make / update tables from models"""
 		import model, objstore
 
+		self.sql("set foreign_key_checks=0")
 		tables = self.table_list()
 		for modelclass in model.all():
 			m = modelclass({})
@@ -105,15 +109,9 @@ class Database:
 					objstore.post(type="_parent_child", parent=m._parent, child=m._name)
 					self.commit()
 
+		self.sql("set foreign_key_checks=1")
+
 conn = None	
-def create_db(rootuser, rootpass):
-	"""create a new db"""
-	conn = MySQLdb.connect('localhost', rootuser, rootpass)
-	cur = conn.cursor()
-	cur.execute("create database if not exists `%s`;" % conf.dbname)
-	cur.execute("create user %s@'localhost' identified by %s", (conf.dbuser, conf.dbpassword))
-	cur.execute("grant all privileges on `%s`.* to '%s'" % (conf.dbname, conf.dbuser))
-	cur.execute("flush privileges")
 
 def get():
 	"""return a new connection"""

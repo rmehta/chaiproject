@@ -1,7 +1,7 @@
 # db saved here
-dbuser = 'chaiproject'
-dbpassword = 'test'
-dbname = 'chaiproject'
+dbuser = 'wbapp'
+dbpassword = 'wbapp111'
+dbname = 'wbapp'
 
 # files are uploaded here
 files_path = 'files'

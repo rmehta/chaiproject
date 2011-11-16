@@ -2,8 +2,8 @@
 generate html pages for all type "page"
 records for seo friendliness
 
-files are generated from index_template.html
-index_template.html must have `<div class="main container"></div>`
+files are generated from template.html
+template.html must have `<div class="main container"></div>`
 inside which the page html will be rendered
 """
 
@@ -23,7 +23,7 @@ def make():
 		db = database.Database()
 	pages_path = os.path.join(os.path.dirname(__file__), '../..')
 	
-	index_html = open(os.path.join(os.path.dirname(__file__), '../..', 'index_template.html'),'r').read()
+	index_html = open(os.path.join(os.path.dirname(__file__), '../..', 'template.html'),'r').read()
 	index_html = index_html.split(container)
 
 	if len(index_html)!=2:
