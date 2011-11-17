@@ -23,6 +23,7 @@ def create_user_and_index():
 	</ol>
 	'''
 	database.get()
+	database.conn.sync_tables('_parent_child')
 	database.conn.sync_tables()
 
 	database.conn.begin()

@@ -1,6 +1,53 @@
+/* form library to create forms and save them as objects
+created by @rushabh_mehta
+license: MIT
 
-// standard form actions
+Usage:
+------
+$.modal_form({
+	"id":"myform",
+	"label": "My Form"
+	"fields": [ <fieldinfo> ]
+})
+
+`fieldinfo` 
+-----------
+is a standard way of declaring form fields
+properties include:
+
+	"name" (name)
+	"type" (input type)
+	"defaultval" (default value)
+	"mandatory" (if mandatory)
+	"min_length"
+	"data_type" (one of "email",)
+	"no_special" (only letters and numbers)
+
+`$(<form selector>).set_values(obj)`
+	set values on form (will clear and then set)
+
+`$(selector).stacked_form(fields)`
+	create a form with the given fields
+
+`$(<form>).form_values()`
+	returns form values as dict
+
+Events:
+-------
+	$(<form>)->'save' // success
+	$(<form>)->'save_error' // error
+*/
+
+
 (function($) {
+	$.fn.form_values = function() {
+		var d = {}
+		this.find(':input').each(function(i, ele) {
+			if($(ele).attr('name')) d[$(ele).attr('name')] = $(ele).val();
+		});
+		return d;
+	}
+	
 	// make a stacked form
 	$.fn.validate_input = function() {
 		var err = false;
@@ -22,12 +69,6 @@
 			if(f.data_type=='email' && !$.is_email(val)) err = true;
 		}
 		this.parent().toggleClass('error', err);
-	}
-	
-	// return true if txt is
-	// a valid email
-	$.is_email = function(txt) {
-		return txt.search("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")!=-1;
 	}
 	
 	// call the validate_input method on
@@ -158,10 +199,12 @@
 					if(data.message && data.message=='ok') {
 						$(id+' .message')
 							.html('<span class="label success">Done!</span>').delay(1000).fadeOut();
+							$(id+' form').trigger('save');
 					} else {
 						$(id+' .message')
 							.html('<span class="label important">'+data.error+'</span>');
 							console.log(data.traceback);
+							$(id+' form').trigger('save_error', data);
 					}
 					if(data.log) {
 						console.log(data.log);

@@ -1,5 +1,22 @@
+// core library for chaiproject framework
+// created by @rushabh_mehta
+// license: MIT
+//
+
+
+// utility functions
+//
+// Usage:
+// $.rep("string with %(args)s", obj) // replace with values
+// $.set_style(css)
+// $.set_script(js)
+// $.random(n)
+// $.set_default(obj, key, value)
+// $.is_email(txt)
+
 (function($) {
 	// python style string replace
+	$.index = 'index';
 	$.rep = function(s, dict) {
 		for(key in dict) {
 		    var re = new RegExp("%\\("+ key +"\\)s", "g");
@@ -19,11 +36,16 @@
 	};
 	$.set_default = function(d, k, v) {
 		if(!d[k])d[k]=v;
-	}
+	};
+	$.is_email = function(txt) {
+		return txt.search("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")!=-1;
+	};
 })(jQuery);
 
 // $.require
 // http://plugins.jquery.com/project/require
+//
+// Usage: $.require('path/to/js')
 (function($) {
 	$.require = function(files, params) {
 		var params = params || {};
@@ -62,6 +84,10 @@
 
 
 // object store wrapper
+//
+// Usage:
+// $.objstore.get(type, name, callback)
+// $.objstore.post(obj, callback)
 $.objstore = {
 	data: {},
 	set: function(obj) {
@@ -85,7 +111,7 @@ $.objstore = {
 		$.ajax({
 			url:'lib/py/objstore.py',
 			type: 'POST',
-			data: obj,
+			data: {json: JSON.stringify(obj)},
 			success: success
 		});		
 	},
@@ -97,6 +123,11 @@ $.objstore = {
 
 
 // view
+// called internally 
+// when the hash url is changed
+//
+// Usage:
+// $.view.open(route)
 $.view = {
 	pages: {},
 	type: function(html) {
@@ -124,45 +155,41 @@ $.view = {
 			$.get(path + name + '.html', function(html) {
 				switch($.view.type(html)) {
 					case 'modal': 
-						$.view.render_modal(name, html)
+						$.view.make_modal(name, html)
 						break;
 					case 'page':
-						$.view.render_page(name, html);
+						$.view.make_page(name, html);
 				}
 				callback();
 			});
 		}
 		
 	},
-	render_modal: function(name, html) {
+	make_modal: function(name, html) {
 		$(document.body).append(html);
 		$('#'+name).bind('hidden', function() {
 			window.history.back();
 		})
 	},
-	render_page: function(name, html) {
+	make_page: function(name, html, js, css) {
 		$('<div>')
 			.addClass('content')
 			.attr('id', name)
 			.appendTo('.main.container')
 			.html(html);
+			
+		if(js) $.set_script(js);
+		if(css) $.set_style(css);
+		
+		$("#"+name).trigger('_make');		
 	},
 	load_object: function(name, callback) {
 		$.objstore.get("page", name, 
 			function(obj) {
-				$.view.make(obj);
+				$.view.make(obj.name, obj.html, obj.js, obj.css);
 				callback();
 			}
 		);
-	},
-	make: function(obj) {
-		$.view.render_page(obj.name, obj.html);
-		if(obj.js)
-			$.set_script(obj.js);
-		if(obj.css)
-			$.set_style(obj.css);
-		$("#"+name).trigger('_render');
-
 	},
 	show: function(name, path, type) {
 		$.view.load(name, path, type, function() {
@@ -176,41 +203,82 @@ $.view = {
 			$("#"+name).trigger('_show');
 			window.scroll(0, 0);
 		});
+	},
+	open: function(name) {
+		if(name[0]=='#') { name = name.substr(1); }
+		if(name[0]=='!') { name = name.substr(1); }
+		if(name.indexOf('/')!=-1) {
+			name = name.split('/')[0];
+		}
+		if(!name)name=$.index;
+		var p = $._plugins[name] || {};
+		$.view.show(name, p.path, p.type);
+		
+		// set location hash
+		var hash = location.hash;
+		if(hash[0]!='#') hash = '#' + hash;
+		if(name[0]!='#') name = '#' + name;
+		if(location.hash!=name) {
+			location.hash = name;
+		}
 	}
 }
 
-
-// open page
-$.open_page = function(name) {
-	if(name[0]=='#') { name = name.substr(1); }
-	if(name[0]=='!') { name = name.substr(1); }
-	if(name.indexOf('/')!=-1) {
-		name = name.split('/')[0];
-	}
-	if(!name)name='index'
-	var p = $._plugins[name] || {};
-	$.view.show(name, p.path, p.type);
-}
-
-
+// bind history change to open
 $(window).bind('hashchange', function() {
-	$.open_page(decodeURIComponent(location.hash));
+	$.view.open(decodeURIComponent(location.hash));
 });
 
+// logout
+// logs out user and reload the page
+//
+// Usage:
+// $.logout();
+//    triggers $(document)->logout event
+(function($) {
+	$.logout = function() {
+		$.ajax({
+			url:'lib/py/session.py', 
+			type:'DELETE', 
+			success: function(data) {
+				$(document).trigger('logout');
+			}
+		});
+		return false;
+	}
 
-// ready to fly
-$(document).ready(function() {
-	$.get('lib/plugins/toolbar.html', function(data) {
-		$('body').append(data);
+	// default logout action, reload the page
+	$(document).bind('logout', function() {
+		window.location.reload(true);
 	});
+})(jQuery);
 
+// login
+// loads session from server
+// and calls $(document)->'session_load' event
+//
+$.getJSON('lib/py/session.py', function(session) {
+	$.session = session
+
+	// trigger session_load
+	$(document).trigger('session_load');
+})
+
+
+// setup pages
+// 1. load session
+// 2. open default page
+// 3. convert hardlinks to softlinks: 
+//    eg. file.html becomes #files
+$(document).ready(function() {	
+	// open default page
 	(function() {
 		$content = $('.main.container .content.active');
 		if($content.length) {
+			// active content is already loaded, just highlight it
 			$content.trigger('_show');
-		}
-		if(location.hash) {
-			$.open_page(location.hash);
+		} else {
+			$.view.open(location.hash || $.index);
 		}
 	})()
 

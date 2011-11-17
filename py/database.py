@@ -62,21 +62,16 @@ class Database:
 		import objstore
 		obs = objstore.ObjStore()
 		
-		# clear old?
-		if ('_tmp_' + ttype) in self.table_list():
-			self.sql("drop table `_tmp_%s`" % ttype)			
-		
-		
-		self.sql("rename table `%s` to `_tmp_%s`" % (ttype, ttype))
+		addrecords = self.sql("select * from `%s`" % (ttype))
+		self.sql('drop table `%s`' % ttype);
 		self.sql(create_table)
+
 		self.begin()
-		for obj in self.sql("select * from `_tmp_%s`" % (ttype)):
+		for obj in addrecords:
 			obj['type'] = ttype
 			obs.post_single(obj)
 		self.commit()
-			
-		self.sql("drop table `_tmp_%s`" % ttype)
-	
+				
 	def table_list(self):
 		"""get list of tables"""
 		return [d[0] for d in self.sql("show tables", as_dict=False)]

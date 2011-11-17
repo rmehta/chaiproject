@@ -52,3 +52,17 @@ $('#register').bind('_show', function() {
 	$('#register form').set_values({});
 	$('#register').modal('show');
 })
+
+$('#register form').bind('save', function() {
+	// login as current user
+	var formdata = $('#register form').form_values()
+	
+	$.getJSON('lib/py/session.py', {user:formdata.name, password:formdata.password}, 
+		function(session) {
+			$.session = session
+			// trigger session_load
+			$(document).trigger('session_load');
+		});	
+	
+	$('#register').modal('hide');
+})
