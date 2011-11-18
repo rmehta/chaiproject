@@ -55,10 +55,10 @@ $('#signin button.btn.primary').click(function() {
 				$('#signin .message').html(['bingo','howdy','welcome'][$.random(2)])
 					.addClass('label success');	
 					
-					// reload the page, with new user creds
-					window.location.hash = '';
-					window.location.reload(true);
-			
+					$.session = data;
+					$(document).trigger('session_load');
+					$('#signin').modal('hide');
+					
 			// false login
 			} else {
 				$('#signin .message').html(['oops','sorry','try again'][$.random(2)] +

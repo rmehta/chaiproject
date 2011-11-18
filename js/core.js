@@ -207,18 +207,17 @@ $.view = {
 	open: function(name) {
 		if(name[0]=='#') { name = name.substr(1); }
 		if(name[0]=='!') { name = name.substr(1); }
-		if(name.indexOf('/')!=-1) {
-			name = name.split('/')[0];
-		}
+		name = name.split('/')[0];
+		
 		if(!name)name=$.index;
 		var p = $._plugins[name] || {};
 		$.view.show(name, p.path, p.type);
 		
 		// set location hash
-		var hash = location.hash;
+		var hash = decodeURIComponent(location.hash).split('/')[0];
 		if(hash[0]!='#') hash = '#' + hash;
 		if(name[0]!='#') name = '#' + name;
-		if(location.hash!=name) {
+		if(hash!=name) {
 			location.hash = name;
 		}
 	}
@@ -241,16 +240,13 @@ $(window).bind('hashchange', function() {
 			url:'lib/py/session.py', 
 			type:'DELETE', 
 			success: function(data) {
+				$.session = {"user":"guest" ,"userobj":{}}
 				$(document).trigger('logout');
+				$(document).trigger('session_load');
 			}
 		});
 		return false;
 	}
-
-	// default logout action, reload the page
-	$(document).bind('logout', function() {
-		window.location.reload(true);
-	});
 })(jQuery);
 
 // login
@@ -294,6 +290,9 @@ $(document).ready(function() {
 		return true;
 	})	
 });
+
+// app namespace for app globals
+var app = {	}
 
 $._plugins = {
 	'editpage': {path:'lib/plugins/'},

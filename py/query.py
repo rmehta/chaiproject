@@ -32,7 +32,7 @@ def get(**args):
 	# conditions
 	if 'filters' in args:
 		args['conditions'] = 'where ' + \
-			' and '.join(['`%s` %s ?' % (f[0], f[1]) for f in args['filters']])
+			' and '.join(['`%s` %s %s' % (f[0], f[1], '%s') for f in args['filters']])
 		args['values'] = tuple([f[2] for f in args['filters']])
 	
 	return {"result": req.db.sql("""select %(columns)s 
