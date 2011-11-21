@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import http_request
+import http_request, json
 
 def get(**args):
 	"""
@@ -10,7 +10,7 @@ def get(**args):
 	type
 	columns = "a,b,c"
 	filters = [["a","=","5"],]
-	order_by = "a"
+	order_by = "a asc"
 	limit = "20"
 	"""
 	req = http_request.req
@@ -31,6 +31,9 @@ def get(**args):
 
 	# conditions
 	if 'filters' in args:
+		if type(args['filters'])==str:
+			args['filters'] = json.loads(args['filters'])
+			
 		args['conditions'] = 'where ' + \
 			' and '.join(['`%s` %s %s' % (f[0], f[1], '%s') for f in args['filters']])
 		args['values'] = tuple([f[2] for f in args['filters']])

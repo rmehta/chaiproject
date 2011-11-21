@@ -77,6 +77,37 @@ Events:
 		this.find(':input').each(function(idx, input) {
 			$(input).validate_input();
 		});
+	};
+	
+	// set autocomplete on this input
+	// opts: {type:<type>}
+	$.fn.set_autocomplete = function(opts) {
+		$.require('lib/js/jquery/jquery.ui.autocomplete.js');
+		$.require('lib/js/jquery/jquery.ui.css');
+		this.autocomplete({
+			source: function(request, response) {
+				filters = (opts.filters || []);
+				filters.push(["name", "like", request.term + '%']);
+				$.ajax({
+					url:"lib/py/query.py",
+					data: {
+						type: opts.type,
+						columns: opts.columns || "name",
+						filters: JSON.stringify(filters),
+						order_by: opts.order_by || "name asc",
+						limit: opts.limit || "20"
+					}, 
+					success: function(data) {
+						response($.map(data.result, function(item) {
+							return {
+								label: item[(opts.label || "name")], 
+								value: item[(opts.value || "name")]
+							}
+						}));
+					}
+				})
+			}
+		})
 	}
 	
 	// make a stacked form from options
@@ -102,6 +133,10 @@ Events:
 			}
 
 			var $input = me.find(' [name="'+f.name+'"]');
+
+			if(f.range) {
+				$input.set_autocomplete({type:"user"});
+			}
 
 			// store field information for
 			// validations
@@ -174,7 +209,7 @@ Events:
 				});
 
 				// save in objectstore
-				$(id+' button.btn.primary').click(me.saveobj);
+				$(id+' button.btn.primary').click(me.onsave);
 				
 				// enable / disable primary input based on form
 				// only do it on keyup if the field is already
@@ -189,13 +224,17 @@ Events:
 						$(id+' .error').length ? true : false);
 				});
 			},
-			saveobj: function() {
+			onsave: function() {
 				$(id+' form').validate_form();
 				// found errors
 				if($(id+ ' .error').length) {
 					return;
 				}
-				$.objstore.post($(id+' form').serialize(), function(data) {
+				me.saveobj($(id+' form').form_values());
+			},
+			
+			saveobj: function(obj) {
+				$.objstore.post($(id+' form').form_values(), function(data) {
 					if(data.message && data.message=='ok') {
 						$(id+' .message')
 							.html('<span class="label success">Done!</span>').delay(1000).fadeOut();
@@ -217,6 +256,12 @@ Events:
 		if(!$(id).length) {
 			me.make();
 			$(id).modal({backdrop:'static', show:false});
+		}
+		
+		
+		// override
+		if(opts.saveobj) {
+			me.saveobj = opts.saveobj
 		}
 	}
 })(jQuery)
