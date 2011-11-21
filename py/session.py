@@ -14,7 +14,6 @@ class Session:
 
 	def load(self):
 		"""resume session via cookie or start a new guest session"""
-		global user
 		
 		if 'sid' in self.req.cookies:
 			self.__dict__.update(objstore.get(type="session", name=self.req.cookies['sid']))
@@ -25,8 +24,6 @@ class Session:
 			database.conn.begin()
 			objstore.post(type="session", user=self.user, name=self.name)
 			database.conn.commit()
-
-			user = self.user
 	
 	def password_okay(self):
 		"""check passwords"""
@@ -38,7 +35,6 @@ class Session:
 	
 	def new(self):
 		"""start a new session"""
-		global user
 
 		if not self.password_okay():
 			self.req.form = {}
@@ -50,7 +46,6 @@ class Session:
 			self.new_sid()
 			self.user = self.req.form['user']
 			objstore.post(type="session", user=self.user, name=self.name)
-			user = self.user
 
 	def new_sid(self):
 		"""set new sid"""
@@ -67,6 +62,7 @@ class Session:
 def get(**args):
 	"""start a new session"""
 	req = http_request.req
+
 	req.session = Session(req)
 	if req.form.get('user'):
 		database.get()

@@ -1,6 +1,8 @@
 """handle http request"""
 import cgi, cgitb
 
+req = None
+
 class Request:
 	def __init__(self):
 		"""set vars"""
@@ -22,6 +24,7 @@ class Request:
 			os.environ['REQUEST_METHOD'] = ''
 			if not 'session.py' in self.script_name:
 				self.start_session()
+
 
 	def load_env(self):
 		"""load env variables"""
@@ -63,9 +66,10 @@ class Request:
 		
 	def start_session(self):
 		"""create/load session"""
-		from session import Session
-		self.session = Session(self)
+	 	import session
+		self.session = session.Session(self)
 		self.session.load()
+		session.user = self.session.user
 	
 	def type_handler(self, obj):
 		if hasattr(obj, 'strftime'):
@@ -95,10 +99,12 @@ def get_traceback():
 	list = traceback.format_tb(tb, None) + traceback.format_exception_only(type, value)
 	return body + "%-20s %s" % (string.join(list[:-1], ""), list[-1])
 
-req = None
 def main(module='__main__'):
 	"""run methods on main class"""
 	cgitb.enable()
+	
+	import common
+	common.update_path()
 	
 	global req
 	req = Request()

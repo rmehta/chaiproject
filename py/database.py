@@ -2,6 +2,8 @@ import MySQLdb
 import conf
 import MySQLdb.constants.ER as ER
 
+conn = None	
+
 class Database:
 	_columns = {}
 
@@ -105,8 +107,6 @@ class Database:
 					self.commit()
 
 		self.sql("set foreign_key_checks=1")
-
-conn = None	
 
 def get():
 	"""return a new connection"""

@@ -159,6 +159,16 @@ Events:
 		$.each(obj, function(k,v) {
 			me.find(' [name="'+k+'"]').val(v);
 		});
+	};
+	
+	// set a messages in the class "message" div of this object
+	$.fn.set_message = function(msg, type, fadeOutIn) {
+		this.find('.message').html('<span class="label '+(type || '')+'">'+
+			msg
+		+'</span>');
+		if(fadeOutIn) {
+			this.find('.message .label').fadeOut(fadeOutIn)
+		}
 	}
 	
 	// make a new modal
@@ -236,14 +246,12 @@ Events:
 			saveobj: function(obj) {
 				$.objstore.post($(id+' form').form_values(), function(data) {
 					if(data.message && data.message=='ok') {
-						$(id+' .message')
-							.html('<span class="label success">Done!</span>').delay(1000).fadeOut();
-							$(id+' form').trigger('save');
+						$(id).set_message('Done!', 'success', 1000);
+						$(id+' form').trigger('save');
 					} else {
-						$(id+' .message')
-							.html('<span class="label important">'+data.error+'</span>');
-							console.log(data.traceback);
-							$(id+' form').trigger('save_error', data);
+						$(id).set_message(data.error, 'important', 1000);
+						console.log(data.traceback);
+						$(id+' form').trigger('save_error', data);
 					}
 					if(data.log) {
 						console.log(data.log);

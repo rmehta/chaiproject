@@ -96,14 +96,21 @@ $.objstore = {
 			d[obj.type] = {}
 		d[obj.type][obj.name] = obj;
 	},
-	get:function(type, name, callback) {
+	get:function(type, name, success, error) {
 		var d = $.objstore.data;
 		if(d[type] && d[type][name]) {
 			callback(d[type][name]);
 		} else {
 			$.getJSON('lib/py/objstore.py', {"type":type, "name":name}, function(obj) {
-				$.objstore.set(obj);
-				callback(obj);
+				if(obj._log) {
+					console.log(obj._log);
+				}
+				if(obj.error) {
+					error(obj); return;
+				} else {
+					$.objstore.set(obj);
+					success(obj);					
+				}
 			});
 		}
 	},
@@ -112,7 +119,12 @@ $.objstore = {
 			url:'lib/py/objstore.py',
 			type: 'POST',
 			data: {json: JSON.stringify(obj)},
-			success: success
+			success: function(response) {
+				if(response._log) {
+					console.log(response._log);
+				}
+				success(response);
+			}
 		});		
 	},
 	clear: function(type, name) {

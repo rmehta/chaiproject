@@ -1,4 +1,4 @@
-import session
+import session, common
 
 class PermissionError(Exception): pass
 class MandatoryError(Exception): pass
@@ -39,11 +39,12 @@ def get(obj):
 		return Model(obj)
 	try:
 		module = __import__('models.' + obj['type'])
-	except ImportError:
+	except ImportError, e:
+		common.log("unable import %s (%s)" % (obj['type'], str(e)))
 		try:
 			# try in core
 			module = __import__('core.' + obj['type'])
-		except ImportError:
+		except ImportError, e:
 			return Model(obj)
 	
 	# find subclass of "Model"
