@@ -99,7 +99,7 @@ $.objstore = {
 	get:function(type, name, success, error) {
 		var d = $.objstore.data;
 		if(d[type] && d[type][name]) {
-			callback(d[type][name]);
+			success(d[type][name]);
 		} else {
 			$.getJSON('lib/py/objstore.py', {"type":type, "name":name}, function(obj) {
 				if(obj._log) {
@@ -222,7 +222,7 @@ $.view = {
 		name = name.split('/')[0];
 		
 		if(!name)name=$.index;
-		var p = $._plugins[name] || {};
+		var p = $._views[name] || {};
 		$.view.show(name, p.path, p.type);
 		
 		// set location hash
@@ -306,13 +306,13 @@ $(document).ready(function() {
 // app namespace for app globals
 var app = {	}
 
-$._plugins = {
-	'editpage': {path:'lib/plugins/'},
-	'editprofile': {path:'lib/plugins/', type:'script'},
-	'register': {path:'lib/plugins/', type:'script'},
-	'signin': {path:'lib/plugins/'},
-	'upload': {path:'lib/plugins/'},
-	'pagelist': {path:'lib/plugins/'},
-	'filelist': {path:'lib/plugins/'},
-	'userlist': {path:'lib/plugins/'}
+$._views = {
+	'editpage': {path:'lib/views/'},
+	'editprofile': {path:'lib/views/', type:'script'},
+	'register': {path:'lib/views/', type:'script'},
+	'signin': {path:'lib/views/'},
+	'upload': {path:'lib/views/'},
+	'pagelist': {path:'lib/views/'},
+	'filelist': {path:'lib/views/'},
+	'userlist': {path:'lib/views/'}
 }

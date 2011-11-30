@@ -1,5 +1,7 @@
-# db saved here
-db_path = 'project.db'
+# db settings
+dbuser = ''
+dbpassword = ''
+dbname = ''
 
 # files are uploaded here
 files_path = 'files'
