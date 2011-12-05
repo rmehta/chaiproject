@@ -9,9 +9,7 @@ inside which the page html will be rendered
 
 def make():
 	import os
-	import conf
-	import database
-	import http_request
+	from lib.py import conf, database, http_request
 	
 	messages = []
 	

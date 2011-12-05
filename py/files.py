@@ -69,7 +69,3 @@ def delete(**args):
 	os.remove(os.path.join(conf.files_path, args['name']))
 	return {"message":"ok"}
 	
-
-# request handling
-if __name__=="__main__":
-	http_request.main()

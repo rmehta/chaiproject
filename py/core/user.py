@@ -1,4 +1,4 @@
-import model
+from lib.py import model
 
 class User(model.Model):
 	_name = 'user'

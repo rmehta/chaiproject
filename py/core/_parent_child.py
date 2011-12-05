@@ -2,7 +2,7 @@
 maintain list of parent-child relation
 """
 
-import model
+from lib.py import model
 
 class ParentChild(model.Model):
 	_name = '_parent_child'

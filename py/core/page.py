@@ -1,4 +1,4 @@
-import model, http_request
+from lib.py import model, http_request
 
 class Page(model.Model):
 	_name = 'page'

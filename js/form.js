@@ -89,8 +89,9 @@ Events:
 				filters = (opts.filters || []);
 				filters.push(["name", "like", request.term + '%']);
 				$.ajax({
-					url:"lib/py/query.py",
+					url:"server/",
 					data: {
+						method: 'lib.py.query.get'
 						type: opts.type,
 						columns: opts.columns || "name",
 						filters: JSON.stringify(filters),

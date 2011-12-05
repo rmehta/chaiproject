@@ -61,8 +61,7 @@ class Database:
 		
 	def repair_table(self, ttype, create_table):
 		"""create a new table and copy records"""
-		import objstore
-		obs = objstore.ObjStore()
+		from lib.py import objstore
 		
 		addrecords = self.sql("select * from `%s`" % (ttype))
 		self.sql('drop table `%s`' % ttype);
@@ -71,7 +70,7 @@ class Database:
 		self.begin()
 		for obj in addrecords:
 			obj['type'] = ttype
-			obs.post_single(obj)
+			objstore.post_single(obj)
 		self.commit()
 				
 	def table_list(self):
@@ -80,7 +79,7 @@ class Database:
 
 	def columns(self, table):
 		"""get columns of"""
-		import database
+		from lib.py import database
 		if not self._columns.get(table):
 			self._columns[table] = [c[0] for c in \
 				database.get().sql("desc `%s`" % table, as_dict=False)]
@@ -88,7 +87,7 @@ class Database:
 
 	def sync_tables(self, table=None):
 		"""make / update tables from models"""
-		import model, objstore
+		from lib.py import model, objstore
 
 		self.sql("set foreign_key_checks=0")
 		tables = self.table_list()

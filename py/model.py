@@ -35,20 +35,24 @@ class Model(object):
 
 def get(obj):
 	"""get model instance for object"""
+	import sys
+	
 	if not 'type' in obj:
 		return Model(obj)
 	try:
-		module = __import__('models.' + obj['type'])
+		modulepackage = 'models.' + obj['type']
+		__import__(modulepackage)
 	except ImportError, e:
 		common.log("unable import %s (%s)" % (obj['type'], str(e)))
+		modulepackage = 'lib.py.core.' + obj['type']
 		try:
 			# try in core
-			module = __import__('core.' + obj['type'])
+			__import__(modulepackage)
 		except ImportError, e:
 			return Model(obj)
-	
+
 	# find subclass of "Model"
-	modelclass = model_class(getattr(module, obj['type']))
+	modelclass = model_class(sys.modules[modulepackage])
 	if modelclass: 
 		return modelclass(obj)
 	else:

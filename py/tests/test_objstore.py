@@ -1,7 +1,6 @@
 import unittest, os, sys
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-import objstore, session, database
+from lib.py import objstore, session, database
 
 class TestObjstore(unittest.TestCase):
 	def setUp(self):

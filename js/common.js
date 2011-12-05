@@ -7,7 +7,7 @@
 			var $me = $(this);
 			$me.attr('disabled',true).html('Deleting...');
 			$.ajax({
-				url: opts.url || 'lib/py/objstore.py',
+				url: opts.url || 'lib/py/',
 				type: "DELETE",
 				data: $.extend((opts.data || {}), 
 					{name:$me.attr("data-name")}),

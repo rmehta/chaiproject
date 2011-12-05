@@ -1,4 +1,4 @@
-import model
+from lib.py import model
 
 class Session(model.Model):
 	_name = 'session'

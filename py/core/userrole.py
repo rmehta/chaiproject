@@ -1,4 +1,4 @@
-import model
+from lib.py import model
 
 class UserRole(model.Model):
 	_name = 'userrole'

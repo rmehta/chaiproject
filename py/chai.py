@@ -12,7 +12,7 @@ chai adduser [username] [password]
 
 def create_user_and_index():
 	"""create first user and index page"""
-	import objstore, database
+	from lib.py import objstore, database
 	
 	content = '''
 	<h1>%(app_name)s</h1>
@@ -22,11 +22,11 @@ def create_user_and_index():
 		<li>Admin -> Edit
 	</ol>
 	'''
-	database.get()
-	database.conn.sync_tables('_parent_child')
-	database.conn.sync_tables()
+	db = database.get()
+	db.sync_tables('_parent_child')
+	db.sync_tables()
 
-	database.conn.begin()
+	db.begin()
 
 	# user
 	objstore.post(type="user", name=conf.dbuser, password=conf.dbpassword, \
@@ -36,7 +36,7 @@ def create_user_and_index():
 	objstore.post(type="page", html=(content % {"app_name":conf.app_name}), \
 		name="index", label=conf.app_name)
 
-	database.conn.commit()
+	db.commit()
 	print "dbuser and index created"
 
 def make_style_css():
@@ -91,7 +91,10 @@ def create_db(rootuser, rootpass):
 
 if __name__=='__main__':
 	import os, sys
-	import objstore, conf, database
+	sys.path.append('.')
+
+	from lib.py import objstore, conf, database
+	
 	
 	if len(sys.argv) > 1:
 		cmd = sys.argv[1]

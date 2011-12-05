@@ -22,22 +22,23 @@ $("#filelist").delete_table_row({
 	url:'lib/py/files.py'
 });
 
-$.getJSON('lib/py/files.py', function(data) {
-
-	// render
-	$.each(data.files, function(i, f) {		
-		$('#filelist_table tbody').append($.rep('<tr>\
-			<td>\
-				<a href="files/%(name)s" target="_blank"><b>files/%(name)s</b></a>\
-				<div class="help-block">%(size)sk | %(ts)s</div>\
-			</td>\
-			<td><button data-name="%(name)s" class="btn small delete-row-btn">Delete</button></td>\
-			</tr>', {
-				name: f[0],
-				size: (f[2] / 1024).toFixed(2),
-				ts: prettyDate(f[1])
-			}))
-	});
-});
+$.getJSON('server/', {'method':'lib.py.files.get'}, 
+	function(data) {
+		// render
+		$.each(data.files, function(i, f) {		
+			$('#filelist_table tbody').append($.rep('<tr>\
+				<td>\
+					<a href="files/%(name)s" target="_blank"><b>files/%(name)s</b></a>\
+					<div class="help-block">%(size)sk | %(ts)s</div>\
+				</td>\
+				<td><button data-name="%(name)s" class="btn small delete-row-btn">Delete</button></td>\
+				</tr>', {
+					name: f[0],
+					size: (f[2] / 1024).toFixed(2),
+					ts: prettyDate(f[1])
+				}))
+		});
+	}
+);
 
 </script>
