@@ -14,7 +14,6 @@ def get(**args):
 	limit = "20"
 	"""
 	import json
-	from lib.py.app import req
 	from lib.py import database
 	db = database.get()
 	

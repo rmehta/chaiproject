@@ -12,11 +12,9 @@ method="package.module.method"
 the query_string and environ will be passed to the method
 """
 
-req, res, session, out = None, None, None, {}
-
 def handle(db):
 	"""handle the request"""
-	global req
+	from lib.py import req
 	import sys
 	
 	# execute a method
@@ -45,7 +43,7 @@ def handle(db):
 			if req.method=='POST':
 				db.commit()
 
-			return t
+			return t or {"message":"no response"}
 		else:
 			return {"error":"Unable to load method"}
 	else:
@@ -55,37 +53,43 @@ def json_type_handler(obj):
 	"""convert datetime objects to string"""
 	if hasattr(obj, 'strftime'):
 		return str(obj)
-		
+
+def set_webob(environ):
+	"""setup global req, res"""
+	from webob import Request, Response
+	import lib.py
+	
+	lib.py.req = Request(environ)
+	lib.py.res = Response()
+
 def application(environ, start_response):
 	import json
-	from webob import Request, Response
 
-	global req, res, out, session
+	set_webob(environ)
 	
-	req = Request(environ)
-	res = Response()
-	
-	from lib.py import database
+	import lib.py
+	from lib.py import database, req, res
 	# start db connection
 	db = database.get()
 
-	if 'method' in req.params and req.params['method'] != 'lib.py.session.login':
+	if '_method' in req.params and req.params['_method'] != 'lib.py.session.login':
 		import lib.py.session
-		session = lib.py.session.load()
+		lib.py.sess = lib.py.session.load()
 	
 	res.content_type = 'text/html'
 	
 	try:
 		out = handle(db)
+		lib.py.out.update(out)
 	except Exception, e:
 		from lib.py.common import traceback
-		out['error'] = str(traceback())
+		lib.py.out['error'] = str(traceback())
 		
 	if not res.body:
-		if type(out) is str:
-			res.body = out
+		if type(lib.py.out) is str:
+			res.body = lib.py.out
 		else:
-			res.body = json.dumps(out, default=json_type_handler)
+			res.body = json.dumps(lib.py.out, default=json_type_handler)
 		
 	db.close()
 	

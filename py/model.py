@@ -1,5 +1,3 @@
-import session, common
-
 class PermissionError(Exception): pass
 class MandatoryError(Exception): pass
 
@@ -29,8 +27,15 @@ class Model(object):
 
 	def check_allow(self, method):
 		"""check allow"""
+		from lib.py import sess
+		
+		# for session types, there is no session defined
+		# (yet)
+		if self.obj['type']=='session':
+			return
+			
 		if method in ('post','delete'):
-			if session.user=='guest':
+			if sess['user']=='guest':
 				raise PermissionError, 'Not allowed'
 
 def get(obj):
@@ -43,6 +48,8 @@ def get(obj):
 		modulepackage = 'models.' + obj['type']
 		__import__(modulepackage)
 	except ImportError, e:
+		from lib.py import common
+		
 		common.log("unable import %s (%s)" % (obj['type'], str(e)))
 		modulepackage = 'lib.py.core.' + obj['type']
 		try:
@@ -68,7 +75,9 @@ def model_class(moduleobj):
 			
 def all():
 	"""get all model objects from 'core' and 'models' folders"""
-	import os, common
+	import os
+	from lib.py import common
+	
 	common.update_path()
 	dr = common.directory_root()
 	ml = find_models(os.path.join(dr, 'models'), 'models')

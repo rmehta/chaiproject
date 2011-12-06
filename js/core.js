@@ -101,7 +101,8 @@ $.objstore = {
 		if(d[type] && d[type][name]) {
 			success(d[type][name]);
 		} else {
-			$.getJSON('lib/py/objstore.py', {"type":type, "name":name}, function(obj) {
+			$.getJSON('server/', {_method:"lib.py.objstore,get", 
+				"type":type, "name":name}, function(obj) {
 				if(obj._log) {
 					console.log(obj._log);
 				}
@@ -116,9 +117,9 @@ $.objstore = {
 	},
 	post: function(obj, success) {
 		$.ajax({
-			url:'lib/py/objstore.py',
+			url:'server/',
 			type: 'POST',
-			data: {json: JSON.stringify(obj)},
+			data: {obj: JSON.stringify(obj), _method:'lib.py.objstore.post'},
 			success: function(response) {
 				if(response._log) {
 					console.log(response._log);
@@ -249,7 +250,8 @@ $(window).bind('hashchange', function() {
 (function($) {
 	$.logout = function() {
 		$.ajax({
-			url:'lib/py/session.py', 
+			url:'server/',
+			data: {_method:'lib.py.session.logout'},
 			type:'DELETE', 
 			success: function(data) {
 				$.session = {"user":"guest" ,"userobj":{}}
@@ -265,7 +267,7 @@ $(window).bind('hashchange', function() {
 // loads session from server
 // and calls $(document)->'session_load' event
 //
-$.getJSON('lib/py/session.py', function(session) {
+$.getJSON('server/', {_method:'lib.py.session.load'}, function(session) {
 	$.session = session
 
 	// trigger session_load

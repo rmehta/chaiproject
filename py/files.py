@@ -12,7 +12,7 @@ conf.files_path = os.path.join(os.path.dirname(__file__), '../..', conf.files_pa
 def post(**args):
 	"""save files in uploads folder"""
 	import json
-	from lib.py.app import req
+	from lib.py import req
 	
 	out = {'message':'start'}
 	
@@ -67,7 +67,7 @@ def get(**args):
 @whitelist
 def delete(**args):
 	"""delete file (user must be logged in)"""
-	from lib.py.app import req, session
+	from lib.py import req, session
 	
 	if session['user'] == 'guest':
 		return {"message":"must be logged in"}

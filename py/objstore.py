@@ -100,7 +100,7 @@ def get_obj_from_args(args):
 	if 'obj' in args:
 		if type(args['obj']==str):
 			import json
-			return json.loads(obj)
+			return json.loads(args['obj'])
 		else:
 			return args['obj']
 	elif 'type' in args:
@@ -214,8 +214,8 @@ def post_single(obj):
 @whitelist	
 def delete(**args):
 	"""delete an object and its children"""
-	db = database.get()
 	from lib.py import model, database
+	db = database.get()
 	
 	try:
 		model.get(args).check_allow('delete')

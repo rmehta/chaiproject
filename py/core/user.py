@@ -14,6 +14,14 @@ class User(model.Model):
 	
 	def __init__(self, obj):
 		super(User, self).__init__(obj)
+
+	def check_allow(self, method):
+		"""allow guest to create a new user, via register"""
+		from lib.py import req		
+		if method in ('post','delete'):
+			if sess['user']=='guest':
+				raise PermissionError, 'Not allowed'
+
 		
 	def before_post(self):
 		"""save password as sha256 hash"""		

@@ -1,3 +1,7 @@
+req = None
+res = None
+sess = None
+out = {}
 whitelisted = []
 
 def whitelist(fn):

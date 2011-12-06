@@ -57,7 +57,8 @@ $('#register form').bind('save', function() {
 	// login as current user
 	var formdata = $('#register form').form_values()
 	
-	$.getJSON('lib/py/session.py', {user:formdata.name, password:formdata.password}, 
+	$.getJSON('server/', 
+		{_method:'lib.py.session.login', user:formdata.name, password:formdata.password}, 
 		function(session) {
 			$.session = session
 			// trigger session_load

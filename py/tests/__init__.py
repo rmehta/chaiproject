@@ -32,6 +32,11 @@ def xcall(method, args, method_type='get'):
 		cookies = res.cookies
 	
 	if 'error' in rjson:
+		# print the error
+		print rjson['error']
+		
+		# now print remaining info
+		del rjson['error']
 		print rjson
 		raise Exception
 		

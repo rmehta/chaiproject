@@ -56,8 +56,9 @@ class Database:
 		"""close connection"""
 		if commit:
 			self.commit()
-		self.conn.close()
-		self.conn = None
+		if self.conn:
+			self.conn.close()
+			self.conn = None
 		
 	def repair_table(self, ttype, create_table):
 		"""create a new table and copy records"""

@@ -29,25 +29,27 @@ user = None
 
 from lib.py import whitelist
 
-def load():
+@whitelist
+def load(**args):
 	"""load an existing sesion from cookies or start a new guest session"""
-	from lib.py import objstore, database
-	from lib.py.app import req, res
+	from lib.py import objstore, database, req, res
 	
 	db = database.get()
 	
 	if 'sid' in req.cookies:
 		sess = objstore.get(type='session', name=req.cookies['sid'])
 		if sess:
+			sess['userobj'] = objstore.get(type='user', name=sess['user'])
 			return sess
 	
 	# no session, start a new one as guest
 	sess = dict(type='session', name=new_sid(), user='guest')
-	if not db.in_transaction:
-		db.begin()
 
+	db.begin()
 	objstore.post(**sess)
 	db.commit()
+	
+	res.set_cookie('sid', sess['name'])
 	
 	return sess
 	
@@ -59,7 +61,7 @@ def new_sid():
 @whitelist
 def login(**args):
 	"""login"""
-	from lib.py import database, objstore
+	from lib.py import database, objstore, res
 	db = database.get()
 	
 	import hashlib
@@ -69,7 +71,11 @@ def login(**args):
 	
 	if pwd == hashlib.sha256(args.get("password")).hexdigest():
 		d = dict(type='session', name=new_sid(), user=args['user'])
+		db.begin()
 		objstore.post(**d)
+		db.commit()
+		res.set_cookie('sid', d['name'])
+		
 		return {"message":"ok", "userobj":objstore.get(type='user', name=args['user'])}
 	else:
 		return {"error":"Invalid Login"}
@@ -77,6 +83,6 @@ def login(**args):
 @whitelist
 def logout(**args):
 	"""logout"""
-	from lib.py.app import req
+	from lib.py import req
 	db = database.get()
 	db.sql("delete from session where user=%s", (req.cookies,))
