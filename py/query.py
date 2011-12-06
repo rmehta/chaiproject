@@ -1,6 +1,6 @@
-#!/usr/bin/python
-
-import http_request, json
+"""
+Simple query service
+"""
 
 def get(**args):
 	"""
@@ -13,7 +13,10 @@ def get(**args):
 	order_by = "a asc"
 	limit = "20"
 	"""
-	req = http_request.req
+	import json
+	from lib.py.app import req
+	from lib.py import database
+	db = database.get()
 	
 	if 'json' in args:
 		args.update(args['json'])
@@ -38,10 +41,7 @@ def get(**args):
 			' and '.join(['`%s` %s %s' % (f[0], f[1], '%s') for f in args['filters']])
 		args['values'] = tuple([f[2] for f in args['filters']])
 	
-	return {"result": req.db.sql("""select %(columns)s 
+	return {"result": db.sql("""select %(columns)s 
 		from `%(type)s` 
 		%(conditions)s 
 		%(order_by)s %(limit)s""" % args, args['values'], as_dict=1)}
-
-if __name__=="__main__":
-	http_request.main()
