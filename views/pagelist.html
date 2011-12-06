@@ -22,7 +22,9 @@ $("#pagelist").delete_table_row({
 })
 
 // get list of pages
-$.getJSON('lib/py/query.py', {"json": JSON.stringify({
+$.getJSON('server/', {
+		"method":"lib.py.query.get",
+		"json": JSON.stringify({
 		type:"page", 
 		columns:"name, label, _updated",
 		order_by: "label asc"

@@ -5,8 +5,9 @@
 		<h3>Upload a File</h3>
 	</div>
 	<div class="modal-body">
-		<form class="form-stacked" method="POST" action="lib/py/files.py" enctype="multipart/form-data">
+		<form class="form-stacked" method="POST" action="server/" enctype="multipart/form-data">
 			<input name="mimetype" type="hidden" value="json">
+			<input name="method" type="hidden" value="lib.py.files.post">
 			<div class="clearfix">
 				<input name="filedata" type="file" />
 			</div>

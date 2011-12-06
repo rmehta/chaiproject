@@ -2,21 +2,24 @@
 
 """file upload manager"""
 
-import os, conf, http_request
+import os
+from lib.conf import conf
+from lib.py import whitelist
 
 conf.files_path = os.path.join(os.path.dirname(__file__), '../..', conf.files_path)
 
+@whitelist
 def post(**args):
 	"""save files in uploads folder"""
 	import json
+	from lib.py.app import req
 	
-	req = http_request.req
 	out = {'message':'start'}
 	
 	try:
-		if 'filedata' in req.formdata:
+		if 'filedata' in req.params:
 			# read the content
-			fdata = req.formdata['filedata']
+			fdata = req.params['filedata']
 			fname, content = scrub(fdata.filename), fdata.file.read()
 		
 			# check size
@@ -28,7 +31,7 @@ def post(**args):
 	except Exception, e:
 		out = {'error': str(e)}
 
-	req.out_text = json.dumps(out)
+	return out
 
 def save(fname, content):
 	"""save the file"""
@@ -45,10 +48,11 @@ def scrub(fname):
 		return fname.split('/')[-1]
 	return fname
 
+@whitelist
 def get(**args):
 	"""retun list of files"""
 	ret = []
-	import os, conf
+	import os
 	import datetime
 	
 	for wt in os.walk(os.path.join(conf.files_path)):
@@ -60,10 +64,12 @@ def get(**args):
 
 	return {'files':ret}
 
+@whitelist
 def delete(**args):
 	"""delete file (user must be logged in)"""
-	req = http_request.req
-	if req.session.user == 'guest':
+	from lib.py.app import req, session
+	
+	if session['user'] == 'guest':
 		return {"message":"must be logged in"}
 	import os
 	os.remove(os.path.join(conf.files_path, args['name']))

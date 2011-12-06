@@ -1,89 +1,82 @@
-#!/usr/bin/python
-import http_request, json
-import objstore
-import database
+"""
+Manage sessions
+
+1. Loads session / start a new session at the beginning of a request
+2. Login
+3. Logout
+
+Methods:
+--------
+
+### new_guest
+
+start a new guest session
+
+### new_sid
+
+return a new sid hash
+
+### login (whitelist)
+
+login - requires form variables user and password.
+
+### logout (whitelist)
+
+logout - delete all sessions of this user
+"""
 
 user = None
 
-class Session:
-	def __init__(self, req):
-		"""load session"""
-		self.req = req
-		self.user = ''
-		self.name = ''
+from lib.py import whitelist
 
-	def load(self):
-		"""resume session via cookie or start a new guest session"""
-		
-		if 'sid' in self.req.cookies:
-			self.__dict__.update(objstore.get(type="session", name=self.req.cookies['sid']))
-		if not self.user:
-			self.user = 'guest'
-			self.new_sid()
-			database.get()
-			database.conn.begin()
-			objstore.post(type="session", user=self.user, name=self.name)
-			database.conn.commit()
+def load():
+	"""load an existing sesion from cookies or start a new guest session"""
+	from lib.py import objstore, database
+	from lib.py.app import req, res
 	
-	def password_okay(self):
-		"""check passwords"""
-		import hashlib
-		pwd = self.req.db.sql("select password from user where name=%s", (self.req.form['user'],))
-		if pwd: pwd = pwd[0]['password']
-		
-		return pwd == hashlib.sha256(self.req.form.get("password")).hexdigest()
+	db = database.get()
 	
-	def new(self):
-		"""start a new session"""
+	if 'sid' in req.cookies:
+		sess = objstore.get(type='session', name=req.cookies['sid'])
+		if sess:
+			return sess
+	
+	# no session, start a new one as guest
+	sess = dict(type='session', name=new_sid(), user='guest')
+	if not db.in_transaction:
+		db.begin()
 
-		if not self.password_okay():
-			self.req.form = {}
-			self.req.method = 'error'
-			self.user = 'guest'
-			self.req.out["error"] = "Incorrect login"
-		else:
-			self.req.out["message"] = "ok"	
-			self.new_sid()
-			self.user = self.req.form['user']
-			objstore.post(type="session", user=self.user, name=self.name)
+	objstore.post(**sess)
+	db.commit()
+	
+	return sess
+	
+def new_sid():
+	"""set new sid"""
+	import hashlib, time
+	return hashlib.sha224(str(time.time())).hexdigest()
 
-	def new_sid(self):
-		"""set new sid"""
-		import hashlib, time
-		self.name = hashlib.sha224(str(time.time())).hexdigest()
-
-	def logout(self):
-		"""logout sessions"""
-		if 'user' in self.req.cookies:
-			database.get().sql("delete from session where user=%s", (self.req.cookies['user'],))
-			self.name = ''
-			self.user = 'guest'
-
-def get(**args):
-	"""start a new session"""
-	req = http_request.req
-
-	req.session = Session(req)
-	if req.form.get('user'):
-		database.get()
-		database.conn.begin()
-		req.session.new()
-		database.conn.commit()
+@whitelist
+def login(**args):
+	"""login"""
+	from lib.py import database, objstore
+	db = database.get()
+	
+	import hashlib
+	pwd = db.sql("select password from user where name=%s", (args['user'],))
+	if pwd: 
+		pwd = pwd[0]['password']
+	
+	if pwd == hashlib.sha256(args.get("password")).hexdigest():
+		d = dict(type='session', name=new_sid(), user=args['user'])
+		objstore.post(**d)
+		return {"message":"ok", "userobj":objstore.get(type='user', name=args['user'])}
 	else:
-		req.session.load()
+		return {"error":"Invalid Login"}
 
-	return {
-		"user":req.session.user, 
-		"sid":req.session.name, 
-		"userobj":objstore.get(type='user', name=req.session.user)
-	}
-
-def delete(**args):
+@whitelist
+def logout(**args):
 	"""logout"""
-	req = http_request.req
-	req.session = Session(req)
-	req.session.logout()
-		
-# request handling
-if __name__=='__main__':
-	http_request.main()
+	from lib.py.app import req
+	db = database.get()
+	db.sql("delete from session where user=%s", (req.cookies,))

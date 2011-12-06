@@ -1,0 +1,5 @@
+<uwsgi>
+    <socket>127.0.0.1:3031</socket>
+	<file>/var/www/rmehta/whiteboardapp/lib/py/app.py</file>
+    <master/>
+</uwsgi>

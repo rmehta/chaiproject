@@ -41,14 +41,16 @@ $('#signin button.btn.primary').click(function() {
 		} else {
 			params[$(this).attr('name')] = $(this).val();
 		}
-	})
+	});
+	
+	params.method = 'lib.py.session.get';
 
 	// check login
 	if(params.user && params.password) {
 		$(this).attr('disabled',true);
 		var me = this;
 		$('#signin message').html('Signing in...').addClass('label');
-		$.getJSON('lib/py/session.py', params, function(data) {
+		$.getJSON('server/', params, function(data) {
 			
 			// logged in okay
 			if(data.message && data.message=='ok') {

@@ -1,5 +1,5 @@
 import MySQLdb
-import conf
+from lib.conf import conf
 import MySQLdb.constants.ER as ER
 
 conn = None	

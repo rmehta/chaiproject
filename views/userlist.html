@@ -39,7 +39,7 @@ $('#btn-new-profile').click(function() {
 
 
 // get list of pages
-$.getJSON('lib/py/query.py', {"json": JSON.stringify({
+$.getJSON('session/', {"method":"lib.py.query.get", "json": JSON.stringify({
 		type:"user", 
 		columns:"name, full_name, email, is_admin",
 		order_by: "full_name asc"

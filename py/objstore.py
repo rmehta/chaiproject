@@ -104,6 +104,8 @@ def get_obj_from_args(args):
 		else:
 			return args['obj']
 	elif 'type' in args:
+		if '_method' in args:
+			del args['_method']
 		return args
 	else:
 		raise Exception, 'Badly formed object'
@@ -152,6 +154,7 @@ def post(**args):
 					else:
 						raise Exception, "child %s must be dict or literal" % str(child)	
 	modelobj and modelobj.after_post()
+	return {"message":"ok"}
 
 def exists(obj):
 	"""check exists by name"""
