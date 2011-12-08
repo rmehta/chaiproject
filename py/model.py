@@ -1,5 +1,34 @@
+"""
+Module `model`
+==============
+
+Model base class and function to get a model-object from an object.
+
+The model object is used to
+1. Define the schema using create table
+2. Declare events that will be called by objstore before or after "get", "insert", "update", "delete"
+3. Declare basic permission rules by overriding the method "check_allow"
+4. Any other utility methods
+
+Models are usually saved in modules in the sub-directory "models". Core models, that are supplied
+with the framework are saved in "lib/py/core"
+
+Events
+------
+
+Standard Events are:
+
+1. "before_get"
+2. "before_insert"
+3. "before_update"
+4. "before_delete"
+5. "after_insert"
+6. "after_update"
+7. "after_delete"
+8. "check_allow"
+
+"""
 class PermissionError(Exception): pass
-class MandatoryError(Exception): pass
 
 class Model(object):
 	mandatory = []
@@ -13,17 +42,13 @@ class Model(object):
 		import datetime
 		self.obj["_updated"] = datetime.datetime.now()
 
-	def before_post(self):
-		pass
-
-	def after_post(self):
-		pass
-	
-	def before_get(self):
-		pass
-
-	def before_delete(self):
-		pass
+	def before_get(self): pass
+	def before_insert(self): pass
+	def before_update(self): pass
+	def before_delete(self): pass
+	def after_insert(self): pass
+	def after_update(self): pass
+	def after_delete(self): pass
 
 	def check_allow(self, method):
 		"""check allow"""

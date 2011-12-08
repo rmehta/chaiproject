@@ -14,16 +14,8 @@ class User(model.Model):
 	
 	def __init__(self, obj):
 		super(User, self).__init__(obj)
-
-	def check_allow(self, method):
-		"""allow guest to create a new user, via register"""
-		from lib.py import req		
-		if method in ('post','delete'):
-			if sess['user']=='guest':
-				raise PermissionError, 'Not allowed'
-
 		
-	def before_post(self):
+	def before_insert(self):
 		"""save password as sha256 hash"""		
 		import hashlib
 		if 'password' in self.obj and len(self.obj['password'])!=64:
@@ -32,7 +24,10 @@ class User(model.Model):
 		# clear re-entered password
 		if 'password_again' in self.obj:
 			del self.obj['password_again']
-			
+	
+	def before_update(self):
+		self.before_insert()
+	
 	def before_get(self):
 		"""hide password"""
 		if 'password' in self.obj:

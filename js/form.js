@@ -38,7 +38,6 @@ Events:
 	$(<form>)->'save_error' // error
 */
 
-
 (function($) {
 	$.fn.form_values = function() {
 		var d = {}
@@ -88,10 +87,9 @@ Events:
 			source: function(request, response) {
 				filters = (opts.filters || []);
 				filters.push(["name", "like", request.term + '%']);
-				$.ajax({
-					url:"server/",
+				$.call({
+					method: 'lib.py.query.get',
 					data: {
-						method: 'lib.py.query.get'
 						type: opts.type,
 						columns: opts.columns || "name",
 						filters: JSON.stringify(filters),
@@ -234,6 +232,11 @@ Events:
 					$(id+' button.btn.primary').attr('disabled',
 						$(id+' .error').length ? true : false);
 				});
+				
+				// focus on first input on show
+				$(id).bind('shown', function() {
+					$(id + ' :input:first[type!="hidden"]').focus()
+				});
 			},
 			onsave: function() {
 				$(id+' form').validate_form();
@@ -245,7 +248,7 @@ Events:
 			},
 			
 			saveobj: function(obj) {
-				$.objstore.post($(id+' form').form_values(), function(data) {
+				$.objstore[opts.action || 'insert']($(id+' form').form_values(), function(data) {
 					if(data.message && data.message=='ok') {
 						$(id).set_message('Done!', 'success', 1000);
 						$(id+' form').trigger('save');

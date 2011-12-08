@@ -2,6 +2,9 @@
 Simple query service
 """
 
+from lib.py import whitelist, database
+
+@whitelist
 def get(**args):
 	"""
 	execute a select query
@@ -14,7 +17,6 @@ def get(**args):
 	limit = "20"
 	"""
 	import json
-	from lib.py import database
 	db = database.get()
 	
 	if 'json' in args:

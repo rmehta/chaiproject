@@ -50,7 +50,7 @@ def register(user='testuser', password='testpass'):
 		"password":password }, 'post')
 
 def login(user='testuser', password='testpass'):
-	resp = xcall('lib.py.session.login', {"user":user, "password":password});
+	resp = xcall('lib.py.session.login', {"user":user, "password":password}, method_type='post');
 	if resp.get('message') == 'ok':
 		global userobj
 		userobj = resp.get('userobj')

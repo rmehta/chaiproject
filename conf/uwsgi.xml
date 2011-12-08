@@ -4,6 +4,7 @@
 	    <pidfile>/tmp/wbapp.pid</pidfile>
 	    <socket>/tmp/wbapp.sock</socket>
 		<file>/var/www/rmehta/whiteboardapp/lib/py/app.py</file>
+		<daemonize>/tmp/uwsgi.log</daemonize>
 	    <master/>
 	</uwsgi>
 </localhost>

@@ -27,30 +27,23 @@ logout - delete all sessions of this user
 
 user = None
 
-from lib.py import whitelist
+from lib.py import whitelist, database, objstore
 
 @whitelist
 def load(**args):
 	"""load an existing sesion from cookies or start a new guest session"""
-	from lib.py import objstore, database, req, res
+	from lib.py import req, res
 	
 	db = database.get()
 	
-	if 'sid' in req.cookies:
+	if 'sid' in req.cookies and req.cookies['sid']!='guest':
 		sess = objstore.get(type='session', name=req.cookies['sid'])
 		if sess:
 			sess['userobj'] = objstore.get(type='user', name=sess['user'])
 			return sess
 	
-	# no session, start a new one as guest
-	sess = dict(type='session', name=new_sid(), user='guest')
-
-	db.begin()
-	objstore.post(**sess)
-	db.commit()
-	
-	res.set_cookie('sid', sess['name'])
-	
+	# no session, start a new one as guest (no need to save)
+	sess = dict(type='session', name='guest', user='guest')	
 	return sess
 	
 def new_sid():
@@ -61,7 +54,7 @@ def new_sid():
 @whitelist
 def login(**args):
 	"""login"""
-	from lib.py import database, objstore, res
+	from lib.py import res
 	db = database.get()
 	
 	import hashlib
@@ -71,12 +64,10 @@ def login(**args):
 	
 	if pwd == hashlib.sha256(args.get("password")).hexdigest():
 		d = dict(type='session', name=new_sid(), user=args['user'])
-		db.begin()
-		objstore.post(**d)
-		db.commit()
+		objstore.insert(**d)
 		res.set_cookie('sid', d['name'])
-		
-		return {"message":"ok", "userobj":objstore.get(type='user', name=args['user'])}
+		d.update({"message":"ok", "userobj":objstore.get(type='user', name=args['user'])})
+		return d
 	else:
 		return {"error":"Invalid Login"}
 
@@ -85,4 +76,5 @@ def logout(**args):
 	"""logout"""
 	from lib.py import req
 	db = database.get()
-	db.sql("delete from session where user=%s", (req.cookies,))
+	user = db.sql("""select user from session where name=%s""", req.cookies['sid'])[0]['user']
+	db.sql("delete from session where user=%s", user)

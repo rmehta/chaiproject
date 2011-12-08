@@ -1,7 +1,7 @@
 $.require('lib/js/form.js');
 
 // make the modal-form
-(function() {
+(function() {	
 	$.modal_form({
 		id: 'editprofile',
 		label: "Edit Profile",
@@ -13,7 +13,8 @@ $.require('lib/js/form.js');
 			{name:'password', label:'Password', type:'password',
 				help:'Must be at least 6 characters'},
 			{name:'password_again', label:'Re-type Password', type:'password'},
-		]
+		],
+		action: 'update'
 	});
 })();
 

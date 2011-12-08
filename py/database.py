@@ -27,7 +27,8 @@ class Database:
 			self.connect()
 			
 		if debug:
-			print query % values
+			from lib.py import out
+			out['log'] = query % values
 		
 		self.cur.execute(query, values)
 		res = self.cur.fetchall()

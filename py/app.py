@@ -12,11 +12,11 @@ method="package.module.method"
 the query_string and environ will be passed to the method
 """
 
-def handle(db):
+def handle():
 	"""handle the request"""
-	from lib.py import req
+	from lib.py import req, database
 	import sys
-	
+		
 	# execute a method
 	if '_method' in req.params:
 	
@@ -36,12 +36,12 @@ def handle(db):
 
 			# execute
 			if req.method=='POST':
-				db.begin()
+				database.conn.begin()
 				
 			t = getattr(sys.modules[module], method)(**req.params)
 
 			if req.method=='POST':
-				db.commit()
+				database.conn.commit()
 
 			return t or {"message":"no response"}
 		else:
@@ -54,18 +54,21 @@ def json_type_handler(obj):
 	if hasattr(obj, 'strftime'):
 		return str(obj)
 
-def set_webob(environ):
+def setup_request(environ):
 	"""setup global req, res"""
 	from webob import Request, Response
 	import lib.py
 	
+	# clear session
+	lib.py.out = {}
+	lib.py.sess = {}
 	lib.py.req = Request(environ)
 	lib.py.res = Response()
 
 def application(environ, start_response):
 	import json
 
-	set_webob(environ)
+	setup_request(environ)
 	
 	import lib.py
 	from lib.py import database, req, res
@@ -79,7 +82,7 @@ def application(environ, start_response):
 	res.content_type = 'text/html'
 	
 	try:
-		out = handle(db)
+		out = handle()
 		lib.py.out.update(out)
 	except Exception, e:
 		from lib.py.common import traceback

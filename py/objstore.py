@@ -1,60 +1,66 @@
-#!/usr/bin/python
-
 """
-Objectstore add, update and remove objects from the db
+Module `objstore`
+=================
 
-Methods:
+Objectstore get, insert, update and delete objects from the db
 
+Objects for insert and update can be passed in any of the following formats:
 
-get
----
-returns a full object with children as dict
-
-usage:
-get(type=[str], name=[str])
-
-post
-----
-insert/replace an object in the database
-
-usage:
 post(type=, name=, property1= ...)
 post(obj=[dict])
 post(obj=[json])
 
-notes:
-If a new object is to be created, a temp property "_new" must be set on the object. If this
-property is present, "INSERT" will be used and an exception will be thrown on duplicate key
+Vector objects
+--------------
 
-delete
-------
+Objects can also be vectors and can have property values as lists or lists of dicts.
+For example::
+
+	obj = {"name":"test", "type":"user", "user_role":["admin", "manager"]}
+
+Such objects are stored in two tables, `user` and `user_role`. The child table `user_role`
+must have 3 columns `parent`, `parent_type`, `idx`. idx is to maintain the sequence of the
+vector property.
+
+If the child items have only one property, it is stored by default in a column by name `value`.
+If the child is a dict, then each key becomes the table column. The child tables must have
+their schema declared as models.
+
+Callable Methods
+----------------
+
+4 methods are directly callable by client with a valid session
+
+1. get
+2. insert
+3. update
+4. delete
+
+Update and child items
+----------------------
+
+All child items must be passed during update. Update will clear all child items and
+insert them again.
+
 """
-from lib.py import whitelist
+
+from lib.py import whitelist, model, database
 import MySQLdb
 import MySQLdb.constants.ER as ER
 
 @whitelist
 def get(**args):
 	"""get an object"""
-	from lib.py import model, database
-	db = database.get()
+	db = database.conn
 	
 	obj = {"type":args['type'], "name":args['name']}
-	try:
-		obj = db.sql("select * from `%s` where name=%s" % (args['type'], '%s'), 
-			(args['name'],), as_dict=1)
-		if obj:
-			obj = obj[0]
-		else:
-			return {}
-		get_children(obj, args['type'], args['name'])
-		
-	except MySQLdb.Error, e:
-		if e.args[0]==ER.NO_SUCH_TABLE:
-			pass
-		else:
-			raise e
-			
+	obj = db.sql("select * from `%s` where name=%s" % (args['type'], '%s'), 
+		(args['name'],), as_dict=1)
+	if obj:
+		obj = obj[0]
+	else:
+		return {}
+	get_children(obj, args['type'], args['name'])			
 	obj['type'] = args['type']
 
 	modelobj = model.get(obj) or None
@@ -65,12 +71,9 @@ def get(**args):
 	
 def get_children(obj, ttype, name):
 	"""get children rows"""
-	from lib.py import database
-	db = database.get()
+	db = database.conn
 	
-	for child_tab in db.sql("select child from _parent_child where parent=%s", 
-		(ttype,)):
-		childtype = child_tab['child']
+	for childtype in children_types(ttype):
 		obj_list = db.sql("""select * from `%s` where parent=%s and parent_type=%s 
 			order by idx asc""" % (childtype,'%s','%s'), (name, ttype))
 		obj[childtype] = []
@@ -83,17 +86,42 @@ def get_children(obj, ttype, name):
 				obj[childtype].append(child['value'])
 			else:
 				obj[childtype].append(child)
+				
+def children_types(parenttype):
+	"""get children types for parent type from table `_parent_child`"""
+	return [c['child'] for c in \
+		database.conn.sql("select child from _parent_child where parent=%s", parenttype)]				
 
-def get_single(obj):
-	"""filter vector properties"""
-	s = {}
-	is_vector = False
-	for k in obj:
-		if type(obj[k]) not in (list, tuple, dict):
-			s[k] = obj[k]
-		else:
-			is_vector = True
-	return s, is_vector
+@whitelist
+def insert(**args):
+	"""insert a new object"""
+	return post(args, action='insert')
+
+@whitelist
+def update(**args):
+	"""update object (child items are cleared and rewritten)"""
+	return post(args, action='update')
+
+def post(args, action):
+	"""Post a vector object, the property name is the type. See test case for example"""
+
+	obj = get_obj_from_args(args)
+	if action=='update':
+		delete_children(obj['type'], obj['name'])
+
+	modelobj = (not obj.get('parent_type')) and model.get(obj) or None
+	modelobj and getattr(modelobj, 'before_' + action.lower())()
+	modelobj and modelobj.validate()
+
+	obj_single, is_vector = get_single(obj)
+	# save the parent
+	post_single(obj_single, action)
+
+	if is_vector:
+		post_children(obj)
+		
+	modelobj and getattr(modelobj, 'after_' + action.lower())()
+	return {"message":"ok"}
 
 def get_obj_from_args(args):
 	"""extract obj from args either passed as object or json string"""
@@ -109,124 +137,115 @@ def get_obj_from_args(args):
 		return args
 	else:
 		raise Exception, 'Badly formed object'
-			
-			
-@whitelist
-def post(**args):
-	"""post a vector object, the property name is the type. see test case for example"""
-	from lib.py import model, database
 
-	obj = get_obj_from_args(args)
+def get_single(obj):
+	"""filter vector properties"""
+	s = {}
+	is_vector = False
+	for k in obj:
+		if type(obj[k]) not in (list, tuple, dict):
+			s[k] = obj[k]
+		else:
+			is_vector = True
+	return s, is_vector
 
-	modelobj = (not obj.get('parent_type')) and model.get(obj) or None
-	modelobj and modelobj.before_post()
-	modelobj and modelobj.validate()
+def post_single(obj, action='insert'):
+	"""post an object in db, ignore extra columns"""
+	import MySQLdb
+
+	db = database.conn
+	obj_copy = get_valid_obj(obj)
+
+	if action=='insert':
+		query = insert_query(obj, obj_copy)
+	else:
+		query = update_query(obj, obj_copy)
+
+	db.sql(query, tuple(obj_copy.values()))
+
+def post_children(obj):
+	"""find out children from vector and post them"""
+	for k in obj:
+		d = {"type":k, "parent":obj["name"], "parent_type":obj["type"]}
+		# dict, one child only
+		if type(obj[k]) is dict:
+			obj[k].update(d)
+			post_single(obj[k])
+		
+		# multiple children
+		if type(obj[k]) in (list, tuple):
+			idx = 0
+			for child in obj[k]:
+				d['idx'] = idx
+				idx += 1
 				
-	obj_single, is_vector = get_single(obj)
-	# save the parent
-	post_single(obj_single)
-
-	if is_vector:	
-		for k in obj:
-			d = {"type":k, "parent":obj["name"], "parent_type":obj["type"]}
-			# dict, one child only
-			if type(obj[k]) is dict:
-				obj[k].update(d)
-				post(obj[k])
-			
-			# multiple children
-			if type(obj[k]) in (list, tuple):
-				idx = 0
-				for child in obj[k]:
-					d['idx'] = idx
-					idx += 1
+				# child is a dict
+				if type(child) is dict:
+					child.update(d)
+					post_single(child)
 					
-					# child is a dict
-					if type(child) is dict:
-						child.update(d)
-						post(child)
-						
-					# child is literal (only names)
-					elif type(child) in (str, int, float):
-						c = {"value":child}
-						c.update(d)
-						post_single(c)
-					else:
-						raise Exception, "child %s must be dict or literal" % str(child)	
-	modelobj and modelobj.after_post()
-	return {"message":"ok"}
+				# child is literal (only names)
+				elif type(child) in (str, int, float):
+					c = {"value":child}
+					c.update(d)
+					post_single(c)
+				else:
+					raise Exception, "child %s must be dict or literal" % str(child)	
 
 def exists(obj):
 	"""check exists by name"""
-	from lib.py import database
-
-	db = database.get()
+	db = database.conn
 	
 	if obj.get('name') and obj.get('type'):
 		return db.sql("select name from `%s` where name=%s" % \
 		 	(obj['type'],'%s'), obj['name'])
 
-def post_action(obj):
-	"""identify post action"""
-	if obj.get('_new'):
-		return 'insert'
-	elif obj.get('_replace'):
-		return 'replace'
-	elif not obj.get('name'):
-		return 'replace'
-	elif not exists(obj):
-		return 'replace'
-	else:
-		return 'update'
-
-def post_single(obj):
-	"""post an object in db, ignore extra columns"""
-	import MySQLdb
-	from lib.py import database
-
-	db = database.get()
-	
-	obj_copy = {}
-	
-	columns = db.columns(obj['type'])
+def get_valid_obj(obj):
+	"""returns an object copy with only valid columns"""
+	obj_copy = {}	
+	columns = database.conn.columns(obj['type'])
 	# copy valid columns
 	for c in columns:
 		if obj.get(c):
 			obj_copy[c] = obj.get(c)
+	return obj_copy
 
-	parts = {
-		'tab': obj['type'],
-		'cmd': post_action(obj)
-	}
+def insert_query(obj, obj_copy):
+	"""returns the insert query"""
+	parts = {}
+	parts['tab'] = obj['type']
+	parts['cols'] = '`, `'.join(obj_copy.keys())
+	parts['vals'] = ('%s,'*len(obj_copy))[:-1]
+	query = """insert into `%(tab)s`(`%(cols)s`) 
+		values (%(vals)s)""" % parts
+		
+	return query
 
-	if parts['cmd'] in ('insert', 'replace'):
-		parts['cols'] = '`, `'.join(obj_copy.keys())
-		parts['vals'] = ('%s,'*len(obj_copy))[:-1]
-		query = """%(cmd)s into `%(tab)s`(`%(cols)s`) 
-			values (%(vals)s)""" % parts
-	else:
-		parts['set'] = ', '.join(['`%s`=%s' % (key, '%s') for key in obj_copy.keys()])
-		parts['name'] = obj['name'].replace("'", "\'")
-		query = """update `%(tab)s` set %(set)s where name='%(name)s'""" % parts
-	
-	db.sql(query, tuple(obj_copy.values()))
+def update_query(obj, obj_copy):
+	"""returns update query for the given object"""
+	parts = {}
+	parts['tab'] = obj['type']
+	parts['set'] = ', '.join(['`%s`=%s' % (key, '%s') for key in obj_copy.keys()])
+	parts['name'] = obj['name'].replace("'", "\'")
+	query = """update `%(tab)s` set %(set)s where name='%(name)s'""" % parts
+	return query
 
 @whitelist	
 def delete(**args):
-	"""delete an object and its children"""
-	from lib.py import model, database
-	db = database.get()
+	"""delete object and its children, if permitted"""
+	from lib.py import model
 	
-	try:
-		model.get(args).check_allow('delete')
-		db.sql("""delete from `%s` where name=%s""" % (args['type'], '%s'), args['name'])
+	model.get(args).check_allow('delete')
+	delete_obj(**args)
+	
+def delete_obj(type, name):
+	"""delete object and its children"""
+	database.conn.sql("""delete from `%s` where name=%s""" % (type, '%s'), name)
+	delete_children(type, name)
 
-		# delete children
-		for child_tab in db.sql("select child from _parent_child where parent=%s", (args['type'],)):
-			db.sql("""delete from `%s` where parent=%s and parent_type=%s""" \
-				% (child_tab['child'],'%s','%s'), (args['name'], args['type']))
-	except MySQLdb.Error, e:
-		if e.args[0] == ER.NO_SUCH_TABLE:
-			return
-		else:
-			raise e
+def delete_children(parenttype, parent):
+	"""delete all children of the given object"""
+	for child_tab in children_types(parenttype):
+		database.conn.sql("""delete from `%s` where parent=%s and parent_type=%s""" \
+			% (child_tab,'%s','%s'), (parent, parenttype))
+

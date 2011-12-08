@@ -50,24 +50,30 @@ $('#signin button.btn.primary').click(function() {
 		$(this).attr('disabled',true);
 		var me = this;
 		$('#signin message').html('Signing in...').addClass('label');
-		$.getJSON('server/', params, function(data) {
-			
-			// logged in okay
-			if(data.message && data.message=='ok') {
-				$('#signin .message').html(['bingo','howdy','welcome'][$.random(2)])
-					.addClass('label success');	
+		$.call({
+			method:'lib.py.session.login',
+			data: params, 
+			type: 'POST',
+			success: function(data) {
+				// logged in okay
+				if(data.message && data.message=='ok') {
+					$('#signin .message').html(['bingo','howdy','welcome'][$.random(2)])
+						.removeClass('important')
+						.addClass('label success');	
 					
-					$.session = data;
-					$(document).trigger('session_load');
-					$('#signin').modal('hide');
+						$.session = data;
+						$(document).trigger('session_load');
+						$('#signin').modal('hide');
 					
-			// false login
-			} else {
-				$('#signin .message').html(['oops','sorry','try again'][$.random(2)] +
-					': ' + data.error)
-					.addClass('label important');
+				// false login
+				} else {
+					$('#signin .message').html(['oops','sorry','try again'][$.random(2)] +
+						': ' + data.error)
+						.removeClass('success')
+						.addClass('label important');
+				}
+				$(me).attr('disabled',false);
 			}
-			$(me).attr('disabled',false);
 		});
 	}
 });
@@ -76,6 +82,18 @@ $('#signin button.btn.primary').click(function() {
 // activate as modal
 $('#signin').bind('_show', function() {
 	$('#signin').modal({backdrop:'static', show:true});
+	
+	// focus on first element
+	$('#signin').bind('shown', function() {
+		$('#signin input:first').trigger('focus');
+	})
+	
+	// click on enter
+	$('#signin').bind('keydown', function(event) {
+		if(event.which==13) {
+			$('#signin button.btn.primary').click();
+		}
+	})
 })
 
 </script>

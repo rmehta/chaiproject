@@ -6,19 +6,39 @@ class TestObjstore(unittest.TestCase):
 	def setUp(self):
 		self.db = database.get()
 		self.db.begin()
+		import lib.py
+		lib.py.blank()
 		
 	def tearDown(self):
 		self.db.rollback()
 		self.db.close()
 		
-	def test_post(self):
-		objstore.post(type="user", name="testuser", email="testmail")
+	def test_insert(self):
+		objstore.insert(type="user", name="testuser", email="testmail")
 		obj = self.db.sql("""select * from user where name='testuser'""")[0]
 		self.assertTrue(obj['email'] == 'testmail')
 
+	def test_update(self):
+		self.test_insert()
+		objstore.update(type="user", name="testuser", email="testmail2")
+		objstore.get(type="user", name="testuser")['email']=='testmail2'
+	
+	def test_delete(self):
+		self.test_insert()
+		objstore.delete(type="user", name="testuser")
+		self.assertFalse(self.db.sql("""select * from user where name='testuser'"""))
+
+	def test_update_with_children(self):
+		objstore.insert(type="user", name="testuser", userrole=['Admin', 'Manager'])
+		objstore.update(type="user", name="testuser", userrole=['Admin', 'MX'])
+		obj = objstore.get(type="user", name="testuser")
+		self.assertTrue('Admin' in obj['userrole'])
+		self.assertFalse('Manager' in obj['userrole'])
+		self.assertTrue('MX' in obj['userrole'])
+
 	def test_get(self):
 		obj = dict(type="user", name="testuser", email="testmail", fullname="Test User")
-		objstore.post(**obj)
+		objstore.insert(**obj)
 		obj1 = objstore.get(type="user", name="testuser")
 		# clear nulls
 		del obj1['_updated']
@@ -29,7 +49,7 @@ class TestObjstore(unittest.TestCase):
 		
 	def test_vector(self):
 		obj = dict(type="user", name="testuser", email="testmail", fullname="Test User")
-		objstore.post(type="user", name="testuser", userrole=['Admin', 'Manager'])
+		objstore.insert(type="user", name="testuser", userrole=['Admin', 'Manager'])
 		obj1 = objstore.get(type="user", name="testuser")
 		self.assertTrue('Admin' in obj1['userrole'])
 		self.assertTrue('Manager' in obj1['userrole'])

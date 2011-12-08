@@ -40,6 +40,27 @@
 	$.is_email = function(txt) {
 		return txt.search("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")!=-1;
 	};
+	$.call = function(opts) {
+		if(!opts.type) opts.type = 'GET';
+		if(!opts.data) opts.data = {};
+		
+		opts.data._method = opts.method;
+		$.ajax({
+			url:'server/',
+			type: opts.type || 'GET',
+			data: opts.data,
+			dataType: 'json',
+			success: function(data) {
+				if(data.error) {
+					console.log('Error:' + data.error);
+				}
+				if(data.log) {
+					console.log(data.log);
+				}
+				opts.success(data);
+			}
+		});
+	}
 })(jQuery);
 
 // $.require
@@ -101,25 +122,32 @@ $.objstore = {
 		if(d[type] && d[type][name]) {
 			success(d[type][name]);
 		} else {
-			$.getJSON('server/', {_method:"lib.py.objstore,get", 
-				"type":type, "name":name}, function(obj) {
-				if(obj._log) {
-					console.log(obj._log);
-				}
-				if(obj.error) {
-					error(obj); return;
-				} else {
-					$.objstore.set(obj);
-					success(obj);					
+			$.call({
+				method:"lib.py.objstore.get", 
+				data: {"type":type, "name":name}, 
+				success: function(obj) {
+					if(obj.error) {
+						error(obj); 
+						return;
+					} else {
+						$.objstore.set(obj);
+						success(obj);					
+					}
 				}
 			});
 		}
 	},
-	post: function(obj, success) {
-		$.ajax({
-			url:'server/',
+	insert: function(obj, success) {
+		$.objstore.post(obj, success, 'insert');
+	},
+	update: function(obj, success) {
+		$.objstore.post(obj, success, 'update');
+	},
+	post: function(obj, success, insert_or_update) {
+		$.call({
 			type: 'POST',
-			data: {obj: JSON.stringify(obj), _method:'lib.py.objstore.post'},
+			method: 'lib.py.objstore.' + (insert_or_update || 'insert'),
+			data: {obj: JSON.stringify(obj)},
 			success: function(response) {
 				if(response._log) {
 					console.log(response._log);
@@ -249,10 +277,9 @@ $(window).bind('hashchange', function() {
 //    triggers $(document)->logout event
 (function($) {
 	$.logout = function() {
-		$.ajax({
-			url:'server/',
-			data: {_method:'lib.py.session.logout'},
-			type:'DELETE', 
+		$.call({
+			method:'lib.py.session.logout',
+			type:'POST', 
 			success: function(data) {
 				$.session = {"user":"guest" ,"userobj":{}}
 				$(document).trigger('logout');
@@ -267,11 +294,13 @@ $(window).bind('hashchange', function() {
 // loads session from server
 // and calls $(document)->'session_load' event
 //
-$.getJSON('server/', {_method:'lib.py.session.load'}, function(session) {
-	$.session = session
-
-	// trigger session_load
-	$(document).trigger('session_load');
+$.call({
+	method:'lib.py.session.load', 
+	success:function(session) {
+		$.session = session
+		// trigger session_load
+		$(document).trigger('session_load');
+	}
 })
 
 

@@ -9,3 +9,10 @@ def whitelist(fn):
 	global whitelisted
 	whitelisted.append(fn)
 	return fn
+	
+def blank():
+	"""start an empty session for testing"""
+	global sess, req
+	from webob import Request
+	req = Request.blank('server/')
+	sess = {"user":"test"}
