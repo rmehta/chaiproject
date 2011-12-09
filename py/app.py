@@ -60,11 +60,11 @@ def setup_request(environ):
 	import lib.py
 	
 	# clear session
-	lib.py.out = {}
 	lib.py.sess = {}
 	lib.py.req = Request(environ)
 	lib.py.res = Response()
-
+	lib.py.out = {}
+	
 def application(environ, start_response):
 	import json
 

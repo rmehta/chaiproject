@@ -1,4 +1,4 @@
-from lib.py import model, http_request
+from lib.py import model, common
 
 class Page(model.Model):
 	_name = 'page'
@@ -21,5 +21,4 @@ class Page(model.Model):
 		"""generated html pages"""
 		import pages
 		ret = pages.make()
-		if http_request.req:
-			http_request.req.out['log'] = ret
+		common.log(ret)
