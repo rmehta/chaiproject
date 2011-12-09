@@ -19,12 +19,21 @@ $.require('lib/js/common.js');
 
 // delete
 $("#filelist").delete_table_row({
-	url:'lib/py/files.py'
+	method:'lib.py.files.delete'
 });
 
-$.getJSON('server/', {'method':'lib.py.files.get'}, 
-	function(data) {
-		// render
+$.call({
+	method:'lib.py.files.filelist', 
+	success: function(data) {
+		// no pages?
+		if(!data.files.length) {
+			$('#filelist_table tbody').append($.rep('<tr>\
+				<td><div class="help-block">No Files Uploaded...</div>\
+				</td><td></td></tr>'));
+			return;
+		}
+		
+		// list pages
 		$.each(data.files, function(i, f) {		
 			$('#filelist_table tbody').append($.rep('<tr>\
 				<td>\
@@ -39,6 +48,6 @@ $.getJSON('server/', {'method':'lib.py.files.get'},
 				}))
 		});
 	}
-);
+});
 
 </script>

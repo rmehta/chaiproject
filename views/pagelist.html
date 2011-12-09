@@ -22,31 +22,40 @@ $("#pagelist").delete_table_row({
 })
 
 // get list of pages
-$.getJSON('server/', {
-		"method":"lib.py.query.get",
-		"json": JSON.stringify({
+$.call({
+	method:"lib.py.query.get",
+	data: {
 		type:"page", 
 		columns:"name, label, _updated",
 		order_by: "label asc"
-	})}, function(data) {
+	}, 
+	success:function(data) {
 
-	// render
-	$.each(data.result, function(i, p) {
-		if(!p.label) p.label = p.name;
-		p.ts = prettyDate(p._updated);
+		// no pages?
+		if(!data.result.length) {
+			$('#pagelist_table tbody').append($.rep('<tr>\
+				<td><div class="help-block">No Pages...</div>\
+				</td><td></td></tr>'));
+			return;
+		}
+
+		// render
+		$.each(data.result, function(i, p) {
+			if(!p.label) p.label = p.name;
+			p.ts = prettyDate(p._updated);
 		
-		$('#pagelist_table tbody').append($.rep('<tr>\
-			<td>\
-				<a href="#%(name)s"><b>%(label)s</b></a>\
-				<div class="help-block">%(ts)s</div>\
-			</td>\
-			<td>\
-				<button class="btn small primary" onclick="location.hash=\'editpage/%(name)s\'" >Edit</button>\
-				<button data-name="%(name)s" class="btn small delete-row-btn">Delete</button>\
-			</td>\
-			</tr>', p))
-	});
-	
+			$('#pagelist_table tbody').append($.rep('<tr>\
+				<td>\
+					<a href="#%(name)s"><b>%(label)s</b></a>\
+					<div class="help-block">%(ts)s</div>\
+				</td>\
+				<td>\
+					<button class="btn small primary" onclick="location.hash=\'editpage/%(name)s\'" >Edit</button>\
+					<button data-name="%(name)s" class="btn small delete-row-btn">Delete</button>\
+				</td>\
+				</tr>', p))
+		});
+	}
 });
 
 </script>

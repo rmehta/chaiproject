@@ -49,7 +49,7 @@ def scrub(fname):
 	return fname
 
 @whitelist
-def get(**args):
+def filelist(**args):
 	"""retun list of files"""
 	ret = []
 	import os
@@ -67,9 +67,9 @@ def get(**args):
 @whitelist
 def delete(**args):
 	"""delete file (user must be logged in)"""
-	from lib.py import req, session
+	from lib.py import req, sess
 	
-	if session['user'] == 'guest':
+	if sess['user'] == 'guest':
 		return {"message":"must be logged in"}
 	import os
 	os.remove(os.path.join(conf.files_path, args['name']))

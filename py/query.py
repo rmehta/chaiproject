@@ -2,7 +2,9 @@
 Simple query service
 """
 
-from lib.py import whitelist, database
+from lib.py import whitelist, database, out
+
+typemethod = type
 
 @whitelist
 def get(**args):
@@ -35,7 +37,7 @@ def get(**args):
 
 	# conditions
 	if 'filters' in args:
-		if type(args['filters'])==str:
+		if typemethod(args['filters']) in (str, unicode):
 			args['filters'] = json.loads(args['filters'])
 			
 		args['conditions'] = 'where ' + \

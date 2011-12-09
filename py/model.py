@@ -59,7 +59,7 @@ class Model(object):
 		if self.obj['type']=='session':
 			return
 			
-		if method in ('post','delete'):
+		if method in ('insert','update','delete'):
 			if sess['user']=='guest':
 				raise PermissionError, 'Not allowed'
 

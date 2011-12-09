@@ -29,11 +29,11 @@ def create_user_and_index():
 	db.begin()
 
 	# user
-	objstore.post(type="user", name=conf.dbuser, password=conf.dbpassword, \
+	objstore.insert(type="user", name=conf.dbuser, password=conf.dbpassword, \
 		is_admin=1)
 	
 	# index page
-	objstore.post(type="page", html=(content % {"app_name":conf.app_name}), \
+	objstore.insert(type="page", html=(content % {"app_name":conf.app_name}), \
 		name="index", label=conf.app_name)
 
 	db.commit()
@@ -114,17 +114,21 @@ if __name__=='__main__':
 				table = sys.argv[1]
 			
 			database.get().sync_tables(table)
+
+		elif cmd == 'update-all':
+			database.get().sync_tables()
 		
 		elif cmd == 'pages':
 			make_pages()
 			
 		elif cmd == 'adduser':
-			objstore.post(type="user", name=sys.argv[2], password=sys.argv[3])
-			
+			database.get()
+			database.conn.begin()
+			objstore.insert(type="user", name=sys.argv[2], password=sys.argv[3])
+			database.conn.commit()			
 		else:
 			print usage_string
 	else:
 		print usage_string
 		
-	database.get().sync_tables()
 

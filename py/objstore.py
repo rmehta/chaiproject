@@ -53,23 +53,35 @@ def get(**args):
 	"""get an object"""
 	db = database.conn
 	
-	obj = {"type":args['type'], "name":args['name']}
-	obj = db.sql("select * from `%s` where name=%s" % (args['type'], '%s'), 
-		(args['name'],), as_dict=1)
-	if obj:
-		obj = obj[0]
-	else:
+	obj = _get_obj(type=args['type'], name=args['name'])
+	if not obj:
 		return {}
-	get_children(obj, args['type'], args['name'])			
-	obj['type'] = args['type']
-
+		
+	# check permissions
 	modelobj = model.get(obj) or None
 	modelobj and modelobj.check_allow('get')
 	modelobj and modelobj.before_get()
 
 	return obj
+
+def _get_obj(type, name):
+	"""load an object without any events"""
+	db = database.conn
 	
-def get_children(obj, ttype, name):
+	obj = db.sql("select * from `%s` where name=%s" % (type, '%s'), 
+		name, as_dict=1)
+	if not obj:
+		return {}
+	else:
+		obj = obj[0]
+		# add "type" property		
+		obj['type'] = type
+
+	load_children(obj, type, name)
+		
+	return obj
+	
+def load_children(obj, ttype, name):
 	"""get children rows"""
 	db = database.conn
 	
@@ -115,7 +127,10 @@ def post(args, action):
 
 	obj_single, is_vector = get_single(obj)
 	# save the parent
-	post_single(obj_single, action)
+	try:
+		post_single(obj_single, action)
+	except MySQLdb.IntegrityError, e:
+		return {"error":"name exists"}
 
 	if is_vector:
 		post_children(obj)
@@ -235,8 +250,9 @@ def delete(**args):
 	"""delete object and its children, if permitted"""
 	from lib.py import model
 	
-	model.get(args).check_allow('delete')
-	delete_obj(**args)
+	model.get(_get_obj(args['type'], args['name'])).check_allow('delete')
+	delete_obj(args['type'], args['name'])
+	return {"message":"ok"}
 	
 def delete_obj(type, name):
 	"""delete object and its children"""
