@@ -11,6 +11,10 @@ class Database:
 		"""connect to db"""
 		self.connect()
 
+	def clear_cache(self):
+		"""clear all cached info about schema, done before request starts"""
+		self._columns = {}
+
 	def connect(self):
 		"""connect to mysql db"""
 		self.conn = MySQLdb.connect('localhost', conf.dbuser, conf.dbpassword)
@@ -104,7 +108,7 @@ class Database:
 				# update parent-child map
 				if hasattr(m, '_parent'):
 					self.begin()
-					objstore.post(type="_parent_child", parent=m._parent, child=m._name)
+					objstore.insert(type="_parent_child", parent=m._parent, child=m._name)
 					self.commit()
 
 		self.sql("set foreign_key_checks=1")

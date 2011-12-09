@@ -14,7 +14,7 @@ def update_path():
 	
 def log(msg):
 	"""log some info to publish in client console"""
-	from http_request import req
+	from lib.py import req
 	if not req: return
 		
 	if not req.out.get('_log'):

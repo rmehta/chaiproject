@@ -74,6 +74,7 @@ def application(environ, start_response):
 	from lib.py import database, req, res
 	# start db connection
 	db = database.get()
+	db.clear_cache()
 
 	if '_method' in req.params and req.params['_method'] != 'lib.py.session.login':
 		import lib.py.session

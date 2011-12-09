@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 project utils
 """
@@ -113,13 +115,10 @@ if __name__=='__main__':
 		
 		elif cmd == 'update':
 			table = None
-			if len(sys.argv) > 1:
-				table = sys.argv[1]
+			if len(sys.argv) > 2:
+				table = sys.argv[2]
 			
 			database.get().sync_tables(table)
-
-		elif cmd == 'update-all':
-			database.get().sync_tables()
 		
 		elif cmd == 'pages':
 			make_pages()
