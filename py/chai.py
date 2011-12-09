@@ -93,7 +93,8 @@ if __name__=='__main__':
 	import os, sys
 	sys.path.append('.')
 
-	from lib.py import objstore, conf, database
+	from lib.py import objstore, database
+	from lib.conf import conf
 	
 	
 	if len(sys.argv) > 1:
@@ -103,8 +104,10 @@ if __name__=='__main__':
 			print "database %s created" % conf.dbname
 
 			make_folders()
+
+		elif cmd == 'bootstrap':
 			make_style_css()
-			make_index_html()	
+			make_template_html()	
 			create_user_and_index()
 			make_pages()
 		

@@ -13,6 +13,7 @@
 // $.random(n)
 // $.set_default(obj, key, value)
 // $.is_email(txt)
+// $('selector').classList() - get class list of the object
 
 (function($) {
 	// python style string replace
@@ -40,6 +41,9 @@
 	$.is_email = function(txt) {
 		return txt.search("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")!=-1;
 	};
+	$.fn.classList = function() {
+		return this.attr('class').split(/\s+/);
+	}
 	$.call = function(opts) {
 		if(!opts.type) opts.type = 'GET';
 		if(!opts.data) opts.data = {};

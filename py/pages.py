@@ -9,16 +9,14 @@ inside which the page html will be rendered
 
 def make():
 	import os
-	from lib.py import conf, database, http_request
+	from lib.py import database
+	from lib.conf import conf
 	
 	messages = []
 	
 	container = '<div class="main container">'
 
-	if http_request.req:
-		db = http_request.req.db
-	else:
-		db = database.Database()
+	db = database.get()
 	pages_path = os.path.join(os.path.dirname(__file__), '../..')
 	
 	index_html = open(os.path.join(os.path.dirname(__file__), '../..', 'template.html'),'r').read()
