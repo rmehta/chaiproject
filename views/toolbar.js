@@ -75,6 +75,10 @@ $(document).ready(function() {
 })
 
 // make toolbar on login
-$(document).bind('session_load', function() {
+$(document).bind('login', function() {
+	$.topbar.make();
+});
+
+$(document).bind('logout', function() {
 	$.topbar.make();
 });

@@ -25,7 +25,6 @@
 </div>
 <script>
 $.require('lib/js/bootstrap/bootstrap-modal.js');
-
 $('#signin button.btn.secondary').click(function() {
 	$('#signin').modal('hide'); 
 });
@@ -42,7 +41,7 @@ $('#signin button.btn.primary').click(function() {
 			params[$(this).attr('name')] = $(this).val();
 		}
 	});
-	
+		
 	params._method = 'lib.py.session.login';
 
 	// check login
@@ -57,13 +56,14 @@ $('#signin button.btn.primary').click(function() {
 			success: function(data) {
 				// logged in okay
 				if(data.message && data.message=='ok') {
+					console.log(data);
 					$('#signin .message').html(['bingo','howdy','welcome'][$.random(2)])
 						.removeClass('important')
 						.addClass('label success');	
 					
-						$.session = data;
-						$(document).trigger('session_load');
-						$('#signin').modal('hide');
+					$.session = data;
+					$(document).trigger('login');
+					$('#signin').modal('hide');
 					
 				// false login
 				} else {

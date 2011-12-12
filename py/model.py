@@ -28,6 +28,8 @@ Standard Events are:
 8. "check_allow"
 
 """
+core_types = ['_parent_child', 'page', 'user', 'session', 'userrole']
+
 class PermissionError(Exception): pass
 
 class Model(object):
@@ -69,27 +71,20 @@ def get(obj):
 	
 	if not 'type' in obj:
 		return Model(obj)
-	try:
-		modulepackage = 'models.' + obj['type']
-		__import__(modulepackage)
-	except ImportError, e:
-		from lib.py import common
 		
-		common.log("unable import %s (%s)" % (obj['type'], str(e)))
-		modulepackage = 'lib.py.core.' + obj['type']
-		try:
-			# try in core
-			__import__(modulepackage)
-		except ImportError, e:
-			return Model(obj)
+	if obj['type'] in core_types:
+		modulepackage = 'lib.py.core.' + obj['type']		
+	else:
+		modulepackage = 'models.' + obj['type']
+
+	__import__(modulepackage)
 
 	# find subclass of "Model"
 	modelclass = model_class(sys.modules[modulepackage])
 	if modelclass: 
 		return modelclass(obj)
 	else:
-		# did not find
-		return Model(obj)
+		raise Exception, 'Model for %s not found' %  obj['type']
 
 def model_class(moduleobj):
 	"""find first subclass of model.Model"""

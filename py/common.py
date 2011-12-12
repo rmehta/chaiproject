@@ -14,12 +14,13 @@ def update_path():
 	
 def log(msg):
 	"""log some info to publish in client console"""
-	from lib.py import req
-	if not req: return
+	from lib.py import req, out
+	if not req: 
+		return
 		
-	if not req.out.get('_log'):
-		req.out['_log'] = []
-	req.out['_log'].append(msg)
+	if not out.get('_log'):
+		out['_log'] = []
+	out['_log'].append(msg)
 	
 def traceback():
 	"""Returns the traceback of the Exception"""

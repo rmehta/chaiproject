@@ -61,8 +61,8 @@ $('#register form').bind('save', function() {
 		{_method:'lib.py.session.login', user:formdata.name, password:formdata.password}, 
 		function(session) {
 			$.session = session
-			// trigger session_load
-			$(document).trigger('session_load');
+			// trigger login
+			$(document).trigger('login');
 		});	
 	
 	$('#register').modal('hide');

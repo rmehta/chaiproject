@@ -24,10 +24,6 @@ def create_user_and_index():
 		<li>Admin -> Edit
 	</ol>
 	'''
-	db = database.get()
-	db.sync_tables('_parent_child')
-	db.sync_tables()
-
 	db.begin()
 
 	# user
@@ -51,7 +47,7 @@ def make_style_css():
 		shutil.copyfile('lib/css/style_template.css', 'css/style.css')
 		print "css/style.css made"
 
-def make_index_html():
+def make_template_html():
 	"""make template.html if not exists"""
 	if not os.path.exists('template.html'):
 		index_content = file('lib/html/template.html','r').read()
@@ -90,6 +86,10 @@ def create_db(rootuser, rootpass):
 	cur.execute("grant all privileges on `%s`.* to '%s'" % (conf.dbname, conf.dbuser))
 	cur.execute("flush privileges")
 
+def sync_tables():
+	datbase.conn.sync_tables('_parent_child')
+	datbase.conn.sync_tables()
+
 
 if __name__=='__main__':
 	import os, sys
@@ -97,9 +97,9 @@ if __name__=='__main__':
 
 	from lib.py import objstore, database
 	from lib.conf import conf
-	
-	
+		
 	if len(sys.argv) > 1:
+		database.get()
 		cmd = sys.argv[1]
 		if cmd == 'setup':
 			create_db(sys.argv[2], sys.argv[3])
@@ -108,10 +108,10 @@ if __name__=='__main__':
 			make_folders()
 
 		elif cmd == 'bootstrap':
+			sync_tables()
 			make_style_css()
 			make_template_html()	
 			create_user_and_index()
-			make_pages()
 		
 		elif cmd == 'update':
 			table = None
@@ -124,7 +124,6 @@ if __name__=='__main__':
 			make_pages()
 			
 		elif cmd == 'adduser':
-			database.get()
 			database.conn.begin()
 			objstore.insert(type="user", name=sys.argv[2], password=sys.argv[3])
 			database.conn.commit()			

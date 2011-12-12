@@ -26,10 +26,10 @@
 	    return s;
 	}
 	// import css / js files
-	$.set_style = function(css) {
+	$.set_css = function(css) {
 		$('head').append('<style type="text/css">'+css+'</style>')
 	};
-	$.set_script = function(js) {
+	$.set_js = function(js) {
 		$('head').append('<script language="javascript">'+js+'</script>');
 	};
 	$.random = function(n) {
@@ -72,39 +72,39 @@
 //
 // Usage: $.require('path/to/js')
 (function($) {
-	$.require = function(files, params) {
-		var params = params || {};
-
-		if (!$.require.loaded) 
-			$.require.loaded = {};
-
-		if (!$.require.path )
-			$.require.path = '';
-
-		if (typeof files === "string") {
-			files = new Array(files);
+	$.require = function(file, params) {
+		var extn = file.split('.').slice(-1);
+		if(!params) params = {};
+		
+		// get from localstorage if exists
+		if(localStorage && localStorage[file]) {
+			extn == 'js' && $.set_js(localStorage[file]) || $.set_css(localStorage[file]);
+			$._require_loaded[file] = true;
+			return $;
 		}
-		$.each(files, function(n, file) {
-			if (!$.require.loaded[file]) {
-				var extn = file.split('.').slice(-1);
-				xhr = $.ajax({
-					type: "GET",
-					url: $.require.path + files[n],
-					success: params.callback || null,
-					dataType: extn=="js" ? "script" : "text",
-					cache: params.cache===false?false:true,
-					async: false
-				});
-				$.require.loaded[file] = true;
-				if(extn=="css") {
-					$.set_style(xhr.responseText);
-				}
+		
+		if (!$._require_loaded[file]) {
+			xhr = $.ajax({
+				type: "GET",
+				url: file,
+				success: params.callback || null,
+				dataType: extn=="js" ? "script" : "text",
+				cache: params.cache===false?false:true,
+				async: false
+			});
+			$._require_loaded[file] = true;
+			
+			// js loaded automatically
+			if(extn=="css") {
+				$.set_css(xhr.responseText);
 			}
-		})
-		//console.dir($.require.loaded);
-
+			
+			// add to localStorage
+			if(localStorage) localStorage[file] = xhr.responseText;
+		}
 		return $;
 	};
+	$._require_loaded = {};
 })(jQuery);
 
 
@@ -184,20 +184,21 @@ $.view = {
 			return 'page';
 		}
 	},
-	load: function(name, path, type, callback) {
+	load: function(name, path, callback) {
 		if(!$('#'+name).length) {
 			if(path) 
-				$.view.load_files(name, path, type, callback);
+				$.view.load_files(name, path, callback);
 			else
 				$.view.load_object(name, callback);
 		}
 		callback();
 	},
-	load_files: function(name, path, type, callback) {
-		if(type=='script') {
-			$.getScript(path + name + '.js', callback);
+	load_files: function(name, path, callback) {
+		var extn = path.split('.').splice(-1)[0];
+		if(extn=='js') {
+			$.getScript(path, callback);
 		} else {
-			$.get(path + name + '.html', function(html) {
+			$.get(path, function(html) {
 				switch($.view.type(html)) {
 					case 'modal': 
 						$.view.make_modal(name, html)
@@ -236,8 +237,8 @@ $.view = {
 			}
 		);
 	},
-	show: function(name, path, type) {
-		$.view.load(name, path, type, function() {
+	show: function(name, path) {
+		$.view.load(name, path, function() {
 			// make page active
 			if($("#"+name).length) {
 				if($(".main.container .content#" + name).length) {
@@ -249,22 +250,39 @@ $.view = {
 			window.scroll(0, 0);
 		});
 	},
-	open: function(name) {
-		if(name[0]=='#') { name = name.substr(1); }
-		if(name[0]=='!') { name = name.substr(1); }
-		name = name.split('/')[0];
-		
-		if(!name)name=$.index;
-		var p = $._views[name] || {};
-		$.view.show(name, p.path, p.type);
-		
-		// set location hash
+	
+	// get view id from the given route
+	// route may have sub-routes separated
+	// by `/`
+	// e.g. "editpage/mypage"
+	get_view_id: function(txt) {
+		if(txt[0]=='#') { txt = txt.substr(1); }
+		if(txt[0]=='!') { txt = txt.substr(1); }
+		txt = txt.split('/')[0];
+		if(!txt) txt = $.index;
+		return txt;		
+	},
+
+	// set location hash
+	// if it is not set to the current id
+	set_location_hash: function(viewid) {
 		var hash = decodeURIComponent(location.hash).split('/')[0];
+		
+		// add hash on both sides!
 		if(hash[0]!='#') hash = '#' + hash;
-		if(name[0]!='#') name = '#' + name;
-		if(hash!=name) {
-			location.hash = name;
+		if(viewid[0]!='#') viewid = '#' + viewid;
+		
+		if(hash!=viewid) {
+			location.hash = viewid;
 		}
+	},
+	
+	open: function(name) {
+		var viewid = $.view.get_view_id(name);		
+		var viewinfo = $._views[viewid] || {};
+		
+		$.view.show(viewid, viewinfo.path);
+		$.view.set_location_hash(viewid);
 	}
 }
 
@@ -287,7 +305,6 @@ $(window).bind('hashchange', function() {
 			success: function(data) {
 				$.session = {"user":"guest" ,"userobj":{}}
 				$(document).trigger('logout');
-				$(document).trigger('session_load');
 			}
 		});
 		return false;
@@ -296,14 +313,14 @@ $(window).bind('hashchange', function() {
 
 // login
 // loads session from server
-// and calls $(document)->'session_load' event
+// and calls $(document)->'login' event
 //
 $.call({
 	method:'lib.py.session.load', 
 	success:function(session) {
 		$.session = session
-		// trigger session_load
-		$(document).trigger('session_load');
+		// trigger login
+		$(document).trigger('login');
 	}
 })
 
@@ -314,6 +331,16 @@ $.call({
 // 3. convert hardlinks to softlinks: 
 //    eg. file.html becomes #files
 $(document).ready(function() {	
+	// clear localStorage if version changed
+	if(localStorage) {
+		if(app.version==-1) 
+			localStorage.clear();
+		if(localStorage._version && localStorage._version != app.version) {
+			localStorage.clear();
+		}
+	} 
+	localStorage._version = app.version;
+	
 	// open default page
 	(function() {
 		$content = $('.main.container .content.active');
@@ -342,12 +369,12 @@ $(document).ready(function() {
 var app = {	}
 
 $._views = {
-	'editpage': {path:'lib/views/'},
-	'editprofile': {path:'lib/views/', type:'script'},
-	'register': {path:'lib/views/', type:'script'},
-	'signin': {path:'lib/views/'},
-	'upload': {path:'lib/views/'},
-	'pagelist': {path:'lib/views/'},
-	'filelist': {path:'lib/views/'},
-	'userlist': {path:'lib/views/'}
+	'editpage': {path:'lib/views/editpage.html'},
+	'editprofile': {path:'lib/views/editprofile.js'},
+	'register': {path:'lib/views/register.js'},
+	'signin': {path:'lib/views/signin.html'},
+	'upload': {path:'lib/views/upload.html'},
+	'pagelist': {path:'lib/views/pagelist.html'},
+	'filelist': {path:'lib/views/filelist.html'},
+	'userlist': {path:'lib/views/userlist.html'}
 }
