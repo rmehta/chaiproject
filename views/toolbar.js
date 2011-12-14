@@ -23,8 +23,8 @@ $.require('lib/js/bootstrap/bootstrap-dropdown.js');
 		
 		make_login: function() {
 			$('.topbar .nav.secondary-nav').append('\
-				<li><a href="#signin">Login</a></li>\
-			')		
+				<li><a href="javascript:app.login()">Login</a></li>\
+			');
 		},
 		
 		make_admin: function() {
