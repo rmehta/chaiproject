@@ -42,7 +42,7 @@ var FormInputView = Class.extend({
 	},
 	make_hidden: function() {
 		this.opts.$parent.append($.rep('\
-			<input name="%(name)s" type="%(type)s">', this.opts));			
+			<input name="%(name)s" type="%(type)s" value="%(value)s">', this.opts));			
 	},
 	make_with_label: function() {
 		this.opts.$parent.append($.rep('\
@@ -66,7 +66,7 @@ var FormInputView = Class.extend({
 		this.$input[0].fieldinfo = this.opts;
 		this.$input[0].forminput = this;
 	},
-	validate: function() {
+	std_validate: function() {
 		var err = false;
 		if(this.opts.type=='hidden') return;
 		var val = this.$input.val();
@@ -88,7 +88,8 @@ var FormInputView = Class.extend({
 	bind_events: function() {
 		var me = this;
 		this.$input.keyup(function() {
-			me.validate();
+			me.std_validate();
+			if(me.validate) me.validate();
 		});
 	}
 });

@@ -421,13 +421,26 @@ $(document).ready(function() {
 });
 
 // app namespace for app globals
-var app = {	};
-app.login = function() {
-	$.require('lib/views/login.js');
-	if(!app.loginview)
-		app.loginview = new LoginView();
-	app.loginview.show();
-}
+var app = {	
+	login: function() {
+		$.require('lib/views/login.js');
+		if(!app.loginview)
+			app.loginview = new LoginView();
+		app.loginview.modal.show();
+	},
+	register: function() {
+		$.require('lib/views/register.js');
+		if(!app.registerview)
+			app.registerview = new RegisterView();
+		app.registerview.modal.show();		
+	},
+	editprofile: function() {
+		$.require('lib/views/editprofile.js');
+		if(!app.editprofileview)
+			app.editprofileview = new EditProfileView();
+		app.editprofileview.modal.show();
+	}
+};
 
 $._views = {
 	'editpage': {path:'lib/views/editpage.html'},

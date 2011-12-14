@@ -14,6 +14,8 @@ success - called after post
 
 Properties:
 -----------
+inputlist - list of FormInputView objects
+inputsdict - dict of FormInputView objects (key is the "name")
 $wrapper
 $form
 $message
@@ -51,7 +53,9 @@ Structure:
 
 var FormView = Class.extend({
 	init: function(opts) {
-		this.inputs = [];
+		this.inputlist = [];
+		this.inputdict = {};
+		
 		if(opts)this.opts = opts;
 		if(!this.opts) return; // not ready
 		
@@ -60,6 +64,7 @@ var FormView = Class.extend({
 		this.$form = this.opts.$parent.find('form:last');
 		
 		this.make_form_inputs();
+		this.make_static_inputs();
 		this.make_footer();
 		this.bind_events();		
 	},
@@ -69,9 +74,18 @@ var FormView = Class.extend({
 		for(var i in this.opts.fields) {
 			f = this.opts.fields[i];
 			f.$parent = this.$form;
-			this.inputs.push(new FormInputView(f));			
+			
+			var forminputview = new FormInputView(f)
+			this.inputlist.push(forminputview);
+			this.inputdict[f.name] = forminputview;		
 		}
 	},
+	make_static_inputs: function() {
+		if(!this.opts.static) return;
+		for(key in this.opts.static) {
+			new FormInputView({type:'hidden',name:key, value:this.opts.static[key]})
+		}
+	}
 	// footer includes message, primary action, secondary action
 	make_footer: function() {
 		$.set_default(this.opts, 'btn_primary_label', 'Save')
@@ -112,7 +126,7 @@ var FormView = Class.extend({
 		});
 	},
 	validate: function() {
-		$.each(this.inputs, function(i, input) {
+		$.each(this.inputlist, function(i, input) {
 			input.validate();
 		});
 	},
@@ -131,7 +145,8 @@ var FormView = Class.extend({
 		}
 		var d = {};
 		this.$form.find(':input').each(function(i, ele) {
-			if($(ele).attr('name')) d[$(ele).attr('name')] = $(ele).val();
+			if($(ele).attr('name')) 
+				d[$(ele).attr('name')] = $(ele).val();
 		});
 		return d;
 	},
@@ -146,10 +161,10 @@ var FormView = Class.extend({
 		this.$message.empty();
 		
 		// clear form first (to defaults)
-		this.$form.find(':input').each(function() {
-			var defval = this.fieldinfo ? this.fieldinfo.defaultval : '';
-			$(this).val(defval || '');
-		});			
+		$.each(this.inputlist, function(i, forminput) {
+			var defval = forminput.opts ? forminput.opts.defaultval : '';
+			forminput.$input.val(defval);
+		});
 	},
 	set_message: function(msg, type, fadeOutIn) {
 		this.$message.html(

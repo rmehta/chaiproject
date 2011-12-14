@@ -1,69 +1,61 @@
-$.require('lib/js/form.js');
+/*
+RegisterView
+============
 
-// make the modal-form
-(function() {
-	$.modal_form({
-		id: 'register',
-		label: "Register",
-		fields: [
+Usage:
+new RegisterView().modal.show();
+*/
+
+$.require('lib/views/form/modal.js');
+
+RegisterView = Class.extend({
+	init: function() {
+		var register_fields = [
 			{
-				name:'type', 
-				type:'hidden', 
-				defaultval:'user'
-			},
-			{
-				name:'_new', 
-				type:'hidden', 
-				defaultval:'1'
-			},
-			{
-				name:'name', 
-				label:'Username',
+				name:'name', label:'Username',
 				help:'No spaces or special characters', 
-				min_length:6,
-				no_special: true
+				min_length:6, no_special: true
 			},
 			{
-				name:'password', 
-				label:'Password', 
-				type:'password',
+				name:'password',  label:'Password', type:'password',
 				help:'Must be at least 6 characters', 
 				min_length:6
 			},
 			{
-				name:'email', 
-				label:'Email', 
-				help:'Incase you forget your password',
-				data_type:'email'
+				name:'email', label:'Email', data_type:'email',
+				help:'Incase you forget your password'
 			}
 		]
-	});
-})();
-
-$('#register').bind('hidden', function() {
-	window.history.back();
-});
-
-// check if all data is correct
-// and then enable the register button
-//$('#register .btn.primary').click()
-
-$('#register').bind('_show', function() {
-	$('#register form').set_values({});
-	$('#register').modal('show');
-})
-
-$('#register form').bind('save', function() {
-	// login as current user
-	var formdata = $('#register form').form_values()
-	
-	$.getJSON('server/', 
-		{_method:'lib.py.session.login', user:formdata.name, password:formdata.password}, 
-		function(session) {
-			$.session = session
-			// trigger login
-			$(document).trigger('login');
-		});	
-	
-	$('#register').modal('hide');
-})
+		
+		this.modal = new FormModalView({
+			id: 'register',
+			label: "Register",
+			static: {
+				type:'user'
+			}
+			fields: register_fields,
+			success: function(data) {
+				// login after registration
+				if(data.message=='ok') {
+					$.call({
+						method:'lib.py.session.login',
+						type: 'POST', 
+						data: {
+							user: $('#register input[name="name"]').val(), 
+							password: $('#register input[name="password"]').val()
+						}, 
+						success: function(session) {
+							if(session.message=='ok') {
+								$.session = session
+								// trigger login
+								$(document).trigger('login');								
+							} else {
+								alert('[register] did not login');
+							}
+						}
+					});
+				}
+			}
+		});
+	}
+}

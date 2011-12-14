@@ -2,13 +2,10 @@
 LoginView
 =========
 
-To call,
-
-app.login();
-
+Usage:
+new LoginView().modal.show();
 */
 
-$.require('lib/js/bootstrap/bootstrap-modal.js');
 $.require('lib/views/form/modal.js');
 
 var LoginView = Class.extend({
@@ -33,8 +30,5 @@ var LoginView = Class.extend({
 				}
 			}
 		});
-	},
-	show: function() {
-		this.modal.show();
 	}
 });
