@@ -2,12 +2,26 @@
 created by @rushabh_mehta
 license: MIT
 
+FormView
+
+Options:
+
+"$parent": <container>
+"fields": <fields>
+	
+	
+ModalFormView
+
+
 Usage:
 ------
 $.modal_form({
-	"id":"myform",
-	"label": "My Form"
-	"fields": [ <fieldinfo> ]
+	"id": <dom id (new)>,
+	"label": <Label>
+	"fields": [ <fieldinfo> ],
+	"action": [ "insert" (default) | "update"],
+	"method": [optional], server method default "lib.py.objstore[action]",
+	"btn_primary_label": [optional, "Save" (default)]
 })
 
 `fieldinfo` 
@@ -38,38 +52,12 @@ Events:
 	$(<form>)->'save_error' // error
 */
 
-(function($) {
-	$.fn.form_values = function() {
-		var d = {}
-		this.find(':input').each(function(i, ele) {
-			if($(ele).attr('name')) d[$(ele).attr('name')] = $(ele).val();
-		});
-		return d;
-	}
-	
-	// make a stacked form
-	$.fn.validate_input = function() {
-		var err = false;
-		var f = this[0].fieldinfo;
-		if(!f) return;
-		if(f.type=='hidden') return;
-		var val = this.val();
-		
-		if(f.mandatory && !val) {
-			err = true;
-		}
-		if(f.min_length && val.length < f.min_length) {
-			err = true;
-		}
-		if(f.no_special && val.search(/[^\w\d]/)!=-1) {
-			err = true;
-		}
-		if(f.data_type) {
-			if(f.data_type=='email' && !$.is_email(val)) err = true;
-		}
-		this.parent().toggleClass('error', err);
-	}
-	
+
+
+
+
+
+(function($) {	
 	// call the validate_input method on
 	// all inputs in the form
 	$.fn.validate_form = function() {
@@ -78,88 +66,7 @@ Events:
 		});
 	};
 	
-	// set autocomplete on this input
-	// opts: {type:<type>}
-	$.fn.set_autocomplete = function(opts) {
-		$.require('lib/js/jquery/jquery.ui.autocomplete.js');
-		$.require('lib/js/jquery/jquery.ui.css');
-		this.autocomplete({
-			source: function(request, response) {
-				filters = (opts.filters || []);
-				filters.push(["name", "like", request.term + '%']);
-				$.call({
-					method: 'lib.py.query.get',
-					data: {
-						type: opts.type,
-						columns: opts.columns || "name",
-						filters: JSON.stringify(filters),
-						order_by: opts.order_by || "name asc",
-						limit: opts.limit || "20"
-					}, 
-					success: function(data) {
-						response($.map(data.result, function(item) {
-							return {
-								label: item[(opts.label || "name")], 
-								value: item[(opts.value || "name")]
-							}
-						}));
-					}
-				})
-			}
-		})
-	}
-	
-	// make a stacked form from options
-	$.fn.stacked_form = function(opts) {		
-		this.append('<form class="form-stacked"></form>');
-		var me = this;
-		$.each(opts, function(i, f) {
-			if(!f.type) f.type='text';
-			if(!f.help) f.help='';
-			
-			switch(f.type) {
-				case 'hidden':
-					me.find('form').append($.rep('\
-						<input name="%(name)s" type="%(type)s">', f));
-					break;
-				default:
-					me.find('form').append($.rep('\
-					<div class="clearfix">\
-						<label>%(label)s</label>\
-						<input name="%(name)s" type="%(type)s">\
-						<div class="help-block">%(help)s</div>\
-					</div>', f));
-			}
-
-			var $input = me.find(' [name="'+f.name+'"]');
-
-			if(f.range) {
-				$input.set_autocomplete({type:"user"});
-			}
-
-			// store field information for
-			// validations
-			$input[0].fieldinfo = f;
-		});
 		
-		// clear all
-		me.find('form').set_values({});
-	};
-	
-	$.fn.set_values = function(obj) {
-		var me = this;
-		// clear form first (to defaults)
-		me.find(':input').each(function() {
-			var defval = this.fieldinfo ? this.fieldinfo.defaultval : '';
-			$(this).val(defval || '');
-		});
-		
-		// set values
-		$.each(obj, function(k,v) {
-			me.find(' [name="'+k+'"]').val(v);
-		});
-	};
-	
 	// set a messages in the class "message" div of this object
 	$.fn.set_message = function(msg, type, fadeOutIn) {
 		this.find('.message').html('<span class="label '+(type || '')+'">'+
@@ -182,11 +89,7 @@ Events:
 				// show
 				$(id).modal('show');
 			},
-			set_defaults: function() {
-				// make
-				$.set_default(opts, 'btn_primary_label', 'Save')
-				$.set_default(opts, 'btn_secondary_label', 'Cancel')				
-			},
+
 			make: function() {
 				me.set_defaults();
 				me.make_modal();
