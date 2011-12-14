@@ -6,7 +6,7 @@ from lib.py import whitelist, database, out
 
 typemethod = type
 
-@whitelist
+@whitelist(allow_guest=True)
 def get(**args):
 	"""
 	execute a select query

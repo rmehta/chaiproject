@@ -29,7 +29,7 @@ user = None
 
 from lib.py import whitelist, database, objstore
 
-@whitelist
+@whitelist()
 def load(**args):
 	"""load an existing sesion from cookies or start a new guest session"""
 	from lib.py import req, res
@@ -51,7 +51,7 @@ def new_sid():
 	import hashlib, time
 	return hashlib.sha224(str(time.time())).hexdigest()
 
-@whitelist
+@whitelist(allow_guest=True)
 def login(**args):
 	"""login"""
 	from lib.py import res
@@ -71,7 +71,7 @@ def login(**args):
 	else:
 		return {"error":"Invalid Login"}
 
-@whitelist
+@whitelist()
 def logout(**args):
 	"""logout"""
 	from lib.py import req

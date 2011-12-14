@@ -1,5 +1,5 @@
 import MySQLdb
-from lib.conf import conf
+from conf import dbsettings
 import MySQLdb.constants.ER as ER
 
 conn = None	
@@ -17,12 +17,12 @@ class Database:
 
 	def connect(self):
 		"""connect to mysql db"""
-		self.conn = MySQLdb.connect('localhost', conf.dbuser, conf.dbpassword)
+		self.conn = MySQLdb.connect('localhost', dbsettings.dbuser, dbsettings.dbpassword)
 		self.conn.converter[246]=float
 		self.conn.set_character_set('utf8')
 
 		self.cur = self.conn.cursor()
-		self.cur.execute("use %s" % conf.dbname)
+		self.cur.execute("use %s" % dbsettings.dbname)
 
 
 	def sql(self, query, values=(), as_dict=True, debug=False):
@@ -48,6 +48,23 @@ class Database:
 
 		return res
 
+	def setvalue(self, type, name, key, value, commit=False):
+		"""
+		set a value
+		
+		If commit=True, begin transaction and commit
+		[WARNING - does not call after_update]
+		"""
+		if commit: self.begin()
+		self.sql("""update `%s` set `%s`=%s where name=%s""" % (type, key, '%s', '%s'), \
+			(value, name))
+		if commit: self.commit()
+
+	def getvalue(self, type, name, key):
+		"""get a value"""
+		return self.sql("""select `%s` from `%s` where name=%s""" % (type, ttype, '%s'), 
+			name)
+
 	def begin(self):
 		self.sql("start transaction");
 
@@ -68,8 +85,14 @@ class Database:
 	def repair_table(self, ttype, create_table):
 		"""create a new table and copy records"""
 		from lib.py import objstore
+		import os
 		
 		addrecords = self.sql("select * from `%s`" % (ttype))
+		# write in a file, incase there is a crash
+		tmp = open('repair.tmp', 'w')
+		tmp.write(str(addrecords))
+		tmp.close()
+		
 		self.sql('drop table `%s`' % ttype);
 		self.sql(create_table)
 
@@ -78,6 +101,8 @@ class Database:
 			obj['type'] = ttype
 			objstore.post_single(obj)
 		self.commit()
+		
+		os.remove('repair.tmp')
 				
 	def table_list(self):
 		"""get list of tables"""
@@ -91,25 +116,29 @@ class Database:
 				database.get().sql("desc `%s`" % table, as_dict=False)]
 		return self._columns[table]
 
-	def sync_tables(self, table=None):
+	def sync_tables(self, lst):
+		"""sync list of tables"""
+		for table in lst:
+			self.sync_table(table)
+
+	def sync_table(self, table=None):
 		"""make / update tables from models"""
 		from lib.py import model, objstore
 
 		self.sql("set foreign_key_checks=0")
 		tables = self.table_list()
-		for modelclass in model.all():
-			m = modelclass({})
-			if (not table) or (table==m._name):
-				if not m._name in tables:
-					self.sql(m._create_table)
-				else:
-					self.repair_table(m._name, m._create_table)
+		m = model.get({'type':table})
+		
+		if not m._name in tables:
+			self.sql(m._create_table)
+		else:
+			self.repair_table(m._name, m._create_table)
 				
-				# update parent-child map
-				if hasattr(m, '_parent'):
-					self.begin()
-					objstore.insert(type="_parent_child", parent=m._parent, child=m._name)
-					self.commit()
+		# update parent-child map
+		if hasattr(m, '_parent'):
+			self.begin()
+			objstore.insert(type="_parent_child", parent=m._parent, child=m._name)
+			self.commit()
 
 		self.sql("set foreign_key_checks=1")
 

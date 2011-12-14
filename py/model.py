@@ -28,7 +28,7 @@ Standard Events are:
 8. "check_allow"
 
 """
-core_types = ['_parent_child', 'page', 'user', 'session', 'userrole']
+import conf
 
 class PermissionError(Exception): pass
 
@@ -68,11 +68,12 @@ class Model(object):
 def get(obj):
 	"""get model instance for object"""
 	import sys
+	from lib.py import core_models
 	
 	if not 'type' in obj:
 		return Model(obj)
 		
-	if obj['type'] in core_types:
+	if obj['type'] in core_models:
 		modulepackage = 'lib.py.core.' + obj['type']		
 	else:
 		modulepackage = 'models.' + obj['type']

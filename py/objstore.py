@@ -48,7 +48,7 @@ from lib.py import whitelist, model, database
 import MySQLdb
 import MySQLdb.constants.ER as ER
 
-@whitelist
+@whitelist(allow_guest=True)
 def get(**args):
 	"""get an object"""
 	db = database.conn
@@ -104,12 +104,12 @@ def children_types(parenttype):
 	return [c['child'] for c in \
 		database.conn.sql("select child from _parent_child where parent=%s", parenttype)]				
 
-@whitelist
+@whitelist()
 def insert(**args):
 	"""insert a new object"""
 	return post(args, action='insert')
 
-@whitelist
+@whitelist()
 def update(**args):
 	"""update object (child items are cleared and rewritten)"""
 	return post(args, action='update')
@@ -245,7 +245,7 @@ def update_query(obj, obj_copy):
 	query = """update `%(tab)s` set %(set)s where name='%(name)s'""" % parts
 	return query
 
-@whitelist	
+@whitelist()
 def delete(**args):
 	"""delete object and its children, if permitted"""
 	from lib.py import model

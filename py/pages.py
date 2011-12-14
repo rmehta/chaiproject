@@ -10,7 +10,6 @@ inside which the page html will be rendered
 def make():
 	import os
 	from lib.py import database
-	from lib.conf import conf
 	
 	messages = []
 	

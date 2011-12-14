@@ -17,7 +17,7 @@
 
 (function($) {
 	// python style string replace
-	$.index = 'index';
+	$.index = null;
 	$.rep = function(s, dict) {
 		for(key in dict) {
 		    var re = new RegExp("%\\("+ key +"\\)s", "g");
@@ -175,15 +175,6 @@ $.objstore = {
 // $.view.open(route)
 $.view = {
 	pages: {},
-	type: function(html) {
-		if(html.search(/<\!--\s*type:\s*modal\s*-->/)!=-1) {
-			return 'modal';
-		} else if(html.search(/<\!--\s*type:\s*script\s*-->/)!=-1) {
-			return 'script'
-		} else {
-			return 'page';
-		}
-	},
 	load: function(name, path, callback) {
 		if(!$('#'+name).length) {
 			if(path) 
@@ -199,17 +190,10 @@ $.view = {
 			$.getScript(path, callback);
 		} else {
 			$.get(path, function(html) {
-				switch($.view.type(html)) {
-					case 'modal': 
-						$.view.make_modal(name, html)
-						break;
-					case 'page':
-						$.view.make_page(name, html);
-				}
+				$.view.make_page(name, html);
 				callback();
 			});
 		}
-		
 	},
 	make_modal: function(name, html) {
 		$(document.body).append(html);
@@ -259,36 +243,39 @@ $.view = {
 		if(txt[0]=='#') { txt = txt.substr(1); }
 		if(txt[0]=='!') { txt = txt.substr(1); }
 		txt = txt.split('/')[0];
-		if(!txt) txt = $.index;
+		if(!txt) txt = $.index || 'index';
 		return txt;		
 	},
-
-	// set location hash
-	// if it is not set to the current id
-	set_location_hash: function(viewid) {
-		var hash = decodeURIComponent(location.hash).split('/')[0];
-		
-		// add hash on both sides!
-		if(hash[0]!='#') hash = '#' + hash;
-		if(viewid[0]!='#') viewid = '#' + viewid;
-		
-		if(hash!=viewid) {
-			location.hash = viewid;
-		}
+	
+	is_same: function(name) {
+		if(name[0]!='#') name = '#' + name;
+		return name==location.hash;
 	},
 	
-	open: function(name) {
-		var viewid = $.view.get_view_id(name);		
-		var viewinfo = $._views[viewid] || {};
+	// shows view from location.hash
+	show_location_hash: function() {
+		var route = location.hash;
+		if(route==$.view.current_route) {
+			// no change
+			return;
+		}
+		$.view.current_route = location.hash;
 		
+		var viewid = $.view.get_view_id(route);		
+		var viewinfo = $._views[viewid] || {};
 		$.view.show(viewid, viewinfo.path);
-		$.view.set_location_hash(viewid);
+	},
+	
+	// sets location.hash
+	open: function(route) {
+		if(route[0]!='#') route = '#' + route;
+		window.location = route;
 	}
 }
 
 // bind history change to open
 $(window).bind('hashchange', function() {
-	$.view.open(decodeURIComponent(location.hash));
+	$.view.show_location_hash(decodeURIComponent(location.hash));
 });
 
 // logout
@@ -348,7 +335,12 @@ $(document).ready(function() {
 			// active content is already loaded, just highlight it
 			$content.trigger('_show');
 		} else {
-			$.view.open(location.hash || $.index);
+			if(location.hash) {
+				$(window).trigger('hashchange');
+			} else if($.index) {
+				// no location, open index
+				$.view.open($.index);
+			}
 		}
 	})()
 

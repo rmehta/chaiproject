@@ -3,12 +3,9 @@
 """file upload manager"""
 
 import os
-from lib.conf import conf
-from lib.py import whitelist
+from lib.py import whitelist, files_path, max_file_size
 
-conf.files_path = os.path.join(os.path.dirname(__file__), '../..', conf.files_path)
-
-@whitelist
+@whitelist()
 def post(**args):
 	"""save files in uploads folder"""
 	import json
@@ -23,8 +20,8 @@ def post(**args):
 			fname, content = scrub(fdata.filename), fdata.file.read()
 		
 			# check size
-			if len(content) > conf.max_file_size:
-				out = {"error":"file exceeds limit %sMB" % (int(conf.max_file_size / 1024**3))}
+			if len(content) > max_file_size:
+				out = {"error":"file exceeds limit %sMB" % (int(max_file_size / 1024**3))}
 			else:
 				save(fname, content)
 				out = {"message":"ok", "fname":fname}
@@ -35,7 +32,7 @@ def post(**args):
 
 def save(fname, content):
 	"""save the file"""
-	f = open(os.path.join(conf.files_path, fname), 'w+')
+	f = open(os.path.join(files_path, fname), 'w+')
 	f.write(content)
 	f.close()
 
@@ -48,30 +45,27 @@ def scrub(fname):
 		return fname.split('/')[-1]
 	return fname
 
-@whitelist
+@whitelist()
 def filelist(**args):
 	"""retun list of files"""
 	ret = []
 	import os
 	import datetime
 	
-	for wt in os.walk(os.path.join(conf.files_path)):
+	for wt in os.walk(os.path.join(files_path)):
 		for fn in wt[2]:
 			fpath = os.path.join(wt[0], fn)
-			ret.append([os.path.relpath(fpath, conf.files_path), \
+			ret.append([os.path.relpath(fpath, files_path), \
 				str(datetime.datetime.fromtimestamp(os.stat(fpath).st_mtime)), \
 				os.stat(fpath).st_size])
 
 	return {'files':ret}
 
-@whitelist
+@whitelist()
 def delete(**args):
 	"""delete file (user must be logged in)"""
-	from lib.py import req, sess
-	
-	if sess['user'] == 'guest':
-		return {"message":"must be logged in"}
+	from lib.py import req, sess	
 	import os
-	os.remove(os.path.join(conf.files_path, args['name']))
+	os.remove(os.path.join(files_path, args['name']))
 	return {"message":"ok"}
 	
