@@ -1,17 +1,20 @@
-$.require('lib/views/form/form.js');
+/*
+Edit profile
+============
 
-var EditProfileView = Class.extend({
+usage new EditProfileView().show();
+*/
+
+$.require('lib/views/form/modal.js');
+
+var EditProfileView = FormModalView.extend({
 	init: function() {
-		this.make_modal();
-		this.bind_events();
-	},
-	make_modal: function() {
-		this.modal = new FormModalView({
+		this._super({
 			id: 'editprofile',
 			label: "Edit Profile",
 			static: {
 				type: 'user',
-				name: $.session.user;
+				name: $.session.user
 			},
 			fields: [
 				{name:'fullname', label:'Full Name'},
@@ -20,11 +23,14 @@ var EditProfileView = Class.extend({
 					help:'Must be at least 6 characters'},
 				{name:'password_again', label:'Re-type Password', type:'password'},
 			],
-			method: 'lib.py.objstore.update'
-		})
+			method: 'lib.py.objstore.update',
+			obj: $.session.userobj
+		});
+		this.bind_events();
 	},
 	bind_events: function() {
-		this.modal.inputdict['password_again'].validate = function() {
+		this._super();
+		this.inputdict['password_again'].validate = function() {
 			$pwd =  $('#editprofile input[name="password"]');
 			$pwd1 =  $('#editprofile input[name="password_again"]');
 			$pwd1.parent().toggleClass('error', !$pwd.val() || $pwd.val()!=$pwd1.val())

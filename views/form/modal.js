@@ -32,7 +32,7 @@ var FormModalView = FormView.extend({
 		this.bind_modal_events();
 		
 		// render the form
-		this._super(opts);
+		this._super();
 		
 		var me = this;
 		this.secondary_action = function() {

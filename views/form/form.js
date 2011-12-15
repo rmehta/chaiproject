@@ -55,7 +55,7 @@ var FormView = Class.extend({
 	init: function(opts) {
 		this.inputlist = [];
 		this.inputdict = {};
-		
+
 		if(opts)this.opts = opts;
 		if(!this.opts) return; // not ready
 		
@@ -83,9 +83,14 @@ var FormView = Class.extend({
 	make_static_inputs: function() {
 		if(!this.opts.static) return;
 		for(key in this.opts.static) {
-			new FormInputView({type:'hidden',name:key, value:this.opts.static[key]})
+			new FormInputView({
+				type:'hidden',
+				name:key, 
+				value:this.opts.static[key],
+				$parent: this.$form
+			})
 		}
-	}
+	},
 	// footer includes message, primary action, secondary action
 	make_footer: function() {
 		$.set_default(this.opts, 'btn_primary_label', 'Save')
@@ -100,10 +105,10 @@ var FormView = Class.extend({
 	},
 	bind_events: function() {
 		var me = this;
-		this.$wrapper.find('button.primary').click(function() {
-			 me.primary_action();
+		this.$wrapper.find('button.btn.primary').click(function() {
+			me.primary_action();
 		});
-		this.$wrapper.find('button.secondary').click(function() {
+		this.$wrapper.find('button.btn.secondary').click(function() {
 			me.secondary_action();
 		});
 		
@@ -115,7 +120,9 @@ var FormView = Class.extend({
 		});
 	},
 	primary_action: function() {
+		console.log(2);
 		var obj = this.get_values();
+		console.log(obj)
 		if(!obj) return;
 		var me = this;
 		$.call({
@@ -153,9 +160,9 @@ var FormView = Class.extend({
 	set_values: function(obj) {
 		this.reset();
 		// set values
-		$.each(obj, function(k,v) {
-			this.$form.find(' [name="'+k+'"]').val(v);
-		});
+		for(k in obj) {
+			this.$form.find(' [name="'+k+'"]').val(obj[k]);
+		}
 	},
 	reset: function() {
 		this.$message.empty();

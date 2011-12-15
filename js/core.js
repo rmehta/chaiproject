@@ -1,20 +1,106 @@
-// core library for chaiproject framework
-// created by @rushabh_mehta
-// license: MIT
-//
+/* core.js
 
+Core Functions
+==============
+
+
+Utility
+-------
+
+$.rep("string with %(args)s", obj) // replace with values
+$.set_style(<css code>)
+$.set_script(<js code>)
+$.random(n)
+$.set_default(obj, key, value)
+$.is_email(txt)
+$('selector').classList() - get class list of the object
+
+
+Server Call
+-----------
+
+Call server method. Wrapper to $.ajax
+Will automatically print "log", "error" and "traceback" in console.
+
+Usage:
+
+$.call({
+	type: [optional | "GET" default],
+	method: <string: server method like "lib.py.objstore.get"
+	data: <dict: arguments>,
+	success: <function: on success parameter data, see $.ajax>
+	
+})
+
+
+Inheritence "Class"
+-------------------
+see: http://ejohn.org/blog/simple-javascript-inheritance/
+To subclass, use:
+
+	var MyClass = Class.extend({
+		init: function
+	})
+
+
+Require
+-------
+Load js/css files (sub-modules)
+
+Usage:
+
+$.require("path/to/library")
+
+LocalStorage:
+- This method tries to save modules once loaded to localStorage. 
+- The versioning is maintained using `app.version` global property.
+- If app.version is different from localStorage._version OR app.version = -1,
+  then the localStorage will be cleared on load
+
+
+Object Store (model persistence)
+--------------------------------
+
+Usage:
+
+$.objstore.insert(obj, <function: callback>)
+$.objstore.update(obj, <function: callback>)
+$.objstore.get(<type>, <name>, <function: callback>) - if not available locally, get from server
+
+$.objstore.data - double dict of all objects loaded in session via $.objstore.get
+
+
+View Management
+---------------
+
+Manages opening of "Pages" via location.hash (url fragment). Pages can be changed by
+changing location.hash or calling:
+
+$.view.open('page/param')
+
+
+Application
+-----------
+
+Application methods
+
+app.register() - open register modal
+app.login() - fires login modal
+app.logout()
+app.editprofile() - edit profile view
+
+Setup/internal methods:
+
+These are called at startup $(document).ready
+
+app.load_session() - load session info
+app.setup_localstorage() - clear localstorage if version is changed or -1
+app.delegate_hardlinks() - create a delegate on click events on link <a> objects
+app.open_default_page() - open default page on load / fire necessary events
+
+*/
 
 // utility functions
-//
-// Usage:
-// $.rep("string with %(args)s", obj) // replace with values
-// $.set_style(css)
-// $.set_script(js)
-// $.random(n)
-// $.set_default(obj, key, value)
-// $.is_email(txt)
-// $('selector').classList() - get class list of the object
-
 (function($) {
 	// python style string replace
 	$.index = null;
@@ -131,8 +217,6 @@
 
 // $.require
 // http://plugins.jquery.com/project/require
-//
-// Usage: $.require('path/to/js')
 (function($) {
 	$.require = function(file, params) {
 		var extn = file.split('.').slice(-1);
@@ -172,10 +256,6 @@
 
 
 // object store wrapper
-//
-// Usage:
-// $.objstore.get(type, name, callback)
-// $.objstore.post(obj, callback)
 $.objstore = {
 	data: {},
 	set: function(obj) {
@@ -224,21 +304,49 @@ $.objstore = {
 		});		
 	},
 	clear: function(type, name) {
+		var d = $.objstore.data;
 		if(d[type] && d[type][name])
 			delete d[type][name];
 	}
 }
 
 
-// view
-// called internally 
-// when the hash url is changed
-//
-// Usage:
-// $.view.open(route)
+// view management
 $.view = {
 	pages: {},
+	// sets location.hash
+	open: function(route) {
+		if(route[0]!='#') route = '#' + route;
+		window.location = route;
+	},
+	// shows view from location.hash
+	show_location_hash: function() {
+		var route = location.hash;
+		if(route==$.view.current_route) {
+			// no change
+			return;
+		}
+		$.view.current_route = location.hash;
+		
+		var viewid = $.view.get_view_id(route);		
+		var viewinfo = app.views[viewid] || {};
+		$.view.show(viewid, viewinfo.path);
+	},	
+	show: function(name, path) {
+		$.view.load(name, path, function() {
+			// make page active
+			if($("#"+name).length) {
+				if($(".main.container .content#" + name).length) {
+					$(".main.container .content.active").removeClass('active');
+					$("#"+name).addClass('active');					
+				}
+			}
+			$("#"+name).trigger('_show');
+			window.scroll(0, 0);
+		});
+	},
 	load: function(name, path, callback) {
+		
 		if(!$('#'+name).length) {
 			if(path) 
 				$.view.load_files(name, path, callback);
@@ -258,11 +366,18 @@ $.view = {
 			});
 		}
 	},
-	make_modal: function(name, html) {
-		$(document.body).append(html);
-		$('#'+name).bind('hidden', function() {
-			window.history.back();
-		})
+	load_object: function(name, callback) {
+		$.objstore.get("page", name, 
+			function(obj) {
+				// not found, go to index
+				if(obj.message && obj.message=='no response') {
+					$.view.open('notfound');
+					return;
+				}
+				$.view.make(obj.name, obj.html, obj.js, obj.css);
+				callback();
+			}
+		);
 	},
 	make_page: function(name, html, js, css) {
 		$('<div>')
@@ -276,28 +391,7 @@ $.view = {
 		
 		$("#"+name).trigger('_make');		
 	},
-	load_object: function(name, callback) {
-		$.objstore.get("page", name, 
-			function(obj) {
-				$.view.make(obj.name, obj.html, obj.js, obj.css);
-				callback();
-			}
-		);
-	},
-	show: function(name, path) {
-		$.view.load(name, path, function() {
-			// make page active
-			if($("#"+name).length) {
-				if($(".main.container .content#" + name).length) {
-					$(".main.container .content.active").removeClass('active');
-					$("#"+name).addClass('active');					
-				}
-			}
-			$("#"+name).trigger('_show');
-			window.scroll(0, 0);
-		});
-	},
-	
+
 	// get view id from the given route
 	// route may have sub-routes separated
 	// by `/`
@@ -314,26 +408,6 @@ $.view = {
 		if(name[0]!='#') name = '#' + name;
 		return name==location.hash;
 	},
-	
-	// shows view from location.hash
-	show_location_hash: function() {
-		var route = location.hash;
-		if(route==$.view.current_route) {
-			// no change
-			return;
-		}
-		$.view.current_route = location.hash;
-		
-		var viewid = $.view.get_view_id(route);		
-		var viewinfo = $._views[viewid] || {};
-		$.view.show(viewid, viewinfo.path);
-	},
-	
-	// sets location.hash
-	open: function(route) {
-		if(route[0]!='#') route = '#' + route;
-		window.location = route;
-	}
 }
 
 // bind history change to open
@@ -341,14 +415,26 @@ $(window).bind('hashchange', function() {
 	$.view.show_location_hash(decodeURIComponent(location.hash));
 });
 
-// logout
-// logs out user and reload the page
-//
-// Usage:
-// $.logout();
-//    triggers $(document)->logout event
-(function($) {
-	$.logout = function() {
+
+// app namespace for app globals
+var app = {	
+	// module views
+	views: {
+		'editpage': {path: 'lib/views/editpage.html'},
+		'register': {path: 'lib/views/register.js'},
+		'upload':   {path: 'lib/views/upload.html'},
+		'pagelist': {path: 'lib/views/pagelist.html'},
+		'filelist': {path: 'lib/views/filelist.html'},
+		'userlist': {path: 'lib/views/userlist.html'},
+		'notfound': {path: 'lib/views/notfound.html'}
+	},
+	login: function() {
+		$.require('lib/views/login.js');
+		if(!app.loginview)
+			app.loginview = new LoginView();
+		app.loginview.show();
+	},
+	logout: function() {
 		$.call({
 			method:'lib.py.session.logout',
 			type:'POST', 
@@ -357,42 +443,44 @@ $(window).bind('hashchange', function() {
 				$(document).trigger('logout');
 			}
 		});
-		return false;
-	}
-})(jQuery);
-
-// login
-// loads session from server
-// and calls $(document)->'login' event
-//
-$.call({
-	method:'lib.py.session.load', 
-	success:function(session) {
-		$.session = session
-		// trigger login
-		$(document).trigger('login');
-	}
-})
-
-
-// setup pages
-// 1. load session
-// 2. open default page
-// 3. convert hardlinks to softlinks: 
-//    eg. file.html becomes #files
-$(document).ready(function() {	
-	// clear localStorage if version changed
-	if(localStorage) {
-		if(app.version==-1) 
-			localStorage.clear();
-		if(localStorage._version && localStorage._version != app.version) {
-			localStorage.clear();
-		}
-	} 
-	localStorage._version = app.version;
-	
+	},
+	register: function() {
+		$.require('lib/views/register.js');
+		if(!app.registerview)
+			app.registerview = new RegisterView();
+		app.registerview.show();		
+	},
+	editprofile: function() {
+		$.require('lib/views/editprofile.js');
+		if(!app.editprofileview)
+			app.editprofileview = new EditProfileView();
+		app.editprofileview.show();
+	},
+	setup_localstorage: function() {
+		if(localStorage) {
+			if(app.version==-1) 
+				localStorage.clear();
+			if(localStorage._version && localStorage._version != app.version) {
+				localStorage.clear();
+			}
+		} 
+		localStorage._version = app.version;		
+	},
+	delegate_hardlinks: function() {
+		// hardlinks to softlinks
+		$("body").delegate("a", "click", function() {
+			var href = $(this).attr('href');
+			if(href && 
+				href.substr(0,1)!='#' &&
+				href.indexOf('.html')!=-1) {
+				location.href = '#' + href.substr(0, href.length-5);
+				return false;
+			}
+			return true;
+		});		
+	},
 	// open default page
-	(function() {
+	open_default_page: function() {
 		$content = $('.main.container .content.active');
 		if($content.length) {
 			// active content is already loaded, just highlight it
@@ -405,49 +493,30 @@ $(document).ready(function() {
 				$.view.open($.index);
 			}
 		}
-	})()
-
-	// hardlinks to softlinks
-	$("body").delegate("a", "click", function() {
-		var href = $(this).attr('href');
-		if(href && 
-			href.substr(0,1)!='#' &&
-			href.indexOf('.html')!=-1) {
-			location.href = '#' + href.substr(0, href.length-5);
-			return false;
-		}
-		return true;
-	})	
-});
-
-// app namespace for app globals
-var app = {	
-	login: function() {
-		$.require('lib/views/login.js');
-		if(!app.loginview)
-			app.loginview = new LoginView();
-		app.loginview.modal.show();
 	},
-	register: function() {
-		$.require('lib/views/register.js');
-		if(!app.registerview)
-			app.registerview = new RegisterView();
-		app.registerview.modal.show();		
-	},
-	editprofile: function() {
-		$.require('lib/views/editprofile.js');
-		if(!app.editprofileview)
-			app.editprofileview = new EditProfileView();
-		app.editprofileview.modal.show();
+	load_session: function() {
+		$.call({
+			method:'lib.py.session.load', 
+			success:function(session) {
+				$.session = session
+				// trigger login
+				$(document).trigger('login');
+			}
+		})		
 	}
 };
 
-$._views = {
-	'editpage': {path:'lib/views/editpage.html'},
-	'editprofile': {path:'lib/views/editprofile.js'},
-	'register': {path:'lib/views/register.js'},
-	'upload': {path:'lib/views/upload.html'},
-	'pagelist': {path:'lib/views/pagelist.html'},
-	'filelist': {path:'lib/views/filelist.html'},
-	'userlist': {path:'lib/views/userlist.html'}
-}
+// STARTUP!
+$(document).ready(function() {	
+	// clear localStorage if version changed
+	app.setup_localstorage();		
+
+	// load session
+	app.load_session();
+
+	// delete hardliks to softlinks
+	app.delegate_hardlinks();
+
+	// open default page
+	app.open_default_page();
+});

@@ -3,13 +3,14 @@ RegisterView
 ============
 
 Usage:
-new RegisterView().modal.show();
+new RegisterView().show();
 */
 
 $.require('lib/views/form/modal.js');
 
-RegisterView = Class.extend({
+RegisterView = FormModalView.extend({
 	init: function() {
+		var me = this;
 		var register_fields = [
 			{
 				name:'name', label:'Username',
@@ -27,35 +28,34 @@ RegisterView = Class.extend({
 			}
 		]
 		
-		this.modal = new FormModalView({
+		this._super({
 			id: 'register',
 			label: "Register",
-			static: {
-				type:'user'
-			}
+			static: { type:'user' },
 			fields: register_fields,
 			success: function(data) {
 				// login after registration
-				if(data.message=='ok') {
-					$.call({
-						method:'lib.py.session.login',
-						type: 'POST', 
-						data: {
-							user: $('#register input[name="name"]').val(), 
-							password: $('#register input[name="password"]').val()
-						}, 
-						success: function(session) {
-							if(session.message=='ok') {
-								$.session = session
-								// trigger login
-								$(document).trigger('login');								
-							} else {
-								alert('[register] did not login');
-							}
-						}
-					});
-				}
+				if(data.message=='ok') me.login_after_register();
 			}
 		});
+	},
+	login_after_register: function() {
+		$.call({
+			method:'lib.py.session.login',
+			type: 'POST', 
+			data: {
+				user: $('#register input[name="name"]').val(), 
+				password: $('#register input[name="password"]').val()
+			}, 
+			success: function(session) {
+				if(session.message=='ok') {
+					$.session = session
+					// trigger login
+					$(document).trigger('login');								
+				} else {
+					alert('[register] did not login');
+				}
+			}
+		});		
 	}
-}
+});

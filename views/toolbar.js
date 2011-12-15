@@ -57,8 +57,8 @@ $.require('lib/js/bootstrap/bootstrap-dropdown.js');
 					'<a class="dropdown-toggle" href="#">'
 						+ ($.session.userobj.fullname || $.session.user)+'</a>\
 					<ul class="dropdown-menu">\
-						<li><a href="#editprofile">Edit Profile</a></li>\
-						<li><a href="#" id="topbar_logout">Logout</a></li>\
+						<li><a href="javascript:app.editprofile()">Edit Profile</a></li>\
+						<li><a href="javascript:app.logout()" id="topbar_logout">Logout</a></li>\
 					</ul>\
 				<li>' + img);
 

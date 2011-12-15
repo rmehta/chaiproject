@@ -8,13 +8,10 @@ new LoginView().modal.show();
 
 $.require('lib/views/form/modal.js');
 
-var LoginView = Class.extend({
+var LoginView = FormModalView.extend({
 	init: function() {
 		// make the modal	
-		this.make_modal();
-	},
-	make_modal: function() {
-		this.modal = new FormModalView({
+		this._super({
 			id: 'login',
 			label: "Login",
 			method: 'lib.py.session.login',
@@ -30,5 +27,5 @@ var LoginView = Class.extend({
 				}
 			}
 		});
-	}
+	},
 });
