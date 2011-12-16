@@ -62,8 +62,9 @@ class Database:
 
 	def getvalue(self, type, name, key):
 		"""get a value"""
-		return self.sql("""select `%s` from `%s` where name=%s""" % (type, ttype, '%s'), 
+		ret = self.sql("""select `%s` from `%s` where name=%s""" % (key, type, '%s'), 
 			name)
+		return ret and ret[0][key] or None
 
 	def begin(self):
 		self.sql("start transaction");

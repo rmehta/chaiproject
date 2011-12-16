@@ -28,8 +28,8 @@ setup autocomplete on form input
 							}
 						}));
 					}
-				})
+				});
 			}
-		})
+		});
 	}
-}
+})(jQuery)

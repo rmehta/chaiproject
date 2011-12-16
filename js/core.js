@@ -130,6 +130,14 @@ app.open_default_page() - open default page on load / fire necessary events
 	$.fn.classList = function() {
 		return this.attr('class').split(/\s+/);
 	}
+	$.get_gravatar = function(email) {
+		// get gravatar
+		$.require('lib/js/md5.js');
+		return '<img src="http://www.gravatar.com/avatar/'
+			+ hex_md5(email)
+			+'?s=28" class="gravatar"/>'
+		
+	};
 	$.call = function(opts) {
 		if(!opts.type) opts.type = 'GET';
 		if(!opts.data) opts.data = {};
@@ -144,7 +152,7 @@ app.open_default_page() - open default page on load / fire necessary events
 				if(data.error) console.log('Error:' + data.error);
 				if(data.traceback) console.log('Traceback:' + data.traceback);
 				if(data.log) { console.log('Log:' + data.log); }
-				opts.success(data);
+				opts.success && opts.success(data);
 			}
 		});
 	}

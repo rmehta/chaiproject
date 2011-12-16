@@ -46,11 +46,7 @@ $.require('lib/js/bootstrap/bootstrap-dropdown.js');
 			// user profile and logout
 			var img = '';
 			if($.session.userobj.email) {
-				// get gravatar
-				$.require('lib/js/md5.js');
-				var img = '<img src="http://www.gravatar.com/avatar/'
-					+hex_md5($.session.userobj.email)
-					+'?s=28" style="margin-right: 8px; float:right; margin-top: 6px"/>'
+				var img = $.get_gravatar($.session.userobj.email);
 			}
 			$('.topbar .nav.secondary-nav').append('\
 				<li class="dropdown">' +

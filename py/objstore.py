@@ -250,7 +250,10 @@ def delete(**args):
 	"""delete object and its children, if permitted"""
 	from lib.py import model
 	
-	model.get(_get_obj(args['type'], args['name'])).check_allow('delete')
+	modelobj = model.get(_get_obj(args['type'], args['name']))
+	modelobj.check_allow('delete')
+	hasattr(modelobj, 'before_delete') and modelobj.before_delete()
+	
 	delete_obj(args['type'], args['name'])
 	return {"message":"ok"}
 	

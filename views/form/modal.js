@@ -62,9 +62,9 @@ var FormModalView = FormView.extend({
 			me.$form.find(':input:first[type!="hidden"]').focus()
 		});	
 	},
-	show: function() {
+	show: function(obj) {
 		// set values
-		this.set_values(this.opts.obj || {})
+		this.set_values(this.opts.obj || obj || {})
 
 		// show
 		this.$modal.modal('show');

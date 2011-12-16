@@ -120,9 +120,7 @@ var FormView = Class.extend({
 		});
 	},
 	primary_action: function() {
-		console.log(2);
 		var obj = this.get_values();
-		console.log(obj)
 		if(!obj) return;
 		var me = this;
 		$.call({
