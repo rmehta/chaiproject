@@ -74,7 +74,7 @@ def get(obj):
 		return Model(obj)
 		
 	if obj['type'] in core_models:
-		modulepackage = 'lib.py.core.' + obj['type']		
+		modulepackage = 'lib.models.' + obj['type']		
 	else:
 		modulepackage = 'models.' + obj['type']
 
@@ -102,7 +102,7 @@ def all():
 	common.update_path()
 	dr = common.directory_root()
 	ml = find_models(os.path.join(dr, 'models'), 'models')
-	ml += find_models(os.path.join(dr, 'lib/py/core'), 'core')
+	ml += find_models(os.path.join(dr, 'lib/models'), 'core')
 	return filter(lambda x: x, ml)
 
 def find_models(path, package):
