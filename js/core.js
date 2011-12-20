@@ -434,7 +434,9 @@ var app = {
 		'pagelist': {path: 'lib/views/pagelist.html'},
 		'filelist': {path: 'lib/views/filelist.html'},
 		'userlist': {path: 'lib/views/userlist.html'},
-		'notfound': {path: 'lib/views/notfound.html'}
+		'notfound': {path: 'lib/views/notfound.html'},
+		'reset_password': {path: 'lib/views/reset_password.html'},
+		'forgot_password': {path: 'lib/views/forgot_password.html'}
 	},
 	login: function() {
 		$.require('lib/views/login.js');

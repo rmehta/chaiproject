@@ -25,6 +25,7 @@ $.require('lib/views/form/form.js');
 
 var FormModalView = FormView.extend({
 	init: function(opts) {
+		this.ismodal = true;
 		this.opts = opts;
 		
 		// make modal
@@ -50,6 +51,7 @@ var FormModalView = FormView.extend({
 				<h3>%(label)s</h3>\
 				</div>\
 			<div class="modal-body"></div>\
+			<div class="modal-footer"></div>\
 		</div>\
 		', this.opts));
 		this.opts.$parent = $('#' + this.opts.id + ' .modal-body');

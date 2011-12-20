@@ -34,14 +34,21 @@ class User(model.Model):
 		
 	def before_insert(self):
 		"""save password as sha256 hash"""		
-		import hashlib
-		if 'password' in self.obj and len(self.obj['password'])!=64:
-			self.obj['password'] = hashlib.sha256(self.obj['password']).hexdigest()
+		if 'password' in self.obj:
+			self.obj['password'] = self.encrypt_password(self.obj['password']) 
 		
 		# clear re-entered password
 		if 'password_again' in self.obj:
 			del self.obj['password_again']
 	
+	def encrypt_password(self, raw):
+		"""encrypt password"""
+		import hashlib
+		if len(raw)==64:
+			return raw
+		else:
+			return hashlib.sha256(raw).hexdigest()			
+		
 	def before_update(self):
 		self.before_insert()
 	
@@ -61,7 +68,7 @@ class User(model.Model):
 		db.setvalue('user', self.obj['name'], 'reset_password_id', resetid)
 		
 		d = {
-			'fullname': self.obj['fullname'] or self.obj['name'],
+			'fullname': self.obj.get('fullname',None) or self.obj['name'],
 			'url': conf.app_url + '#reset_password/' + resetid
 		}
 		

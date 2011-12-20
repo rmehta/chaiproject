@@ -12,12 +12,13 @@ var LoginView = FormModalView.extend({
 	init: function() {
 		// make the modal	
 		this._super({
-			id: 'login',
+			id: 'login_view',
 			label: "Login",
 			method: 'lib.py.session.login',
 			fields: [
 				{name:'user', label:'User Id',mandatory:true},
 				{name:'password', label:'Password', type:'password',mandatory:true},
+				{type:'html', content:'<p><a href="#forgot_password">Forgot Password?</a></p>'}
 			],
 			btn_primary_label: "Login",
 			success: function(data) {

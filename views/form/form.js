@@ -60,11 +60,12 @@ var FormView = Class.extend({
 		if(!this.opts) return; // not ready
 		
 		this.opts.$parent.append('<div class="form-wrapper"><form class="form-stacked"></form></div>');
-		this.$wrapper = this.opts.$parent.find('.form-wrapper:last');
+		this.$wrapper = this.ismodal ? $('#' + this.opts.id) : this.opts.$parent.find('.form-wrapper:last');
 		this.$form = this.opts.$parent.find('form:last');
 		
 		this.make_form_inputs();
 		this.make_static_inputs();
+		this.make_message();
 		this.make_footer();
 		this.bind_events();		
 	},
@@ -91,25 +92,38 @@ var FormView = Class.extend({
 			})
 		}
 	},
+	
+	make_message: function() {
+		this.$form.append('<div class="alert-message block-message form-message" style="display: none;">\
+			</div>');
+		this.$message = this.$form.find('.alert-message.form-message');
+	},
+	
 	// footer includes message, primary action, secondary action
+	footer_container: function() {
+		if(this.ismodal) {
+			return $('#' + this.opts.id + ' .modal-footer');
+		} else {
+			return $(this.$form.append('<div class="form-footer actions"></div>')).find('.actions');
+		}
+	},
+	
 	make_footer: function() {
 		$.set_default(this.opts, 'btn_primary_label', 'Save')
 		$.set_default(this.opts, 'btn_secondary_label', 'Cancel')				
 
-		this.$wrapper.append($.rep('<div class="form-footer">\
-			<span class="form-message"></span>\
+
+		this.footer_container().append($.rep('<span class="form-message"></span>\
 			<button class="btn primary">%(btn_primary_label)s</button>\
-			<button class="btn secondary">%(btn_secondary_label)s</button>\
-		</div>', this.opts));
-		this.$message = this.$wrapper.find('.form-footer .form-message');
+			<button class="btn secondary">%(btn_secondary_label)s</button>', this.opts));
 	},
 	bind_events: function() {
 		var me = this;
 		this.$wrapper.find('button.btn.primary').click(function() {
-			me.primary_action();
+			return me.primary_action();
 		});
 		this.$wrapper.find('button.btn.secondary').click(function() {
-			me.secondary_action();
+			return me.secondary_action();
 		});
 		
 		// enter on last input is primary action
@@ -121,7 +135,8 @@ var FormView = Class.extend({
 	},
 	primary_action: function() {
 		var obj = this.get_values();
-		if(!obj) return;
+		if(!obj) 
+			return false;
 		var me = this;
 		$.call({
 			method: this.opts.method || 'lib.py.objstore.insert',
@@ -129,6 +144,7 @@ var FormView = Class.extend({
 			type: 'POST',
 			success: function(data) { me.success(data); }
 		});
+		return false;
 	},
 	validate: function() {
 		$.each(this.inputlist, function(i, input) {
@@ -137,14 +153,15 @@ var FormView = Class.extend({
 	},
 	success: function(data) {
 		if(data.message && data.message=='ok') {
-			this.set_message('Success', 'success', 4000);
+			this.set_message('Success', 'success');
 			if(this.opts.success)this.opts.success(data);
 		} else {
-			this.set_message(data.error, 'important', 4000);
+			this.set_message(data.error, 'error');
 			if(this.opts.error) this.opts.error(data);
 		}			
 	},
 	get_values: function() {
+		this.clear_message();
 		if(this.$wrapper.find('.error').length) {
 			return;
 		}
@@ -163,19 +180,30 @@ var FormView = Class.extend({
 		}
 	},
 	reset: function() {
-		this.$message.empty();
-		
+		this.clear_message();
 		// clear form first (to defaults)
 		$.each(this.inputlist, function(i, forminput) {
 			var defval = forminput.opts ? forminput.opts.defaultval : '';
-			forminput.$input.val(defval);
+			if(forminput.$input)
+				forminput.$input.val(defval);
 		});
 	},
+	clear_message: function() {
+		this.$message.empty()
+			.css('display', 'none')
+			.removeClass('error').removeClass('warning')
+			.removeClass('success').removeClass('info');
+	},
 	set_message: function(msg, type, fadeOutIn) {
-		this.$message.html(
-			$.rep('<span class="label %(type)s">%(msg)s</span>', {msg:msg, type:type || ''}));
+		this.clear_message();
+		this.$message.css('display', 'block').html(msg)
+
+		if(type) {
+			this.$message.addClass(type);
+		}
+		
 		if(fadeOutIn) {
-			this.$message.find('.label').fadeOut(fadeOutIn);
+			this.$message.fadeOut(fadeOutIn);
 		}
 	}
 });

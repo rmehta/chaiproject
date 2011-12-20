@@ -42,6 +42,9 @@ def handle():
 
 			if req.method=='POST':
 				database.conn.commit()
+			
+			if type(t) in (str, unicode):
+				t = {"message": t}
 
 			return t or {"message":"no response"}
 		else:

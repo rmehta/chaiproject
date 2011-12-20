@@ -28,13 +28,18 @@ var FormInputView = Class.extend({
 		if(!this.opts.type) this.opts.type='text';
 		if(!this.opts.help) this.opts.help='';
 		this.make_input();
-		this.set_properties();
-		this.bind_events();			
+		if(this.opts.type!='html') {
+			this.set_properties();
+			this.bind_events();				
+		}
 	},
 	make_input: function() {
 		switch(this.opts.type) {
 			case 'hidden':
 				this.make_hidden();
+				break;
+			case 'html':
+				this.make_html();
 				break;
 			default:
 				this.make_with_label();
@@ -43,6 +48,9 @@ var FormInputView = Class.extend({
 	make_hidden: function() {
 		this.opts.$parent.append($.rep('\
 			<input name="%(name)s" type="%(type)s" value="%(value)s">', this.opts));			
+	},
+	make_html: function() {
+		this.opts.$parent.append(this.opts.content)
 	},
 	make_with_label: function() {
 		this.opts.$parent.append($.rep('\
