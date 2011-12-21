@@ -21,12 +21,3 @@ textarea.code {
 .content.active {
 	display: block;
 }
-
-/* form */
-.form-footer {
-	margin-top: 17px;
-}
-.form-footer .btn {
-	float: right;
-	margin-left: 5px;
-}

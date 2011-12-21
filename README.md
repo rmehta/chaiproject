@@ -18,11 +18,11 @@ Collection of Python/JS libraries for a standard web project
 
 1. MySQL
 2. Python Modules:
-	mysql-python (mysqldb)
-	markdown2 (for emails)
-	html2text (for emails)
-	requests
-	webob
+	- mysql-python (mysqldb)
+	- markdown2 (for emails)
+	- html2text (for emails)
+	- requests
+	- webob
 3. WSGI web server
 
 ## Start a new app
