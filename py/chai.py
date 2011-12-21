@@ -106,10 +106,9 @@ def create_user(cur, dbname, dbuser, dbpassword):
 	import MySQLdb
 	import MySQLdb.constants.ER as ER
 	try:
-		cur.execute("create user %s@'localhost' identified by %s", (dbuser, dbpassword))
-	except MySQLdb.Error, e:
-		if e.args[0]!=ER.CANNOT_USER:
-			raise e
+		cur.execute("drop user %s@'localhost'" % dbuser)
+	except: pass
+	cur.execute("create user %s@'localhost' identified by %s", (dbuser, dbpassword))
 	cur.execute("grant all privileges on `%s`.* to '%s'" % (dbname, dbuser))
 	cur.execute("flush privileges")
 	print "User created"
@@ -119,11 +118,10 @@ def make_confpy(**dbinfo):
 	# write conf.py template
 	dbinfo['app_name'] = raw_input('Name of your application (title case)')
 	
-	if not os.path.exists('conf/dbsettings.py'):
-		confpy = open('conf/dbsettings.py', 'w')
-		confpy.write(conf_content % dbinfo)
-		confpy.close()
-		print "Wrote conf/dbsettings.py"
+	confpy = open('conf/dbsettings.py', 'w')
+	confpy.write(conf_content % dbinfo)
+	confpy.close()
+	print "Wrote conf/dbsettings.py"
 
 def sync_tables():
 	"""sync all core tables, beginning with _parent_child"""

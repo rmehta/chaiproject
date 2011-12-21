@@ -450,13 +450,13 @@ var app = {
 		});
 	},
 	register: function() {
-		$.require('lib/views/register.js');
+		$.require('lib/views/user/register.js');
 		if(!app.registerview)
 			app.registerview = new RegisterView();
 		app.registerview.show();		
 	},
 	editprofile: function() {
-		$.require('lib/views/editprofile.js');
+		$.require('lib/views/user/editprofile.js');
 		if(!app.editprofileview)
 			app.editprofileview = new EditProfileView();
 		app.editprofileview.show();
