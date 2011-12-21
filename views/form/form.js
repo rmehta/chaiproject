@@ -7,7 +7,8 @@ Options:
 $parent - parent jquery object
 fields - list of fieldinfo objects (see forminput.js)
 method - default "lib.py.objstore.insert"
-btn_primary_label - default "Save"
+primary_btn_label - default "Save"
+primary_btn_working_label - default "Saving..."
 btn_secondary_label - default "Cancel"
 success - called after post
 
@@ -60,7 +61,9 @@ var FormView = Class.extend({
 		if(!this.opts) return; // not ready
 		
 		this.opts.$parent.append('<div class="form-wrapper"><form class="form-stacked"></form></div>');
-		this.$wrapper = this.ismodal ? $('#' + this.opts.id) : this.opts.$parent.find('.form-wrapper:last');
+		this.$wrapper = this.ismodal
+			? $('#' + this.opts.id) 
+			: this.opts.$parent.find('.form-wrapper:last');
 		this.$form = this.opts.$parent.find('form:last');
 		
 		this.make_form_inputs();
@@ -109,17 +112,20 @@ var FormView = Class.extend({
 	},
 	
 	make_footer: function() {
-		$.set_default(this.opts, 'btn_primary_label', 'Save')
-		$.set_default(this.opts, 'btn_secondary_label', 'Cancel')				
+		$.set_default(this.opts, 'primary_btn_label', 'Save')
+		$.set_default(this.opts, 'primary_btn_working_label', 'Saving...')
+		$.set_default(this.opts, 'secondary_btn_label', 'Cancel')				
 
 
 		this.footer_container().append($.rep('<span class="form-message"></span>\
-			<button class="btn primary">%(btn_primary_label)s</button>\
-			<button class="btn secondary">%(btn_secondary_label)s</button>', this.opts));
+			<button class="btn primary">%(primary_btn_label)s</button>\
+			<button class="btn secondary">%(secondary_btn_label)s</button>', this.opts));
+			
+		this.$primary_btn = this.$wrapper.find('button.btn.primary');
 	},
 	bind_events: function() {
 		var me = this;
-		this.$wrapper.find('button.btn.primary').click(function() {
+		this.$primary_btn.click(function() {
 			return me.primary_action();
 		});
 		this.$wrapper.find('button.btn.secondary').click(function() {
@@ -127,13 +133,15 @@ var FormView = Class.extend({
 		});
 		
 		// enter on last input is primary action
-		this.$form.find(':input:last[type!="hidden"]').bind('keydown', function(event) {
+		this.$wrapper.find('input:last[type!="hidden"]').bind('keydown', function(event) {
 			if(event.which==13) {
-				me.$wrapper.find('#button.primary').click();
+				me.$primary_btn.click();
 			}
 		});
 	},
 	primary_action: function() {
+		this.disable_actions();
+		this.$primary_btn.text(this.opts.primary_btn_working_label);
 		var obj = this.get_values();
 		if(!obj) 
 			return false;
@@ -142,9 +150,19 @@ var FormView = Class.extend({
 			method: this.opts.method || 'lib.py.objstore.insert',
 			data: obj,
 			type: 'POST',
-			success: function(data) { me.success(data); }
+			success: function(data) { 
+				me.$primary_btn.text(me.opts.primary_btn_label);
+				me.enable_actions();
+				me.success(data); 
+			}
 		});
 		return false;
+	},
+	disable_actions: function() {
+		this.$wrapper.find('button.btn').attr('disabled', true);
+	},
+	enable_actions: function() {
+		this.$wrapper.find('button.btn').attr('disabled', false);
 	},
 	validate: function() {
 		$.each(this.inputlist, function(i, input) {

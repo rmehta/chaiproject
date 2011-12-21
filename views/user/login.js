@@ -20,7 +20,8 @@ var LoginView = FormModalView.extend({
 				{name:'password', label:'Password', type:'password',mandatory:true},
 				{type:'html', content:'<p><a href="#forgot_password">Forgot Password?</a></p>'}
 			],
-			btn_primary_label: "Login",
+			primary_btn_label: "Login",
+			primary_btn_working_label: "Logging In...",
 			success: function(data) {
 				if(data.message && data.message == 'ok') {
 					$.session = data;

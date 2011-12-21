@@ -33,6 +33,8 @@ RegisterView = FormModalView.extend({
 			label: "Register",
 			static: { type:'user' },
 			fields: register_fields,
+			primary_btn_label: "Register",
+			primary_btn_working_label: "Registering...",
 			success: function(data) {
 				// login after registration
 				if(data.message=='ok') me.login_after_register();

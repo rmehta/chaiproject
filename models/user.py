@@ -1,9 +1,12 @@
 from lib.py import model
 
 reset_email_message = """
+Forgot Password
+---------------
+
 Hello %(fullname)s,
 
-To reset your password <a href="%(url)s">click here</a>.
+To reset your password [click here](%(url)s)
 
 Or copy-paste this url to your address bar:
 
@@ -72,7 +75,7 @@ class User(model.Model):
 			'url': conf.app_url + '#reset_password/' + resetid
 		}
 		
-		emailer.sendtext(recipients=[self.obj['email']], subject="Password Reset",
+		emailer.send(recipients=[self.obj['email']], subject="Password Reset",
 		 	message=reset_email_message % d)
 		
 		

@@ -303,13 +303,13 @@ $.objstore = {
 			type: 'POST',
 			method: 'lib.py.objstore.' + (insert_or_update || 'insert'),
 			data: {obj: JSON.stringify(obj)},
-			success: function(response) {
-				if(response._log) {
-					console.log(response._log);
+			success: function(data) {
+				if(data.message && data.message=='ok') {
+					$.objstore.set(obj);
 				}
-				success(response);
+				success(data);
 			}
-		});		
+		});	
 	},
 	clear: function(type, name) {
 		var d = $.objstore.data;
@@ -330,13 +330,19 @@ $.view = {
 	// shows view from location.hash
 	show_location_hash: function() {
 		var route = location.hash;
+		var viewid = $.view.get_view_id(route);		
+
+		// go to home if not "index"
+		if(viewid=='index' && $.index!='index') {
+			$.view.open($.index);
+			return;
+		}
 		if(route==$.view.current_route) {
 			// no change
 			return;
 		}
 		$.view.current_route = location.hash;
 		
-		var viewid = $.view.get_view_id(route);		
 		var viewinfo = app.views[viewid] || {};
 		$.view.show(viewid, viewinfo.path);
 	},	
@@ -427,19 +433,8 @@ $(window).bind('hashchange', function() {
 // app namespace for app globals
 var app = {	
 	// module views
-	views: {
-		'editpage': {path: 'lib/views/editpage.html'},
-		'register': {path: 'lib/views/register.js'},
-		'upload':   {path: 'lib/views/upload.html'},
-		'pagelist': {path: 'lib/views/pagelist.html'},
-		'filelist': {path: 'lib/views/filelist.html'},
-		'userlist': {path: 'lib/views/userlist.html'},
-		'notfound': {path: 'lib/views/notfound.html'},
-		'reset_password': {path: 'lib/views/reset_password.html'},
-		'forgot_password': {path: 'lib/views/forgot_password.html'}
-	},
 	login: function() {
-		$.require('lib/views/login.js');
+		$.require('lib/views/user/login.js');
 		if(!app.loginview)
 			app.loginview = new LoginView();
 		app.loginview.show();
@@ -515,6 +510,22 @@ var app = {
 		})		
 	}
 };
+
+app.views = {
+	'notfound': {path: 'lib/views/notfound.html'},
+	'editpage': {path: 'lib/views/editpage.html'},
+	'pagelist': {path: 'lib/views/pagelist.html'},
+	'filelist': {path: 'lib/views/filelist.html'},
+	
+	// user
+	'register': {path: 'lib/views/user/register.js'},
+	'userlist': {path: 'lib/views/user/userlist.html'},
+	'reset_password': {path: 'lib/views/user/reset_password.html'},
+	'reset_password_done': {path: 'lib/views/user/reset_password_done.html'},
+	'forgot_password': {path: 'lib/views/user/forgot_password.html'},
+	'forgot_password_done': {path: 'lib/views/user/forgot_password_done.html'}
+}
+
 
 // STARTUP!
 $(document).ready(function() {	
