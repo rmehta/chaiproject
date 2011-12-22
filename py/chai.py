@@ -195,8 +195,7 @@ if __name__=='__main__':
 				table = sys.argv[2]
 				db.sync_table(table)
 			else:
-				db.sync_tables(lib.py.core_models)
-				db.sync_tables(conf.models)		
+				db.sync_tables()
 
 		elif cmd == 'pages':
 			make_pages()
