@@ -324,6 +324,7 @@ $.view = {
 	pages: {},
 	// sets location.hash
 	open: function(route) {
+		if(!route) return;
 		if(route[0]!='#') route = '#' + route;
 		window.location = route;
 	},
@@ -388,7 +389,7 @@ $.view = {
 					$.view.open('notfound');
 					return;
 				}
-				$.view.make(obj.name, obj.html, obj.js, obj.css);
+				$.view.make_page(obj.name, obj.html, obj.js, obj.css);
 				callback();
 			}
 		);

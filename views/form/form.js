@@ -16,7 +16,7 @@ success - called after post
 Properties:
 -----------
 inputlist - list of FormInputView objects
-inputsdict - dict of FormInputView objects (key is the "name")
+inputdict - dict of FormInputView objects (key is the "name")
 $wrapper
 $form
 $message
@@ -194,17 +194,23 @@ var FormView = Class.extend({
 		this.reset();
 		// set values
 		for(k in obj) {
-			this.$form.find(' [name="'+k+'"]').val(obj[k]);
+			if(this.inputdict[k])
+				this.inputdict[k].val(obj[k]);
 		}
+		
+		// set method to update
+		this.opts.method = 'lib.py.objstore.update';
 	},
 	reset: function() {
 		this.clear_message();
 		// clear form first (to defaults)
 		$.each(this.inputlist, function(i, forminput) {
 			var defval = forminput.opts ? forminput.opts.defaultval : '';
-			if(forminput.$input)
-				forminput.$input.val(defval);
+			forminput.val(defval);
 		});
+	},
+	clear: function() {
+		return this.reset();
 	},
 	clear_message: function() {
 		this.$message.empty()

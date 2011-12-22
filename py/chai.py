@@ -195,7 +195,7 @@ if __name__=='__main__':
 				table = sys.argv[2]
 				db.sync_table(table)
 			else:
-				db.sync_tables()
+				sync_tables()
 
 		elif cmd == 'pages':
 			make_pages()

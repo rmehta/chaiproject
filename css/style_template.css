@@ -21,3 +21,9 @@ textarea.code {
 .content.active {
 	display: block;
 }
+
+.secondary-nav img.gravatar { /* gravatar */
+	margin-right: 8px; 
+	float:right; 
+	margin-top: 6px;
+}
