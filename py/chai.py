@@ -125,9 +125,11 @@ def make_confpy(**dbinfo):
 
 def sync_tables():
 	"""sync all core tables, beginning with _parent_child"""
-	from lib.py import database
+	from lib.py import database, core_models
+	from conf import models
 	db = database.get()
-	db.sync_core_tables()
+	db.sync_tables(core_models)
+	db.sync_tables(models)
 
 def create_index():
 	"""create index page"""
