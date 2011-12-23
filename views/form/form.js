@@ -96,9 +96,10 @@ var FormView = Class.extend({
 		if(!this.opts.static) return;
 		for(key in this.opts.static) {
 			this.make_input({
-				type:'hidden',
-				name:key, 
-				value:this.opts.static[key]
+				type: 'hidden',
+				name: key, 
+				value: this.opts.static[key],
+				defaultval: this.opts.static[key]
 			});
 		}
 	},
@@ -216,6 +217,7 @@ var FormView = Class.extend({
 			var defval = forminput.opts ? forminput.opts.defaultval : '';
 			forminput.set_val(defval);
 		});
+		this.opts.method = 'lib.py.objstore.insert';		
 	},
 	clear: function() {
 		return this.reset();

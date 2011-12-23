@@ -103,7 +103,7 @@ app.open_default_page() - open default page on load / fire necessary events
 // utility functions
 (function($) {
 	// python style string replace
-	$.index = null;
+	$.index = 'index';
 	$.rep = function(s, dict) {
 		for(key in dict) {
 		    var re = new RegExp("%\\("+ key +"\\)s", "g");
@@ -480,9 +480,10 @@ var app = {
 			var href = $(this).attr('href');
 			if(href && 
 				href.substr(0,1)!='#' &&
+				href.substr(0,6)=='pages/' &&
 				href.indexOf('.html')!=-1) {
-				location.href = '#' + href.substr(0, href.length-5);
-				return false;
+					location.href = '#' + href.substr(6, href.length-11);
+					return false;
 			}
 			return true;
 		});		
@@ -490,13 +491,13 @@ var app = {
 	// open default page
 	open_default_page: function() {
 		$content = $('.main.container .content.active');
-		if($content.length) {
-			// active content is already loaded, just highlight it
-			$content.trigger('_show');
+		if(location.hash && location.hash != '#') {
+			$(window).trigger('hashchange');
 		} else {
-			if(location.hash) {
-				$(window).trigger('hashchange');
-			} else if($.index) {
+			if($content.length) {
+				// active content is already loaded, just highlight it
+				$content.trigger('_show');
+			} else {
 				// no location, open index
 				$.view.open($.index);
 			}

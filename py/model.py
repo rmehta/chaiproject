@@ -74,9 +74,9 @@ def get(obj):
 		return Model(obj)
 		
 	if obj['type'] in core_models:
-		modulepackage = 'lib.models.' + obj['type']		
+		modulepackage = 'lib.models.' + str(obj['type'])
 	else:
-		modulepackage = 'models.' + obj['type']
+		modulepackage = 'models.' + str(obj['type'])
 
 	__import__(modulepackage)
 
