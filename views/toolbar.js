@@ -29,7 +29,7 @@ $.require('lib/js/bootstrap/bootstrap-dropdown.js');
 		
 		make_admin: function() {
 			// edit links for admins
-			if($.session.userobj.is_admin) {
+			if(app.cms) {
 				$('.topbar .nav.secondary-nav').append('\
 					<li class="dropdown">\
 						<a class="dropdown-toggle" href="#">Admin</a>\

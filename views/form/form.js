@@ -11,7 +11,7 @@ primary_btn_label - default "Save"
 primary_btn_working_label - default "Saving..."
 btn_secondary_label - default "Cancel"
 success - called after post
-
+submit_from_last_input - enter on last input is submit
 
 Properties:
 -----------
@@ -60,11 +60,9 @@ var FormView = Class.extend({
 		if(opts)this.opts = opts;
 		if(!this.opts) return; // not ready
 		
-		this.opts.$parent.append('<div class="form-wrapper"><form class="form-stacked"></form></div>');
-		this.$wrapper = this.ismodal
-			? $('#' + this.opts.id) 
-			: this.opts.$parent.find('.form-wrapper:last');
-		this.$form = this.opts.$parent.find('form:last');
+		this.make_body();
+
+		$.require('lib/views/form/input.js');
 		
 		this.make_form_inputs();
 		this.make_static_inputs();
@@ -72,27 +70,36 @@ var FormView = Class.extend({
 		this.make_footer();
 		this.bind_events();		
 	},
+	make_body: function() {
+		this.opts.$parent.append('<div class="form-wrapper">\
+			<form class="form-stacked" action="javascript:void(0);">\
+			</form></div>');
+		this.$wrapper = this.ismodal
+			? $('#' + this.opts.id) 
+			: this.opts.$parent.find('.form-wrapper:last');
+		this.$form = this.opts.$parent.find('form:last');		
+	},
 	make_form_inputs: function() {
-		$.require('lib/views/form/input.js');
 		// create inputs
 		for(var i in this.opts.fields) {
-			f = this.opts.fields[i];
-			f.$parent = this.$form;
-			
-			var forminputview = new FormInputView(f)
-			this.inputlist.push(forminputview);
-			this.inputdict[f.name] = forminputview;		
+			this.make_input(this.opts.fields[i]);
 		}
+	},
+	make_input: function(fieldopts) {
+		fieldopts.$parent = this.$form;
+		
+		var forminputview = app.input_factory(fieldopts)
+		this.inputlist.push(forminputview);
+		this.inputdict[fieldopts.name] = forminputview;
 	},
 	make_static_inputs: function() {
 		if(!this.opts.static) return;
 		for(key in this.opts.static) {
-			new FormInputView({
+			this.make_input({
 				type:'hidden',
 				name:key, 
-				value:this.opts.static[key],
-				$parent: this.$form
-			})
+				value:this.opts.static[key]
+			});
 		}
 	},
 	
@@ -115,7 +122,7 @@ var FormView = Class.extend({
 		$.set_default(this.opts, 'primary_btn_label', 'Save')
 		$.set_default(this.opts, 'primary_btn_working_label', 'Saving...')
 		$.set_default(this.opts, 'secondary_btn_label', 'Cancel')				
-
+		$.set_default(this.opts, 'submit_from_last_input', false);
 
 		this.footer_container().append($.rep('<span class="form-message"></span>\
 			<button class="btn primary">%(primary_btn_label)s</button>\
@@ -133,11 +140,13 @@ var FormView = Class.extend({
 		});
 		
 		// enter on last input is primary action
-		this.$wrapper.find('input:last[type!="hidden"]').bind('keydown', function(event) {
-			if(event.which==13) {
-				me.$primary_btn.click();
-			}
-		});
+		if(this.opts.submit_from_last_input) {
+			this.$wrapper.find('input:last[type!="hidden"]').bind('keydown', function(event) {
+				if(event.which==13) {
+					me.$primary_btn.click();
+				}
+			});			
+		}
 	},
 	primary_action: function() {
 		this.disable_actions();
@@ -148,7 +157,7 @@ var FormView = Class.extend({
 		var me = this;
 		$.call({
 			method: this.opts.method || 'lib.py.objstore.insert',
-			data: obj,
+			data: {obj: JSON.stringify(obj)},
 			type: 'POST',
 			success: function(data) { 
 				me.$primary_btn.text(me.opts.primary_btn_label);
@@ -184,10 +193,9 @@ var FormView = Class.extend({
 			return;
 		}
 		var d = {};
-		this.$form.find(':input').each(function(i, ele) {
-			if($(ele).attr('name')) 
-				d[$(ele).attr('name')] = $(ele).val();
-		});
+		for(var k in this.inputdict) {
+			d[k] = this.inputdict[k].val();
+		}
 		return d;
 	},
 	set_values: function(obj) {
@@ -195,7 +203,7 @@ var FormView = Class.extend({
 		// set values
 		for(k in obj) {
 			if(this.inputdict[k])
-				this.inputdict[k].val(obj[k]);
+				this.inputdict[k].set_val(obj[k]);
 		}
 		
 		// set method to update
@@ -206,7 +214,7 @@ var FormView = Class.extend({
 		// clear form first (to defaults)
 		$.each(this.inputlist, function(i, forminput) {
 			var defval = forminput.opts ? forminput.opts.defaultval : '';
-			forminput.val(defval);
+			forminput.set_val(defval);
 		});
 	},
 	clear: function() {

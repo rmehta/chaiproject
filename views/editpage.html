@@ -14,6 +14,7 @@ app.edit_form = new FormView({
 		{name:"markdown", label:"Content (Markdown)", mandatory: false, type:'textarea', 
 			help:'This will overwrite html'},
 		{name:"html", label:"HTML", mandatory: false, type:'textarea'},
+		{name:"subpage", label:"Sub Pages", type:"itemlist", range:"page"},
 		{name:"js", label:"Javascript Code", mandatory: false, type:'textarea'},
 		{name:"css", label:"CSS", mandatory: false, type:'textarea'}
 	],

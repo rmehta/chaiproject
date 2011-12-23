@@ -131,6 +131,7 @@ app.open_default_page() - open default page on load / fire necessary events
 		return this.attr('class').split(/\s+/);
 	}
 	$.get_gravatar = function(email) {
+		return ''
 		// get gravatar
 		$.require('lib/js/md5.js');
 		return '<img src="http://www.gravatar.com/avatar/'
@@ -331,6 +332,7 @@ $.view = {
 	// shows view from location.hash
 	show_location_hash: function() {
 		var route = location.hash;
+		if(route=='#') return;
 		var viewid = $.view.get_view_id(route);		
 
 		// go to home if not "index"

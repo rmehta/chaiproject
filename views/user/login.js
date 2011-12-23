@@ -22,6 +22,7 @@ var LoginView = FormModalView.extend({
 			],
 			primary_btn_label: "Login",
 			primary_btn_working_label: "Logging In...",
+			submit_from_last_input: true,
 			success: function(data) {
 				if(data.message && data.message == 'ok') {
 					$.session = data;

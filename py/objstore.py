@@ -192,20 +192,21 @@ def post_children(obj):
 			idx = 0
 			for child in obj[k]:
 				d['idx'] = idx
-				idx += 1
-				
 				# child is a dict
 				if type(child) is dict:
 					child.update(d)
 					post_single(child)
 					
 				# child is literal (only names)
-				elif type(child) in (str, int, float):
+				elif type(child) in (str, int, float, unicode):
 					c = {"value":child}
 					c.update(d)
 					post_single(c)
 				else:
-					raise Exception, "child %s must be dict or literal" % str(child)	
+					raise Exception, "child %s(%s) must be dict or literal" % \
+						(str(child), str(type(child)))
+
+				idx += 1
 
 def exists(obj):
 	"""check exists by name"""
@@ -221,8 +222,8 @@ def get_valid_obj(obj):
 	columns = database.conn.columns(obj['type'])
 	# copy valid columns
 	for c in columns:
-		if obj.get(c):
-			obj_copy[c] = obj.get(c)
+		if c in obj:
+			obj_copy[c] = obj[c]
 	return obj_copy
 
 def insert_query(obj, obj_copy):

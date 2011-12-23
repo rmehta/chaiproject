@@ -5,6 +5,7 @@ setup autocomplete on form input
 	// set autocomplete on this input
 	// opts: {type:<type>}
 	$.fn.set_autocomplete = function(opts) {
+		$.require('lib/js/jquery/jquery.ui.core.js');
 		$.require('lib/js/jquery/jquery.ui.autocomplete.js');
 		$.require('lib/js/jquery/jquery.ui.css');
 		this.autocomplete({

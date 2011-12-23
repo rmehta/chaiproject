@@ -71,4 +71,3 @@ def smtp_send(msg):
 
 	ret = smtp_session.login(smtpsettings['login'], smtpsettings['password'])	
 	smtp_session.sendmail(msg['From'], msg['To'], msg.as_string())
-	
