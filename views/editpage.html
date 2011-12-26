@@ -46,12 +46,14 @@ app.edit_form.inputdict.markdown.$input.change(function() {
 // show from fragment
 $("#editpage").bind('_show', function() {
 	app.edit_form.clear();
+	app.edit_form.opts.method = 'lib.py.objstore.insert';
 
 	var editing = location.hash.split('/');
 	if(editing.length>1) {
 		editing = editing.slice(-1)[0];
 		$.objstore.get("page", editing, function(obj) {
-			app.edit_form.set_values(obj)
+			app.edit_form.set_values(obj);
+			app.edit_form.opts.method = 'lib.py.objstore.update';
 		});
 	}
 })

@@ -140,8 +140,8 @@ app.open_default_page() - open default page on load / fire necessary events
 		
 	};
 	$.call = function(opts) {
-		if(!opts.type) opts.type = 'GET';
-		if(!opts.data) opts.data = {};
+		$.set_default(opts, 'type', 'GET')
+		$.set_default(opts, 'data', {})
 		
 		opts.data._method = opts.method;
 		$.ajax({
@@ -378,7 +378,7 @@ $.view = {
 			$.getScript(path, callback);
 		} else {
 			$.get(path, function(html) {
-				$.view.make_page(name, html);
+				$.view.make_page({name:name, html:html});
 				callback();
 			});
 		}
@@ -391,22 +391,14 @@ $.view = {
 					$.view.open('notfound');
 					return;
 				}
-				$.view.make_page(obj.name, obj.html, obj.js, obj.css);
+				$.view.make_page(obj);
 				callback();
 			}
 		);
 	},
-	make_page: function(name, html, js, css) {
-		$('<div>')
-			.addClass('content')
-			.attr('id', name)
-			.appendTo('.main.container')
-			.html(html);
-			
-		if(js) $.set_script(js);
-		if(css) $.set_style(css);
-		
-		$("#"+name).trigger('_make');		
+	make_page: function(obj) {
+		$.require('lib/views/page.js');
+		new PageView(obj);
 	},
 
 	// get view id from the given route

@@ -37,7 +37,7 @@ def handle():
 			# execute
 			if req.method=='POST':
 				database.conn.begin()
-				
+								
 			t = getattr(sys.modules[module], method)(**req.params)
 
 			if req.method=='POST':

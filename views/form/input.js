@@ -51,7 +51,7 @@ FormInput
 app.input_factory = function(opts) {
 	$.set_default(opts, 'type', 'text')
 	switch(opts.type) {
-		case 'text':
+		case 'text': case 'password':
 		 	return new FormInputText(opts);
 		case 'hidden':
 	 		return new FormInputHidden(opts);
@@ -61,6 +61,8 @@ app.input_factory = function(opts) {
 	 		return new FormInputTextarea(opts);
 		case 'itemlist':
  			return new FormInputItemList(opts);
+		default:
+			console.log('[input_factory] Unknown type "'+opts.type+'"')
 	}
 }
 

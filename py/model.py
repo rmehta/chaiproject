@@ -18,14 +18,17 @@ Events
 
 Standard Events are:
 
-1. "before_get"
-2. "before_insert"
-3. "before_update"
-4. "before_delete"
-5. "after_insert"
-6. "after_update"
-7. "after_delete"
-8. "check_allow"
+- "before_get"
+- "before_post"
+- "before_insert"
+- "before_update"
+- "before_delete"
+- "after_post"
+- "after_insert"
+- "after_update"
+- "after_delete"
+- "check_allow"
+- "validate"
 
 """
 import conf
@@ -44,13 +47,9 @@ class Model(object):
 		import datetime
 		self.obj["_updated"] = datetime.datetime.now()
 
-	def before_get(self): pass
-	def before_insert(self): pass
-	def before_update(self): pass
-	def before_delete(self): pass
-	def after_insert(self): pass
-	def after_update(self): pass
-	def after_delete(self): pass
+	def execute(self, method):
+		if hasattr(self, method):
+			getattr(self, method)()
 
 	def check_allow(self, method):
 		"""check allow"""

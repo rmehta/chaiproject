@@ -59,8 +59,9 @@ def get(**args):
 		
 	# check permissions
 	modelobj = model.get(obj) or None
-	modelobj and modelobj.check_allow('get')
-	modelobj and modelobj.before_get()
+	if modelobj:
+		modelobj.check_allow('get')
+		modelobj.execute('before_get')
 
 	return obj
 
@@ -122,36 +123,49 @@ def post(args, action):
 		delete_children(obj['type'], obj['name'])
 
 	modelobj = (not obj.get('parent_type')) and model.get(obj) or None
-	modelobj and getattr(modelobj, 'before_' + action.lower())()
-	modelobj and modelobj.validate()
+	execute_before_post(modelobj, action)
 
 	obj_single, is_vector = get_single(obj)
+	
 	# save the parent
-	try:
-		post_single(obj_single, action)
-	except MySQLdb.IntegrityError, e:
-		return {"error":"name exists"}
+	post_single(obj_single, action)
 
 	if is_vector:
 		post_children(obj)
+	
+	execute_after_post(modelobj, action)
 		
-	modelobj and getattr(modelobj, 'after_' + action.lower())()
 	return {"message":"ok"}
+
+def execute_before_post(modelobj, action):
+	"""execute pre-post methods"""
+	if modelobj:
+		modelobj.execute('before_' + action.lower())
+		modelobj.execute('before_post')
+		modelobj.execute('validate')
+
+def execute_after_post(modelobj, action):
+	"""execute post-post methods"""
+	if modelobj:
+		modelobj.execute('after_' + action.lower())
+		modelobj.execute('after_post')
 
 def get_obj_from_args(args):
 	"""extract obj from args either passed as object or json string"""
 	if 'obj' in args:
 		if type(args['obj']==str):
 			import json
-			return json.loads(args['obj'])
+			obj = json.loads(args['obj'])
 		else:
-			return args['obj']
+			obj = args['obj']
 	elif 'type' in args:
 		if '_method' in args:
 			del args['_method']
-		return args
+		obj = args
 	else:
-		raise Exception, 'Badly formed object'
+		raise Exception, 'Badly formed object'		
+
+	return obj
 
 def get_single(obj):
 	"""filter vector properties"""

@@ -1,6 +1,6 @@
 $.require('lib/js/bootstrap/bootstrap-dropdown.js');
 (function($) {
-	$.topbar = {
+	app.topbar = {
 		make: function() {
 			var user = $.session.user;
 			// set brand
@@ -11,14 +11,15 @@ $.require('lib/js/bootstrap/bootstrap-dropdown.js');
 
 			// render admin
 			if(!user || user=='guest') {
-				$.topbar.make_login();
+				app.topbar.make_login();
 			}
 
 			// if not guest and admin
 			if(user && user!='guest') {
-				$.topbar.make_admin();
-				$.topbar.make_profile();
-			}			
+				app.topbar.make_admin();
+				app.topbar.make_profile();
+			}
+			app.topbar.make_content();
 		},
 		
 		make_login: function() {
@@ -39,6 +40,13 @@ $.require('lib/js/bootstrap/bootstrap-dropdown.js');
 							<li><a href="#userlist">Users</a></li>\
 						</ul>\
 					<li>');
+			}
+		},
+		
+		make_content: function() {
+			if(app.cms) {
+				if(!$('.topbar .nav [href="#toc"]').length)
+					$('.topbar .nav:first').append('<li><a href="#toc">Contents</a></li>')
 			}
 		},
 		
@@ -72,9 +80,9 @@ $(document).ready(function() {
 
 // make toolbar on login
 $(document).bind('login', function() {
-	$.topbar.make();
+	app.topbar.make();
 });
 
 $(document).bind('logout', function() {
-	$.topbar.make();
+	app.topbar.make();
 });

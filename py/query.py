@@ -22,7 +22,7 @@ def get(**args):
 	db = database.get()
 	
 	if 'json' in args:
-		args.update(args['json'])
+		args.update(json.loads(args['json']))
 
 	if 'order_by' in args:
 		args['order_by'] = ' order by ' + args['order_by']

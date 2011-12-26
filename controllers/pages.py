@@ -18,7 +18,9 @@ def make():
 	db = database.get()
 	pages_path = os.path.join(os.path.dirname(__file__), '../..')
 	
-	index_html = open(os.path.join(os.path.dirname(__file__), '../..', 'template.html'),'r').read()
+	with open(os.path.join(os.path.dirname(__file__), '../..', 'template.html'),'r') as f:
+		index_html = f.read()
+
 	index_html = index_html.split(container)
 
 	if len(index_html)!=2:
@@ -40,9 +42,9 @@ def make():
 			'<title>' + page.get('label', page.get('name')) + '</title>' +\
 		 	html[1].split('</title>')[1]
 		
-		out = open(os.path.join(pages_path, page['name'] + '.html'), 'w')
-		out.write(html)
-		out.close()
+		with open(os.path.join(pages_path, page['name'] + '.html'), 'w') as f:
+			out.write(html)
+
 		messages.append("wrote %s %sk" % (page['name'] + '.html', len(html)/1024))
 
 	return messages

@@ -57,12 +57,8 @@ def getchildren(node):
 	"""get children <ol>"""
 	global all_nodes, level
 	
-	cl = db.sql("""select 
-		t1.name as name, t1.label as label 
-			from page t1, subpage t2 
-		where t2.value=t1.name 
-			and t2.parent=%s
-		order by t2.idx asc""", node)
+	cl = db.sql("""select name, label from page
+		where parent = %s order by idx""", node)
 
 	if not cl:
 		return None

@@ -12,6 +12,7 @@ primary_btn_working_label - default "Saving..."
 btn_secondary_label - default "Cancel"
 success - called after post
 submit_from_last_input - enter on last input is submit
+getdata - if this function is exists, data is passed to this function before calling
 
 Properties:
 -----------
@@ -90,7 +91,8 @@ var FormView = Class.extend({
 		
 		var forminputview = app.input_factory(fieldopts)
 		this.inputlist.push(forminputview);
-		this.inputdict[fieldopts.name] = forminputview;
+		if(fieldopts.name)
+			this.inputdict[fieldopts.name] = forminputview;
 	},
 	make_static_inputs: function() {
 		if(!this.opts.static) return;
@@ -152,13 +154,16 @@ var FormView = Class.extend({
 	primary_action: function() {
 		this.disable_actions();
 		this.$primary_btn.text(this.opts.primary_btn_working_label);
-		var obj = this.get_values();
-		if(!obj) 
-			return false;
+
+		var obj = this.getdata();
+		if(!obj) return false;
+
+		$.set_default(this.opts, 'method', 'lib.py.objstore.insert')
+
 		var me = this;
 		$.call({
-			method: this.opts.method || 'lib.py.objstore.insert',
-			data: {obj: JSON.stringify(obj)},
+			method: this.opts.method,
+			data: obj,
 			type: 'POST',
 			success: function(data) { 
 				me.$primary_btn.text(me.opts.primary_btn_label);
@@ -167,6 +172,15 @@ var FormView = Class.extend({
 			}
 		});
 		return false;
+	},
+	getdata: function() {
+		var obj = this.get_values();
+		for(k in obj) {
+			if(typeof obj[k] == 'object') {
+				return {obj: JSON.stringify(obj)}
+			}
+		}
+		return obj
 	},
 	disable_actions: function() {
 		this.$wrapper.find('button.btn').attr('disabled', true);
@@ -206,9 +220,6 @@ var FormView = Class.extend({
 			if(this.inputdict[k])
 				this.inputdict[k].set_val(obj[k]);
 		}
-		
-		// set method to update
-		this.opts.method = 'lib.py.objstore.update';
 	},
 	reset: function() {
 		this.clear_message();
@@ -217,7 +228,6 @@ var FormView = Class.extend({
 			var defval = forminput.opts ? forminput.opts.defaultval : '';
 			forminput.set_val(defval);
 		});
-		this.opts.method = 'lib.py.objstore.insert';		
 	},
 	clear: function() {
 		return this.reset();

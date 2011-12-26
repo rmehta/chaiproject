@@ -35,7 +35,7 @@ class User(model.Model):
 	def __init__(self, obj):
 		super(User, self).__init__(obj)
 		
-	def before_insert(self):
+	def before_post(self):
 		"""save password as sha256 hash"""		
 		if 'password' in self.obj:
 			self.obj['password'] = self.encrypt_password(self.obj['password']) 
@@ -51,10 +51,7 @@ class User(model.Model):
 			return raw
 		else:
 			return hashlib.sha256(raw).hexdigest()			
-		
-	def before_update(self):
-		self.before_insert()
-	
+			
 	def before_get(self):
 		"""hide password"""
 		if 'password' in self.obj:
