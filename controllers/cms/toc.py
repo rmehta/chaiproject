@@ -3,13 +3,13 @@ generate toc from pages
 
 Usage
 -----
-make()
+Called from lib.controllers.publish
 
 Discussion
 ----------
 
 Will create a TOC html page with toc template as the base
-based on "subpage" list in a page
+based on `parent` and `idx` list in a page
 """
 
 import os
@@ -25,10 +25,8 @@ def make():
 	"""write pages/toc.html"""
 	index = db.sql("select name, label from page where name='index'")[0]
 
-	db.begin()
 	objstore.delete_obj('page', 'toc')
 	objstore.insert(type='page', name='toc', label='Contents', html=template(nodehtml(index)))
-	db.commit()
 	
 def template(content):
 	"""get toc from template or simple"""
@@ -79,5 +77,3 @@ def getchildren(node):
 	
 	return out
 	
-if __name__=="__main__":
-	make()

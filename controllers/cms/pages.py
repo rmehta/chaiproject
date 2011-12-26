@@ -16,9 +16,9 @@ def make():
 	container = '<div class="main container">'
 
 	db = database.get()
-	pages_path = os.path.join(os.path.dirname(__file__), '../..')
+	pages_path = os.path.join(os.path.dirname(__file__), '../../../pages')
 	
-	with open(os.path.join(os.path.dirname(__file__), '../..', 'template.html'),'r') as f:
+	with open(os.path.join(os.path.dirname(__file__), '../../..', 'template.html'),'r') as f:
 		index_html = f.read()
 
 	index_html = index_html.split(container)
@@ -43,7 +43,7 @@ def make():
 		 	html[1].split('</title>')[1]
 		
 		with open(os.path.join(pages_path, page['name'] + '.html'), 'w') as f:
-			out.write(html)
+			f.write(html)
 
 		messages.append("wrote %s %sk" % (page['name'] + '.html', len(html)/1024))
 

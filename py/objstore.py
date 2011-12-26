@@ -135,7 +135,7 @@ def post(args, action):
 	
 	execute_after_post(modelobj, action)
 		
-	return {"message":"ok"}
+	return {"message":"ok", "obj": obj}
 
 def execute_before_post(modelobj, action):
 	"""execute pre-post methods"""

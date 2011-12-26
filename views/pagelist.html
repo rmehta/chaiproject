@@ -1,61 +1,29 @@
-<button class="btn primary small" onclick="location.href='#editpage'" style="float: right">
-	New</button>
-<h2>Pages</h2>
-<br>
-<table class="bordered-table zebra-striped" id="pagelist_table">
-	<thead>
-		<tr>
-			<th width="80%">Page Name</th>
-			<th></th>
-		</tr>
-	</thead>
-	<tbody>
-	</tbody>
-</table>
-<script>
-$.require('lib/js/prettydate.js');
-$.require('lib/js/common.js');
+<h1>Page Content</h1>
+<div id="pagelist-content"></div>
 
-// delete
-$("#pagelist").delete_table_row({
-	data: {type:'page'}
+<script>
+
+$.require('lib/views/objlist.js');
+$.require('lib/js/prettydate.js');
+
+var PageListView = ObjListView.extend({
+	render_result: function(result) {
+		var html = '<ol>';
+		for(var i in result) {
+			obj = result[i];
+			obj.last_update = prettyDate(obj._updated);
+			
+			html += $.rep('<li><a href="#%(name)s">%(label)s</a><br>\
+				<span class="help-block">%(last_update)s</span></li>', obj);
+		}
+		this.$b.append(html + '</ol>');
+	}
 })
 
-// get list of pages
-$.call({
-	method:"lib.py.query.get",
-	data: {
-		type:"page", 
-		columns:"name, label, _updated",
-		order_by: "label asc"
-	}, 
-	success:function(data) {
-
-		// no pages?
-		if(!data.result.length) {
-			$('#pagelist_table tbody').append($.rep('<tr>\
-				<td><div class="help-block">No Pages...</div>\
-				</td><td></td></tr>'));
-			return;
-		}
-
-		// render
-		$.each(data.result, function(i, p) {
-			if(!p.label) p.label = p.name;
-			p.ts = prettyDate(p._updated);
-		
-			$('#pagelist_table tbody').append($.rep('<tr>\
-				<td>\
-					<a href="#%(name)s"><b>%(label)s</b></a>\
-					<div class="help-block">%(ts)s</div>\
-				</td>\
-				<td>\
-					<button class="btn small primary" onclick="location.hash=\'editpage/%(name)s\'" >Edit</button>\
-					<button data-name="%(name)s" class="btn small delete-row-btn">Delete</button>\
-				</td>\
-				</tr>', p))
-		});
-	}
+app.pagelist = new PageListView({
+	$parent: $('#pagelist-content'),
+	type: 'page',
+	columns: ['name', 'label', '_updated'],
+	order_by: 'label'
 });
-
 </script>

@@ -1,4 +1,5 @@
 <h1>Page Edit</h1>
+<p><a href="#" class="editpage-view-link">View Page</a></p>
 <div id="editpage-form-wrapper"></div>
 
 <script>
@@ -6,7 +7,7 @@ $.require('lib/views/form/form.js');
 
 
 // the form
-app.edit_form = new FormView({
+app.editpage_form = new FormView({
 	$parent: $('#editpage-form-wrapper'),
 	fields: [
 		{name:"name", label:"Form ID", mandatory: true},
@@ -20,40 +21,41 @@ app.edit_form = new FormView({
 	],
 	method:'lib.py.objstore.insert',
 	success: function() {
-		app.edit_form.set_message('Form Saved', 5000);
+		app.editpage_form.set_message('Form Saved', 5000);
 	},
 	static: {
 		type: 'page'
 	}
 })
 
-app.edit_form.$wrapper.find('button.btn.secondary').css('display', 'none');
+app.editpage_form.$wrapper.find('button.btn.secondary').css('display', 'none');
 
 
 // convert markdown to html
-app.edit_form.inputdict.markdown.$input.change(function() {
+app.editpage_form.inputdict.markdown.$input.change(function() {
 	var md = $(this).val();
 	if(md) {
 		$.require('lib/js/showdown.js');
 		if(!app.md_converter) app.md_converter = new Showdown.converter();
 			
 		// write html
-		app.edit_form.inputdict.html.val(app.md_converter.makeHtml(md));
+		app.editpage_form.inputdict.html.val(app.md_converter.makeHtml(md));
 	}
 });
 
 
 // show from fragment
 $("#editpage").bind('_show', function() {
-	app.edit_form.clear();
-	app.edit_form.opts.method = 'lib.py.objstore.insert';
+	app.editpage_form.clear();
+	app.editpage_form.opts.method = 'lib.py.objstore.insert';
 
 	var editing = location.hash.split('/');
 	if(editing.length>1) {
 		editing = editing.slice(-1)[0];
+		$('.editpage-view-link').attr('href', '#' + editing)
 		$.objstore.get("page", editing, function(obj) {
-			app.edit_form.set_values(obj);
-			app.edit_form.opts.method = 'lib.py.objstore.update';
+			app.editpage_form.set_values(obj);
+			app.editpage_form.opts.method = 'lib.py.objstore.update';
 		});
 	}
 })

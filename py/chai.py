@@ -18,10 +18,10 @@ Usage:
 chai newapp - create directories for new app and setup db
 chai setup - create new db, setup templates and user
 chai update [type] - update table schema
-chai pages - write page html files
+chai publish - publish cms
 chai adduser [username] [password]
 chai uwsgi-start - start uwsgi service (1)
-chai uwsgi-restart - restart uwsgi service (1)
+chai uwsgi-reload - reload uwsgi service (1)
 chai uwsgi-stop - restart uwsgi service (1)
 """
 
@@ -150,13 +150,10 @@ def create_index():
 	db.commit()
 	print "index created"
 
-def make_pages():
-	"""write pages from db"""
-	make_style_css()
-	make_template_html()
-	import pages
-	pages.make()
-	print "pages made"
+def publish():
+	"""write pages etc."""
+	from lib.controllers.cms.publish import publish
+	publish()
 
 def make_style_css():
 	"""make css/style.css if not exists"""
@@ -197,8 +194,8 @@ if __name__=='__main__':
 			else:
 				sync_tables()
 
-		elif cmd == 'pages':
-			make_pages()
+		elif cmd == 'publish':
+			publish()
 			
 		elif cmd == 'adduser':
 			from lib.py import database, objstore

@@ -26,9 +26,22 @@ class Page(model.Model):
 		super(Page, self).__init__(obj)
 	
 	def before_get(self):
-		"""get list of child pages in `subpage`"""
-		self.obj['subpage'] = [d['name'] for d in db.sql("""
-			select name from page where parent=%s order by idx""", self.obj['name'])]
+		"""
+		load list of child pages in `subpage` and `subpages`
+		load list of ancestors in `ancestors`
+		"""
+		subpages = db.sql("""
+			select name, label from page where parent=%s order by idx""", self.obj['name'])
+			
+		self.obj['subpage'] = [d['name'] for d in subpages]
+		self.obj['subpages'] = subpages
+		
+		if 'lft' in self.obj and self.obj['lft']:
+			self.obj['ancestors'] = db.sql("""select name, label from page 
+				where lft < %s and rgt > %s
+				order by lft""" % (self.obj['lft'], self.obj['rgt']))
+		
+		
 		
 	def before_post(self):
 		"""set parent and idx in child pages"""
@@ -38,11 +51,4 @@ class Page(model.Model):
 					(self.obj['name'], idx, datetime.datetime.now(), self.obj['subpage'][idx]))
 		
 			del self.obj['subpage']
-		
-	
-	def after_post(self):
-		"""set lft rgt for this and its child nodes"""
-		return
-		from util import nestedset
-		nestedset.remove(self.obj)
-		nestedset.add(self.obj)
+			

@@ -197,6 +197,9 @@ var FormView = Class.extend({
 		if(data.message && data.message=='ok') {
 			this.set_message('Success', 'success');
 			if(this.opts.success)this.opts.success(data);
+			if(data.obj) {
+				$.objstore.set(data.obj);
+			}
 		} else {
 			this.set_message(data.error, 'error');
 			if(this.opts.error) this.opts.error(data);
