@@ -7,16 +7,36 @@ $.require('lib/views/objlist.js');
 $.require('lib/js/prettydate.js');
 
 var PageListView = ObjListView.extend({
+	make: function() {
+		this._super();
+		this.$b.delegate('button.editpage-btn','click',function() {
+			$.view.open('editpage/' + $(this).attr('data-name'));
+		});
+	},
 	render_result: function(result) {
-		var html = '<ol>';
+		var html = '';
 		for(var i in result) {
 			obj = result[i];
 			obj.last_update = prettyDate(obj._updated);
 			
-			html += $.rep('<li><a href="#%(name)s">%(label)s</a><br>\
-				<span class="help-block">%(last_update)s</span></li>', obj);
+			html += $.rep('<tr>\
+				<td>\
+					<a href="#%(name)s">%(label)s</a><br>\
+					<span class="help-block" style="display: inline-block;">\
+						%(last_update)s</span>\
+				</td>\
+				<td style="width: 15%">\
+					<button class="btn small editpage-btn"\
+						data-name="%(name)s">Edit</button>\
+				</td></tr>', obj);
+			
 		}
-		this.$b.append(html + '</ol>');
+		
+		if(this.controller.start) {
+			this.$b.find('tbody').append(html);
+		} else {
+			this.$b.append('<br><table class="span7"><tbody>' + html + '</tbody></table>');
+		}
 	}
 })
 
@@ -24,6 +44,6 @@ app.pagelist = new PageListView({
 	$parent: $('#pagelist-content'),
 	type: 'page',
 	columns: ['name', 'label', '_updated'],
-	order_by: 'label'
+	order_by: 'label',
 });
 </script>

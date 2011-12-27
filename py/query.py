@@ -16,7 +16,7 @@ def get(**args):
 	columns = "a,b,c"
 	filters = [["a","=","5"],]
 	order_by = "a asc"
-	limit = "20"
+	limit = "20, 20"
 	"""
 	import json
 	db = database.get()
