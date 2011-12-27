@@ -1,13 +1,73 @@
-<h1>Page Edit</h1>
-<p><a href="#" class="editpage-view-link">View Page</a></p>
+<div class="page-header">
+<h1 id="editpage-header">New</h1>
+</div>
 <div id="editpage-form-wrapper"></div>
 
 <script>
 $.require('lib/views/form/form.js');
 
+var EditPageFormView = FormView.extend({
+	init: function(opts) {
+		this._super(opts);
+		this.make_sidebox();
+		this.markdown_to_html();
+		
+		// hide secondary btn
+		this.$wrapper.find('button.btn.secondary').css('display', 'none');		
+	},
+	make_sidebox: function() {
+		this.add_sidebox_item('Save'.bold(), function(me) {
+			me.primary_action();
+		});
+
+		this.add_sidebox_item('View Page', function(me) {
+			$.view.open(me.get_value('name'));
+		});
+
+		this.add_sidebox_item('List Pages', function(me) {
+			$.view.open('pagelist');
+		});
+
+		this.add_sidebox_item('New Page', function(me) {
+			$.view.open('editpage');
+		});
+	},
+	markdown_to_html: function() {
+		var me = this;
+		this.inputdict.markdown.$input.change(function() {
+			var md = $(this).val();
+			if(md) {
+				$.require('lib/js/showdown.js');
+				if(!app.md_converter) app.md_converter = new Showdown.converter();
+
+				// write html
+				me.inputdict.html.val(app.md_converter.makeHtml(md));
+			}
+		});	
+	},
+	set_obj: function() {
+		this.clear();
+		this.opts.method = 'lib.py.objstore.insert';
+		$('#editpage-header').html('New');
+		
+		var me = this;
+		var editing = location.hash.split('/');
+		if(editing.length>1) {
+			editing = editing.slice(-1)[0];
+			
+			$.objstore.get("page", editing, function(obj) {
+				me.set_values(obj);
+				me.opts.method = 'lib.py.objstore.update';
+				$('#editpage-header').html(obj.label);
+			});
+		}		
+	}
+	
+})
+
 
 // the form
-app.editpage_form = new FormView({
+app.editpage_form = new EditPageFormView({
 	$parent: $('#editpage-form-wrapper'),
 	fields: [
 		{name:"name", label:"Form ID", mandatory: true},
@@ -28,35 +88,8 @@ app.editpage_form = new FormView({
 	}
 })
 
-app.editpage_form.$wrapper.find('button.btn.secondary').css('display', 'none');
-
-
-// convert markdown to html
-app.editpage_form.inputdict.markdown.$input.change(function() {
-	var md = $(this).val();
-	if(md) {
-		$.require('lib/js/showdown.js');
-		if(!app.md_converter) app.md_converter = new Showdown.converter();
-			
-		// write html
-		app.editpage_form.inputdict.html.val(app.md_converter.makeHtml(md));
-	}
-});
-
-
 // show from fragment
 $("#editpage").bind('_show', function() {
-	app.editpage_form.clear();
-	app.editpage_form.opts.method = 'lib.py.objstore.insert';
-
-	var editing = location.hash.split('/');
-	if(editing.length>1) {
-		editing = editing.slice(-1)[0];
-		$('.editpage-view-link').attr('href', '#' + editing)
-		$.objstore.get("page", editing, function(obj) {
-			app.editpage_form.set_values(obj);
-			app.editpage_form.opts.method = 'lib.py.objstore.update';
-		});
-	}
+	app.editpage_form.set_obj();
 })
 </script>

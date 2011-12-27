@@ -35,6 +35,9 @@ var FormModalView = FormView.extend({
 		// render the form
 		this._super();
 		
+		// form always stacked
+		this.$form.addClass('form-stacked');
+		
 		var me = this;
 		this.secondary_action = function() {
 			me.$modal.modal('hide')

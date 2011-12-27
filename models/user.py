@@ -46,10 +46,10 @@ class User(model.Model):
 	
 	def encrypt_password(self, raw):
 		"""encrypt password"""
-		import hashlib
 		if len(raw)==64:
 			return raw
 		else:
+			import hashlib
 			return hashlib.sha256(raw).hexdigest()			
 			
 	def before_get(self):

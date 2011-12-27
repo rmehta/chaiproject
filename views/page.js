@@ -24,7 +24,7 @@ var PageView = Class.extend({
 	},
 	h1: function() {
 		if(this.obj.label && $.trim(this.obj.html).substr(0,4)!='<h1>') {
-			return '<h1>' + this.obj.label + '</h1>';
+			return '<div class="page-header"><h1>' + this.obj.label + '</h1></div>';
 		} else {
 			return '';
 		}		
@@ -46,9 +46,7 @@ var PageView = Class.extend({
 	},
 	subpages: function() {
 		if(this.obj.subpages && this.obj.subpages.length) {
-			out = '<p><div class="span5 round" style="background-color: #f8f8f8; \
-				border: 1px solid #ccc;\
-				padding: 0px 11px">\
+			out = '<p><div class="span5 round item-box">\
 				<h5>Content</h5><ol>';
 			for(var i in this.obj.subpages) {
 				out += $.rep('<li><a href="#%(name)s">%(label)s</a></li>', this.obj.subpages[i])

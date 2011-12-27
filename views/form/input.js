@@ -171,12 +171,14 @@ FormInputItemList = FormInput.extend({
 FormInputWithLabel = FormInput.extend({
 	make_input: function(opts) {
 		this.$w.addClass('clearfix')
-			.append($.rep('<label>%(label)s</label>\
-			<div class="input-place-holder" \
-				style="display: none; cursor: pointer; padding: 4px 0px; color: #888">\
+			.append($.rep('<label for="%(name)s">%(label)s</label>\
+			<div class="input">\
+				<div class="input-place-holder" \
+				style="display: none; cursor: pointer; padding: 7px; color: #888;\
+				line-height: 18px;">\
 				Click to add "%(label)s"</div>'
 			+ this.make_input_element() +
-			'<div class="help-block">%(help)s</div>', this.opts));
+			'<span class="help-block">%(help)s</span></div>', this.opts));
 			
 		this.$input = this.$w.find(':input');
 		this.$placeholder = this.$w.find('.input-place-holder');	
@@ -239,6 +241,6 @@ FormInputText = FormInputWithLabel.extend({
 
 FormInputTextarea = FormInputWithLabel.extend({
 	make_input_element: function() {
-		return $.rep('<textarea name="%(name)s" class="span10 code"></textarea>', this.opts);
+		return $.rep('<textarea name="%(name)s" class="code xxlarge"></textarea>', this.opts);
 	},
 });

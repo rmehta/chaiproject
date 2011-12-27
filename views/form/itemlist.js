@@ -54,18 +54,20 @@ var ItemListView = Class.extend({
 	},
 	make: function() {
 		// wrapper
-		this.opts.$parent.append($.rep('<div class="itemlist span5">\
-		<div class="items"></div>\
-		<div class="item add round">\
-			<div class="add-item-link">\
-				<a href="#" onclick="return false;">Click here to add %(label)s</a>\
-			</div>\
-			<div class="add-item-input" style="display: none;">\
-				<div>\
-					<input name="add-item" />\
-					<button class="btn small add-item-btn">Add</button>\
+		this.opts.$parent.append($.rep('<div class="clearfix">\
+		<div class="itemlist span5 input">\
+			<div class="items"></div>\
+			<div class="item add round">\
+				<div class="add-item-link">\
+					<a href="#" onclick="return false;">Click here to add %(label)s</a>\
 				</div>\
-				<a class="add-item-cancel" href="#" onclick="return false;">Cancel</a>\
+				<div class="add-item-input" style="display: none;">\
+					<div>\
+						<input name="add-item" class="span3" />\
+						<button class="btn small add-item-btn">Add</button>\
+					</div>\
+					<a class="add-item-cancel" href="#" onclick="return false;">Cancel</a>\
+				</div>\
 			</div>\
 		</div>\
 		</div>', this.opts));

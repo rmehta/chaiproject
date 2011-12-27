@@ -60,7 +60,6 @@ var FormView = Class.extend({
 
 		if(opts)this.opts = opts;
 		if(!this.opts) return; // not ready
-		
 		this.make_body();
 
 		$.require('lib/views/form/input.js');
@@ -73,12 +72,19 @@ var FormView = Class.extend({
 	},
 	make_body: function() {
 		this.opts.$parent.append('<div class="form-wrapper">\
-			<form class="form-stacked" action="javascript:void(0);">\
-			</form></div>');
+				<div class="item-box round span3 form-item-box" \
+					style="float: right; display: none; padding-bottom: 4px">\
+					<h5>Actions</h5>\
+				</div>\
+				<form class="" action="javascript:void(0);">\
+					<fieldset></fieldset>\
+				</form>\
+			</div>');
 		this.$wrapper = this.ismodal
 			? $('#' + this.opts.id) 
 			: this.opts.$parent.find('.form-wrapper:last');
-		this.$form = this.opts.$parent.find('form:last');		
+		this.$form = this.$wrapper.find('form');
+		this.$sidebox = this.$wrapper.find('.form-item-box');
 	},
 	make_form_inputs: function() {
 		// create inputs
@@ -87,7 +93,7 @@ var FormView = Class.extend({
 		}
 	},
 	make_input: function(fieldopts) {
-		fieldopts.$parent = this.$form;
+		fieldopts.$parent = this.$form.find('fieldset');
 		
 		var forminputview = app.input_factory(fieldopts)
 		this.inputlist.push(forminputview);
@@ -216,6 +222,11 @@ var FormView = Class.extend({
 		}
 		return d;
 	},
+	get_value: function(key) {
+		if(this.inputdict[key]) {
+			return this.inputdict[key].val();
+		}
+	},
 	set_values: function(obj) {
 		this.reset();
 		// set values
@@ -252,5 +263,14 @@ var FormView = Class.extend({
 		if(fadeOutIn) {
 			this.$message.fadeOut(fadeOutIn);
 		}
+	},
+	add_sidebox_item: function(label, action) {
+		var me = this;
+		this.$sidebox.append($.rep('<div class="item-box-item">\
+			<a href="#" onclick="return false">%(label)s</a></div>', {label:label}))
+			.css('display', 'block');
+		this.$sidebox.find('.item-box-item:last').click(function() {
+			action(me);
+		});
 	}
 });
