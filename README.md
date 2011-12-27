@@ -36,6 +36,28 @@ Collection of Python/JS libraries for a standard web project
 
 [Whiteboard App](https://github.com/rmehta/whiteboardapp)
 
+## Web server
+
+all requests are fed to the / of the url of execution
+set your server to handle / to app.py via wsgi
+
+## Sample nginx settings
+
+	# u-wsgi
+	location / {
+		include uwsgi_params;
+		uwsgi_pass unix:///tmp/myapp.sock;
+	}
+	
+	# redirect index to / (there is no index.html)
+	rewrite /index.html / permanent;
+
+	# write condition to restrict conf, models, controllers, lib/py,
+	# lib/controllers, lib/models
+	location ~* /(conf|models|controllers|py) {
+		return 403;
+	}
+
 ## License
 
 MIT

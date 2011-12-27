@@ -7,51 +7,63 @@ on to the relevant python module to be executed and response will be in json.
 
 The method to be called must be explicitly allowed by calling the @whitelist decorator.
 
-method="package.module.method"
+Usage:
+------
+_method="package.module.method"
+
+If there is no method, index.html will be served
 
 the query_string and environ will be passed to the method
 """
+from lib.py import database, page
+import sys
 
 def handle():
+	from lib.py import req
+	
 	"""handle the request"""
-	from lib.py import req, database
-	import sys
-		
 	# execute a method
 	if '_method' in req.params:
-	
-		parts = req.params['_method'].split('.')
-		module = '.'.join(parts[:-1])
-		method = parts[-1]
-	
-		# import the module
-		__import__(module)
-	
-		from lib.py import whitelisted
-					
-		if module in sys.modules:
-			# check if the method is whitelisted
-			if getattr(sys.modules[module], method) not in whitelisted:
-				return {"error":"Method `%s` not allowed" % method}
-
-			# execute
-			if req.method=='POST':
-				database.conn.begin()
-								
-			t = getattr(sys.modules[module], method)(**req.params)
-
-			if req.method=='POST':
-				database.conn.commit()
-			
-			if type(t) in (str, unicode):
-				t = {"message": t}
-
-			return t or {"message":"no response"}
-		else:
-			return {"error":"Unable to load method"}
+		return handle_method()
+	elif 'page' in req.params:
+		return page.get(name=req.params['page'])
 	else:
-		return {"error":"Request must have method"}
+		return page.get(name='index')
 
+def handle_method():
+	"""pass control to a whitelisted method"""
+	from lib.py import req
+
+	parts = req.params['_method'].split('.')
+	module = '.'.join(parts[:-1])
+	method = parts[-1]
+
+	# import the module
+	__import__(module)
+
+	from lib.py import whitelisted
+				
+	if module in sys.modules:
+		# check if the method is whitelisted
+		if getattr(sys.modules[module], method) not in whitelisted:
+			return {"error":"Method `%s` not allowed" % method}
+
+		# execute
+		if req.method=='POST':
+			database.conn.begin()
+							
+		t = getattr(sys.modules[module], method)(**req.params)
+
+		if req.method=='POST':
+			database.conn.commit()
+		
+		if type(t) in (str, unicode):
+			t = {"message": t}
+
+		return t or {"message":"no response"}
+	else:
+		return {"error":"Unable to load method"}
+		
 def json_type_handler(obj):
 	"""convert datetime objects to string"""
 	if hasattr(obj, 'strftime'):
@@ -87,7 +99,10 @@ def application(environ, start_response):
 	
 	try:
 		out = handle()
-		lib.py.out.update(out)
+		if type(out) is dict:
+			lib.py.out.update(out)
+		else:
+			lib.py.out = out
 	except Exception, e:
 		from lib.py.common import traceback
 		lib.py.out['error'] = str(traceback())

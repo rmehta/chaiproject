@@ -603,7 +603,7 @@ label,
 input,
 select,
 textarea {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: inherit;
   font-size: 13px;
   font-weight: normal;
   line-height: normal;
@@ -1355,7 +1355,7 @@ table .headerSortUp.purple, table .headerSortDown.purple {
 .topbar input {
   background-color: #444;
   background-color: rgba(255, 255, 255, 0.3);
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: inherit;
   font-size: normal;
   font-weight: 13px;
   line-height: 1;
@@ -1816,7 +1816,7 @@ footer {
   color: #ffffff;
 }
 .btn .close, .alert-message .close {
-  font-family: Arial, sans-serif;
+  font-family: inherit;
   line-height: 18px;
 }
 .btn.danger,

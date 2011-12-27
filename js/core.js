@@ -145,7 +145,7 @@ app.open_default_page() - open default page on load / fire necessary events
 		
 		opts.data._method = opts.method;
 		$.ajax({
-			url:'server/',
+			url:'',
 			type: opts.type || 'GET',
 			data: opts.data,
 			dataType: 'json',
@@ -363,12 +363,11 @@ $.view = {
 		});
 	},
 	load: function(name, path, callback) {
-		
 		if(!$('#'+name).length) {
 			if(path) 
 				$.view.load_files(name, path, callback);
 			else
-				$.view.load_object(name, callback);
+				$.view.load_virtual(name, callback);
 		}
 		callback();
 	},
@@ -383,18 +382,17 @@ $.view = {
 			});
 		}
 	},
-	load_object: function(name, callback) {
-		$.objstore.get("page", name, 
-			function(obj) {
-				// not found, go to index
-				if(obj.message && obj.message=='no response') {
-					$.view.open('notfound');
-					return;
-				}
-				$.view.make_page(obj);
+	load_virtual: function(name, callback) {
+		$.call({
+			method: 'lib.py.page.content',
+			data: {
+				name: name,
+			},
+			success: function(data) {
+				$.view.make_page({name:name, html:data.html, virtual:true});
 				callback();
 			}
-		);
+		});
 	},
 	make_page: function(obj) {
 		$.require('lib/views/page.js');
