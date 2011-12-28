@@ -20,7 +20,8 @@ from lib.chai.cms import page
 import sys
 
 def handle():
-	from lib.chai import req
+	from lib.chai import req, site
+	import conf
 	
 	"""handle the request"""
 	# execute a method
@@ -29,7 +30,7 @@ def handle():
 	elif 'page' in req.params:
 		return page.get(name=req.params['page'])
 	else:
-		return page.get(name='index')
+		return page.get(name=conf.sites[site].get('index', 'index'))
 
 def handle_method():
 	"""pass control to a whitelisted method"""

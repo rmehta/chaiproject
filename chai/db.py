@@ -139,10 +139,9 @@ class Database:
 
 	def columns(self, table):
 		"""get columns of"""
-		from lib.chai import database
 		if not self._columns.get(table):
 			self._columns[table] = [c[0] for c in \
-				database.get().sql("desc `%s`" % table, as_dict=False)]
+				self.sql("desc `%s`" % table, as_dict=False)]
 		return self._columns[table]
 
 	def sync_tables(self, lst):
@@ -217,5 +216,5 @@ def commit():
 def getvalue(type, name, key):
 	return pool.get().getvalue(type, name, key)
 	
-def setvalue(type, name, key, value):
-	return pool.get().getvalue(type, name, key, value)
+def setvalue(type, name, key, value, commit=False):
+	return pool.get().setvalue(type, name, key, value, commit)

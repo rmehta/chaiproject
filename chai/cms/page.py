@@ -32,7 +32,7 @@ def get(name):
 	"""return page html"""
 	template = get_template()
 	html = content(name=name)['html']
-	html = """<div class="content active" id="#%s">%s</div>""" % (name, html)
+	html = """<div class="content active" id="%s">%s</div>""" % (name, html)
 	
 	return template % {'content': html}
 

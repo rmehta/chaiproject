@@ -66,8 +66,8 @@ class Model(object):
 
 def get(obj):
 	"""get model instance for object"""
-	import sys
-	from lib.chai import core_models
+	import sys, conf
+	from lib.chai import core_models, site
 	
 	if not 'type' in obj:
 		return Model(obj)
@@ -75,7 +75,7 @@ def get(obj):
 	if obj['type'] in core_models:
 		modulepackage = 'lib.models.' + str(obj['type'])
 	else:
-		modulepackage = 'models.' + str(obj['type'])
+		modulepackage = conf.sites[site]['path'] + '.models.' + str(obj['type'])
 
 	__import__(modulepackage)
 

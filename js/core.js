@@ -485,8 +485,16 @@ var app = {
 			$(window).trigger('hashchange');
 		} else {
 			if($content.length) {
-				// active content is already loaded, just highlight it
-				$content.trigger('_show');
+				var cid = $content.attr('id');
+				if(app.views[cid]) {
+					// loading a view by default
+					$content.remove();
+					$.view.open(cid);
+				} else {
+					// active content is already loaded, 
+					// (for static content)
+					$content.trigger('_show');					
+				}
 			} else {
 				// no location, open index
 				$.view.open($.index);

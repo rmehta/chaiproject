@@ -114,10 +114,10 @@ def make_confpy(**dbinfo):
 
 def sync_tables():
 	"""sync all core tables, beginning with _parent_child"""
-	from lib.chai import db, core_models
-	from conf import models
+	from lib.chai import db, core_models, site
+	import conf
 	db.get().sync_tables(core_models)
-	db.get().sync_tables(models)
+	db.get().sync_tables(conf.sites[lib.chai.site]['models'])
 
 def create_index():
 	"""create index page"""
@@ -208,7 +208,8 @@ def main():
 
 	elif options.replace:
 		from lib.chai.util import replacer
-		replacer.replace('.', options.replace[0], options.replace[1], options.replace[2])
+		replacer.replace(conf.sites[lib.chai.site]['path'], options.replace[0], \
+			options.replace[1], options.replace[2])
 
 if __name__=='__main__':
 	import sys
