@@ -81,7 +81,7 @@ app.editpage_form = new EditPageFormView({
 	],
 	method:'lib.chai.objstore.insert',
 	success: function() {
-		app.editpage_form.set_message('Form Saved', 5000);
+		$.notify('Form Saved');
 	},
 	static: {
 		type: 'page'

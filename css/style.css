@@ -61,6 +61,13 @@ code {
 	background-color: transparent !important; 
 }
 
+.notification {
+	position: fixed !important;
+	bottom: 12px;
+	right: 12px;
+	z-index: 1000;
+}
+
 /* form */
 
 /* for sidebox */

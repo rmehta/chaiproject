@@ -1816,7 +1816,7 @@ footer {
   color: #ffffff;
 }
 .btn .close, .alert-message .close {
-  font-family: inherit;
+  font-family: Arial, sans-serif;
   line-height: 18px;
 }
 .btn.danger,
