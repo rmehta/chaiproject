@@ -26,7 +26,7 @@ Usage:
 
 $.call({
 	type: [optional | "GET" default],
-	method: <string: server method like "lib.py.objstore.get"
+	method: <string: server method like "lib.chai.objstore.get"
 	data: <dict: arguments>,
 	success: <function: on success parameter data, see $.ajax>
 	
@@ -279,7 +279,7 @@ $.objstore = {
 			success(d[type][name]);
 		} else {
 			$.call({
-				method:"lib.py.objstore.get", 
+				method:"lib.chai.objstore.get", 
 				data: {"type":type, "name":name}, 
 				success: function(obj) {
 					if(obj.error) {
@@ -302,7 +302,7 @@ $.objstore = {
 	post: function(obj, success, insert_or_update) {
 		$.call({
 			type: 'POST',
-			method: 'lib.py.objstore.' + (insert_or_update || 'insert'),
+			method: 'lib.chai.objstore.' + (insert_or_update || 'insert'),
 			data: {obj: JSON.stringify(obj)},
 			success: function(data) {
 				if(data.message && data.message=='ok') {
@@ -384,7 +384,7 @@ $.view = {
 	},
 	load_virtual: function(name, callback) {
 		$.call({
-			method: 'lib.py.page.content',
+			method: 'lib.chai.page.content',
 			data: {
 				name: name,
 			},
@@ -434,7 +434,7 @@ var app = {
 	},
 	logout: function() {
 		$.call({
-			method:'lib.py.session.logout',
+			method:'lib.chai.session.logout',
 			type:'POST', 
 			success: function(data) {
 				$.session = {"user":"guest" ,"userobj":{}}
@@ -495,7 +495,7 @@ var app = {
 	},
 	load_session: function() {
 		$.call({
-			method:'lib.py.session.load', 
+			method:'lib.chai.session.load', 
 			success:function(session) {
 				$.session = session
 				// trigger login

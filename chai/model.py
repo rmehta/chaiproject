@@ -53,7 +53,7 @@ class Model(object):
 
 	def check_allow(self, method):
 		"""check allow"""
-		from lib.py import sess
+		from lib.chai import sess
 		
 		# for session types, there is no session defined
 		# (yet)
@@ -67,7 +67,7 @@ class Model(object):
 def get(obj):
 	"""get model instance for object"""
 	import sys
-	from lib.py import core_models
+	from lib.chai import core_models
 	
 	if not 'type' in obj:
 		return Model(obj)
@@ -96,7 +96,7 @@ def model_class(moduleobj):
 def all():
 	"""get all model objects from 'core' and 'models' folders"""
 	import os
-	from lib.py import common
+	from lib.chai import common
 	
 	common.update_path()
 	dr = common.directory_root()

@@ -44,13 +44,13 @@ def xcall(method, args, method_type='get'):
 	
 def register(user='testuser', password='testpass'):
 	"""register a new user"""
-	resp = xcall('lib.py.objstore.post', {
+	resp = xcall('lib.chai.objstore.post', {
 		"type":"user",
 		"name":user,
 		"password":password }, 'post')
 
 def login(user='testuser', password='testpass'):
-	resp = xcall('lib.py.session.login', {"user":user, "password":password}, method_type='post');
+	resp = xcall('lib.chai.session.login', {"user":user, "password":password}, method_type='post');
 	if resp.get('message') == 'ok':
 		global userobj
 		userobj = resp.get('userobj')
@@ -59,8 +59,7 @@ def login(user='testuser', password='testpass'):
 
 def cleanup():
 	"""logout testuser and cleanup"""
-	from lib.py import database
-	db = database.get()
+	from lib.chai import db
 	db.begin()
 	db.sql("""delete from session where user=%s""", userobj['name'])
 	db.sql("""delete from user where name=%s""", userobj['name'])

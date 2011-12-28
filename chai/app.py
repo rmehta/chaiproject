@@ -15,11 +15,11 @@ If there is no method, index.html will be served
 
 the query_string and environ will be passed to the method
 """
-from lib.py import database, page
+from lib.chai import db, page
 import sys
 
 def handle():
-	from lib.py import req
+	from lib.chai import req
 	
 	"""handle the request"""
 	# execute a method
@@ -32,7 +32,7 @@ def handle():
 
 def handle_method():
 	"""pass control to a whitelisted method"""
-	from lib.py import req
+	from lib.chai import req
 
 	parts = req.params['_method'].split('.')
 	module = '.'.join(parts[:-1])
@@ -41,7 +41,7 @@ def handle_method():
 	# import the module
 	__import__(module)
 
-	from lib.py import whitelisted
+	from lib.chai import whitelisted
 				
 	if module in sys.modules:
 		# check if the method is whitelisted
@@ -50,12 +50,12 @@ def handle_method():
 
 		# execute
 		if req.method=='POST':
-			database.conn.begin()
+			db.begin()
 							
 		t = getattr(sys.modules[module], method)(**req.params)
 
 		if req.method=='POST':
-			database.conn.commit()
+			db.commit()
 		
 		if type(t) in (str, unicode):
 			t = {"message": t}
@@ -72,48 +72,46 @@ def json_type_handler(obj):
 def setup_request(environ):
 	"""setup global req, res"""
 	from webob import Request, Response
-	import lib.py
+	import lib.chai
+	import conf
 	
 	# clear session
-	lib.py.sess = {}
-	lib.py.req = Request(environ)
-	lib.py.res = Response()
-	lib.py.out = {}
+	lib.chai.sess = {}
+	lib.chai.req = Request(environ)
+	lib.chai.res = Response()
+	lib.chai.out = {}
+	lib.chai.site = conf.default_site
 	
 def application(environ, start_response):
 	import json
 
 	setup_request(environ)
 	
-	import lib.py
-	from lib.py import database, req, res
+	import lib.chai
+	from lib.chai import db, req, res
+	
 	# start db connection
-	db = database.get()
-	db.clear_cache()
-
-	if '_method' in req.params and req.params['_method'] != 'lib.py.session.login':
-		import lib.py.session
-		lib.py.sess = lib.py.session.load()
+	if '_method' in req.params and req.params['_method'] != 'lib.chai.session.login':
+		import lib.chai.session
+		lib.chai.sess = lib.chai.session.load()
 	
 	res.content_type = 'text/html'
 	
 	try:
 		out = handle()
 		if type(out) is dict:
-			lib.py.out.update(out)
+			lib.chai.out.update(out)
 		else:
-			lib.py.out = out
+			lib.chai.out = out
 	except Exception, e:
-		from lib.py.common import traceback
-		lib.py.out['error'] = str(traceback())
+		from lib.chai.common import traceback
+		lib.chai.out['error'] = str(traceback())
 		
 	if not res.body:
-		if type(lib.py.out) is str:
-			res.body = lib.py.out
+		if type(lib.chai.out) in (str, unicode):
+			res.body = str(lib.chai.out)
 		else:
-			res.body = json.dumps(lib.py.out, default=json_type_handler)
-		
-	db.close()
-	
+			res.body = json.dumps(lib.chai.out, default=json_type_handler)
+			
 	return res(environ, start_response)
 	

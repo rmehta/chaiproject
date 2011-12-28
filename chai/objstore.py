@@ -44,15 +44,13 @@ insert them again.
 
 """
 
-from lib.py import whitelist, model, database
+from lib.chai import whitelist, model, db
 import MySQLdb
 import MySQLdb.constants.ER as ER
 
 @whitelist(allow_guest=True)
 def get(**args):
-	"""get an object"""
-	db = database.conn
-	
+	"""get an object"""	
 	obj = _get_obj(type=args['type'], name=args['name'])
 	if not obj:
 		return {}
@@ -66,9 +64,7 @@ def get(**args):
 	return obj
 
 def _get_obj(type, name):
-	"""load an object without any events"""
-	db = database.conn
-	
+	"""load an object without any events"""	
 	obj = db.sql("select * from `%s` where name=%s" % (type, '%s'), 
 		name, as_dict=1)
 	if not obj:
@@ -83,9 +79,7 @@ def _get_obj(type, name):
 	return obj
 	
 def load_children(obj, ttype, name):
-	"""get children rows"""
-	db = database.conn
-	
+	"""get children rows"""	
 	for childtype in children_types(ttype):
 		obj_list = db.sql("""select * from `%s` where parent=%s and parent_type=%s 
 			order by idx asc""" % (childtype,'%s','%s'), (name, ttype))
@@ -103,7 +97,7 @@ def load_children(obj, ttype, name):
 def children_types(parenttype):
 	"""get children types for parent type from table `_parent_child`"""
 	return [c['child'] for c in \
-		database.conn.sql("select child from _parent_child where parent=%s", parenttype)]				
+		db.sql("select child from _parent_child where parent=%s", parenttype)]				
 
 @whitelist()
 def insert(**args):
@@ -182,7 +176,6 @@ def post_single(obj, action='insert'):
 	"""post an object in db, ignore extra columns"""
 	import MySQLdb
 
-	db = database.conn
 	obj_copy = get_valid_obj(obj)
 
 	if action=='insert':
@@ -223,9 +216,7 @@ def post_children(obj):
 				idx += 1
 
 def exists(obj):
-	"""check exists by name"""
-	db = database.conn
-	
+	"""check exists by name"""	
 	if obj.get('name') and obj.get('type'):
 		return db.sql("select name from `%s` where name=%s" % \
 		 	(obj['type'],'%s'), obj['name'])
@@ -233,7 +224,7 @@ def exists(obj):
 def get_valid_obj(obj):
 	"""returns an object copy with only valid columns"""
 	obj_copy = {}	
-	columns = database.conn.columns(obj['type'])
+	columns = db.get().columns(obj['type'])
 	# copy valid columns
 	for c in columns:
 		if c in obj:
@@ -263,7 +254,7 @@ def update_query(obj, obj_copy):
 @whitelist()
 def delete(**args):
 	"""delete object and its children, if permitted"""
-	from lib.py import model
+	from lib.chai import model
 	
 	modelobj = model.get(_get_obj(args['type'], args['name']))
 	modelobj.check_allow('delete')
@@ -274,12 +265,12 @@ def delete(**args):
 	
 def delete_obj(type, name):
 	"""delete object and its children"""
-	database.conn.sql("""delete from `%s` where name=%s""" % (type, '%s'), name)
+	db.sql("""delete from `%s` where name=%s""" % (type, '%s'), name)
 	delete_children(type, name)
 
 def delete_children(parenttype, parent):
 	"""delete all children of the given object"""
 	for child_tab in children_types(parenttype):
-		database.conn.sql("""delete from `%s` where parent=%s and parent_type=%s""" \
+		db.sql("""delete from `%s` where parent=%s and parent_type=%s""" \
 			% (child_tab,'%s','%s'), (parent, parenttype))
 

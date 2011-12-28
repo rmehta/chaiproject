@@ -2,7 +2,7 @@
 maintain list of parent-child relation
 """
 
-from lib.py import model
+from lib.chai import model
 
 class ParentChild(model.Model):
 	_name = '_parent_child'

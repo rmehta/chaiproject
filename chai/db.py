@@ -1,3 +1,32 @@
+"""
+db.py
+=====
+
+Database functions
+
+- Maintain database connections for each site
+- Database helpers
+
+Usage:
+------
+
+Helpers:
+
+	get(site) - get database obj for the given site (or default site)
+	sql(query, args, as_dict, as_list)
+	begin
+	commit
+	getvalue(type, name, key)
+	setvalue(type, name, key, value)
+	close - close all db objects
+
+Schema updation:
+
+	get().sync_table - match table columns to model 
+
+(warning data may be lost if columns are dropped)
+"""
+
 import MySQLdb
 from conf import dbsettings
 import MySQLdb.constants.ER as ER
@@ -7,22 +36,22 @@ conn = None
 class Database:
 	_columns = {}
 
-	def __init__(self):
+	def __init__(self, settings={}):
 		"""connect to db"""
-		self.connect()
+		self.connect(settings)
 
 	def clear_cache(self):
 		"""clear all cached info about schema, done before request starts"""
 		self._columns = {}
 
-	def connect(self):
+	def connect(self, settings):
 		"""connect to mysql db"""
-		self.conn = MySQLdb.connect('localhost', dbsettings.dbuser, dbsettings.dbpassword)
+		self.conn = MySQLdb.connect('localhost', settings['user'], settings['password'])
 		self.conn.converter[246]=float
 		self.conn.set_character_set('utf8')
 
 		self.cur = self.conn.cursor()
-		self.cur.execute("use %s" % dbsettings.dbname)
+		self.cur.execute("use %s" % settings['database'])
 
 
 	def sql(self, query, values=(), as_dict=True, debug=False):
@@ -31,7 +60,7 @@ class Database:
 			self.connect()
 			
 		if debug:
-			from lib.py import out
+			from lib.chai import out
 			out['log'] = query % values
 		
 		self.cur.execute(query, values)
@@ -85,7 +114,7 @@ class Database:
 		
 	def repair_table(self, ttype, create_table):
 		"""create a new table and copy records"""
-		from lib.py import objstore
+		from lib.chai import objstore
 		import os
 		
 		addrecords = self.sql("select * from `%s`" % (ttype))
@@ -111,7 +140,7 @@ class Database:
 
 	def columns(self, table):
 		"""get columns of"""
-		from lib.py import database
+		from lib.chai import database
 		if not self._columns.get(table):
 			self._columns[table] = [c[0] for c in \
 				database.get().sql("desc `%s`" % table, as_dict=False)]
@@ -124,7 +153,7 @@ class Database:
 
 	def sync_table(self, table=None):
 		"""make / update tables from models"""
-		from lib.py import model, objstore
+		from lib.chai import model, objstore
 
 		self.sql("set foreign_key_checks=0")
 		tables = self.table_list()
@@ -143,10 +172,51 @@ class Database:
 
 		self.sql("set foreign_key_checks=1")
 
+
+class ConnectionPool(object):
+	"""database connection pool based on site"""
+	pool = {}
+	def get(self, site=None):
+		"""get connection"""
+		if not site:
+			import lib.chai
+			site = lib.chai.site
+		
+		if not self.pool.get(site):
+			self.connect(site)
+		
+		return self.pool[site]
+
+	def connect(self, site):
+		"""connect to a site db"""
+		import conf
+		settings = conf.sites[site]['db']
+		
+		self.pool[site] = Database(settings)
+		
+	def close(self):
+		"""close all"""
+		for site in self.pool:
+			self.pool[site].close()
+
+
+pool = ConnectionPool()
 def get():
 	"""return a new connection"""
-	global conn
-	if not conn:
-		conn = Database()
-	return conn
+	return pool.get()
 	
+def sql(query, values=(), as_dict=True, debug=False):
+	"""execute a query in the current site db"""
+	return pool.get().sql(query, values, as_dict, debug)
+
+def begin():
+	sql("start transaction")
+	
+def commit():
+	sql("commit")
+	
+def getvalue(type, name, key):
+	return pool.get().getvalue(type, name, key)
+	
+def setvalue(type, name, key, value):
+	return pool.get().getvalue(type, name, key, value)

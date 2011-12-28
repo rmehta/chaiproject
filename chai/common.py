@@ -14,7 +14,7 @@ def update_path():
 	
 def log(msg):
 	"""log some info to publish in client console"""
-	from lib.py import req, out
+	from lib.chai import req, out
 	if not req: 
 		return
 		

@@ -6,7 +6,7 @@ Options:
 --------
 $parent - parent jquery object
 fields - list of fieldinfo objects (see forminput.js)
-method - default "lib.py.objstore.insert"
+method - default "lib.chai.objstore.insert"
 primary_btn_label - default "Save"
 primary_btn_working_label - default "Saving..."
 btn_secondary_label - default "Cancel"
@@ -164,7 +164,7 @@ var FormView = Class.extend({
 		var obj = this.getdata();
 		if(!obj) return false;
 
-		$.set_default(this.opts, 'method', 'lib.py.objstore.insert')
+		$.set_default(this.opts, 'method', 'lib.chai.objstore.insert')
 
 		var me = this;
 		$.call({

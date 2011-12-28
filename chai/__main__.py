@@ -13,17 +13,6 @@ Set of command line utilities to manage the app
 
 """
 
-usage_string = """
-Usage:
-chai newapp - create directories for new app and setup db
-chai setup - create new db, setup templates and user
-chai update [type] - update table schema
-chai publish - publish cms
-chai adduser [username] [password]
-chai uwsgi-start - start uwsgi service (1)
-chai uwsgi-reload - reload uwsgi service (1)
-chai uwsgi-stop - restart uwsgi service (1)
-"""
 
 conf_content = """
 # db settings
@@ -125,15 +114,14 @@ def make_confpy(**dbinfo):
 
 def sync_tables():
 	"""sync all core tables, beginning with _parent_child"""
-	from lib.py import database, core_models
+	from lib.chai import db, core_models
 	from conf import models
-	db = database.get()
-	db.sync_tables(core_models)
-	db.sync_tables(models)
+	db.get().sync_tables(core_models)
+	db.get().sync_tables(models)
 
 def create_index():
 	"""create index page"""
-	from lib.py import objstore, database
+	from lib.chai import objstore, db
 	
 	content = '''
 	<h1>[Default Index]</h1>
@@ -143,7 +131,6 @@ def create_index():
 		<li>Admin -> Edit
 	</ol>
 	'''
-	db = database.get()
 	db.begin()
 	# index page
 	objstore.insert(type="page", html=content, name="index", label=conf.app_name)
@@ -152,7 +139,7 @@ def create_index():
 
 def publish():
 	"""write pages etc."""
-	from lib.controllers.cms.publish import publish
+	from lib.chai.cms.publish import publish
 	publish()
 
 def make_style_css():
@@ -170,54 +157,61 @@ def make_template_html():
 		shutil.copyfile('lib/html/template.html', 'template.html')
 		print "template.html made"
 
+def getparser():
+	"""setup option parser"""
+	from optparse import OptionParser
+	
+	parser = OptionParser()
+	parser.add_option('-s', '--site', dest='site', help='Site on which the action is to be performed')
+	parser.add_option('--newapp', help='Setup new app, make dirs, setup database', nargs=0)
+	parser.add_option('--setup', help='Setup database', nargs=0)
+	parser.add_option('-u', '--update', dest='update', help='Update model')
+	parser.add_option('--publish', help='Rebuild page tree, write toc', nargs=0)
+	parser.add_option('--adduser', help='Add user', nargs=2)
+	parser.add_option('--uwsgi', help='start/stop/reload uwsgi')
+	parser.add_option('-r', help="Replace string in extenstion", dest='replace', nargs=3)
+	return parser
+
+def main():
+	"""call action based on options"""
+	import os, sys, conf
+	(options, args) = getparser().parse_args()
+	
+	import lib.chai
+	lib.chai.site = options.site or conf.default_site
+
+	if options.newapp is not None:
+		newapp()
+	
+	elif options.setup is not None:
+		setup_db()
+
+	elif options.update is not None:
+		if options.update:
+			db.get().sync_table(options.update)
+		else:
+			sync_tables()
+	
+	elif options.publish is not None:
+		publish()
+			
+	elif options.adduser:
+		from lib.chai import db, objstore
+		db.begin()
+		objstore.insert(type="user", name=options.adduser[0], password=options.adduser[1])
+		db.commit()
+		
+	elif options.uwsgi is not None:
+		from lib.chai.util import uwsgi_manager
+		m = uwsgi_manager.manager('conf/uwsgi.xml')
+		getattr(m, options.uwsgi)(1)
+
+	elif options.replace:
+		from lib.chai.util import replacer
+		replacer.replace('.', options.replace[0], options.replace[1], options.replace[2])
 
 if __name__=='__main__':
-	import os, sys
-	sys.path.append('.')
+	main()
 		
-	if len(sys.argv) > 1:
-		cmd = sys.argv[1]
-		if cmd == 'newapp':
-			newapp()
-
-		elif cmd == 'setup':
-			setup_db()
-			
-		elif cmd == 'update':
-			from lib.py import database
-			table = None
-			db = database.get()
-
-			if len(sys.argv) > 2:
-				table = sys.argv[2]
-				db.sync_table(table)
-			else:
-				sync_tables()
-
-		elif cmd == 'publish':
-			publish()
-			
-		elif cmd == 'adduser':
-			from lib.py import database, objstore
-			db = database.get()
-			db.begin()
-			objstore.insert(type="user", name=sys.argv[2], password=sys.argv[3])
-			db.commit()
-		elif cmd=='uwsgi-start':
-			from lib.py.util import uwsgi_manager
-			m = uwsgi_manager.manager('conf/uwsgi.xml')
-			m.start(1)
-		elif cmd=='uwsgi-reload':
-			from lib.py.util import uwsgi_manager
-			m = uwsgi_manager.manager('conf/uwsgi.xml')
-			m.reload(1)
-		elif cmd=='uwsgi-stop':
-			from lib.py.util import uwsgi_manager
-			m = uwsgi_manager.manager('conf/uwsgi.xml')
-			m.stop(1)
-		else:
-			print usage_string
-	else:
-		print usage_string
 		
 

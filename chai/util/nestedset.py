@@ -3,9 +3,7 @@ Nested Set Model for hierarchies
 """
 
 import unittest, datetime
-from lib.py import database, objstore, model
-
-db = database.get()
+from lib.chai import db, objstore, model
 
 # to check circular references
 all_nodes = []

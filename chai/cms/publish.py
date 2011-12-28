@@ -4,12 +4,11 @@ publish
 write pages, sitemap, rss
 rebuild nested set
 """
-from lib.controllers.cms import pages, toc
-from lib.py.util import nestedset
-from lib.py import database
+from lib.chai.cms import pages, toc
+from lib.chai.util import nestedset
+from lib.chai import db
 
 def publish():
-	db = database.get()
 	db.begin()
 	
 	nestedset.rebuild('page')

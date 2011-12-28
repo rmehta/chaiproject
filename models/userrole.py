@@ -1,4 +1,4 @@
-from lib.py import model
+from lib.chai import model
 
 class UserRole(model.Model):
 	_name = 'userrole'

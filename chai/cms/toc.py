@@ -13,9 +13,8 @@ based on `parent` and `idx` list in a page
 """
 
 import os
-from lib.py import database, objstore
+from lib.chai import db, objstore
 
-db = database.get()
 moduledir = os.path.dirname(__file__)
 
 all_nodes = ['index']

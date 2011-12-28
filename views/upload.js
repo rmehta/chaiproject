@@ -22,7 +22,7 @@ var UploadView = Class.extend({
 			<div class="modal-body">\
 				<form class="form-stacked" method="POST" action="server/" enctype="multipart/form-data">\
 					<input name="mimetype" type="hidden" value="json">\
-					<input name="_method" type="hidden" value="lib.py.files.post">\
+					<input name="_method" type="hidden" value="lib.chai.files.post">\
 					<div class="clearfix">\
 						<input name="filedata" type="file" />\
 					</div>\

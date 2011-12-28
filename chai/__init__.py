@@ -1,5 +1,5 @@
 """
-Package lib.py
+Package lib.chai
 ==============
 
 Server library:
@@ -18,6 +18,7 @@ core_models - core models
 
 import os
 
+site = None
 req = None
 res = None
 sess = None

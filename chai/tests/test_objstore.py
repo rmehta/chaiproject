@@ -1,13 +1,12 @@
 import unittest, os, sys
 
-from lib.py import objstore, session, database
+from lib.chai import objstore, session, db
 
 class TestObjstore(unittest.TestCase):
 	def setUp(self):
-		self.db = database.get()
 		self.db.begin()
-		import lib.py
-		lib.py.blank()
+		import lib.chai
+		lib.chai.blank()
 		
 	def tearDown(self):
 		self.db.rollback()

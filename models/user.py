@@ -1,4 +1,4 @@
-from lib.py import model
+from lib.chai import model
 
 reset_email_message = """
 Forgot Password
@@ -60,10 +60,9 @@ class User(model.Model):
 	def request_reset_password(self):
 		"""generate a reset password id and mail the password to the user"""
 		import hashlib, time
-		from lib.py import database, emailer
+		from lib.chai import db, emailer
 		import conf
 		
-		db = database.get()
 		resetid = hashlib.sha224(str(time.time())).hexdigest()
 		db.setvalue('user', self.obj['name'], 'reset_password_id', resetid)
 		

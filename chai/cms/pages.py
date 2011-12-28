@@ -9,13 +9,12 @@ inside which the page html will be rendered
 
 def make():
 	import os
-	from lib.py import database
+	from lib.chai import db
 	
 	messages = []
 	
 	container = '<div class="main container">'
 
-	db = database.get()
 	pages_path = os.path.join(os.path.dirname(__file__), '../../../pages')
 	
 	with open(os.path.join(os.path.dirname(__file__), '../../..', 'template.html'),'r') as f:

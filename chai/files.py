@@ -3,13 +3,13 @@
 """file upload manager"""
 
 import os
-from lib.py import whitelist, files_path, max_file_size
+from lib.chai import whitelist, files_path, max_file_size
 
 @whitelist()
 def post(**args):
 	"""save files in uploads folder"""
 	import json
-	from lib.py import req
+	from lib.chai import req
 	
 	out = {'message':'start'}
 	
@@ -64,7 +64,7 @@ def filelist(**args):
 @whitelist()
 def delete(**args):
 	"""delete file (user must be logged in)"""
-	from lib.py import req, sess	
+	from lib.chai import req, sess	
 	import os
 	os.remove(os.path.join(files_path, args['name']))
 	return {"message":"ok"}

@@ -23,7 +23,7 @@ var EditProfileView = FormModalView.extend({
 					help:'Must be at least 6 characters'},
 				{name:'password_again', label:'Re-type Password', type:'password'},
 			],
-			method: 'lib.py.objstore.update',
+			method: 'lib.chai.objstore.update',
 			obj: $.session.userobj
 		});
 		this.bind_events();

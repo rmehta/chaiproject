@@ -2,7 +2,7 @@
 Simple query service
 """
 
-from lib.py import whitelist, database, out
+from lib.chai import whitelist, db, out
 
 typemethod = type
 
@@ -19,7 +19,6 @@ def get(**args):
 	limit = "20, 20"
 	"""
 	import json
-	db = database.get()
 	
 	if 'json' in args:
 		args.update(json.loads(args['json']))

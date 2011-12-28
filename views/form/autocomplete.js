@@ -13,7 +13,7 @@ setup autocomplete on form input
 				filters = (opts.filters || []);
 				filters.push(["name", "like", request.term + '%']);
 				$.call({
-					method: 'lib.py.query.get',
+					method: 'lib.chai.query.get',
 					data: {
 						type: opts.type,
 						columns: opts.columns || "name",

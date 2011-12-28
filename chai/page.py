@@ -26,7 +26,7 @@ A template for this must be present in [context]/_index.html
 
 and must have `%(content)s`
 """
-from lib.py import objstore, database, whitelist
+from lib.chai import objstore, db, whitelist
 
 def get(name):
 	"""return page html"""

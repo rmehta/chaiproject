@@ -43,7 +43,7 @@ RegisterView = FormModalView.extend({
 	},
 	login_after_register: function() {
 		$.call({
-			method:'lib.py.session.login',
+			method:'lib.chai.session.login',
 			type: 'POST', 
 			data: {
 				user: $('#register input[name="name"]').val(), 

@@ -2,13 +2,11 @@
 Controllers for user management
 """
 
-from lib.py import whitelist, database, objstore, model
+from lib.chai import whitelist, db, objstore, model
 
 @whitelist(allow_guest=True)
 def forgot_password(**args):
-	"""email the user with a unique link to generate the password"""
-	db = database.get()
-	
+	"""email the user with a unique link to generate the password"""	
 	user = db.sql("""select name from user where name=%s or email=%s""", (args['email'], args['email']))
 	if not user:
 		return 'No such user'
@@ -20,7 +18,6 @@ def forgot_password(**args):
 @whitelist(allow_guest=True)
 def get_user_fullname(**args):
 	"""get user fullname"""
-	db = database.get()
 	ret = db.sql("""
 		select ifnull(fullname, name) as fullname 
 		from user where reset_password_id=%s""", args['requestid'])
@@ -32,7 +29,6 @@ def get_user_fullname(**args):
 @whitelist(allow_guest=True)
 def update_password(**args):
 	"""update user password"""
-	db = database.get()
 	userobj = model.get(dict(type="user", name="any"))
 	db.sql("""update user set password=%s, reset_password_id=NULL
 		where reset_password_id=%s""", \

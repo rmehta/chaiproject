@@ -8,7 +8,7 @@
 			$me.attr('disabled',true).html('Deleting...');
 			$.call({
 				type: "POST",
-				method: opts.method || 'lib.py.objstore.delete',
+				method: opts.method || 'lib.chai.objstore.delete',
 				data: $.extend((opts.data || {}), 
 					{name:$me.attr("data-name")}),
 				success: function(data) {

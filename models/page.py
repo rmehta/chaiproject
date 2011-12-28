@@ -1,7 +1,5 @@
-from lib.py import model, common, database
+from lib.chai import model, common, db
 import datetime
-
-db = database.get()
 
 class Page(model.Model):
 	_name = 'page'
@@ -9,6 +7,7 @@ class Page(model.Model):
 	create table `page` (
 		name varchar(180) primary key,
 		label varchar(240) not null default "No Label",
+		published int(1) not null default 1,
 		html text,
 		markdown text,
 		css text,

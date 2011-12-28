@@ -14,7 +14,7 @@ var LoginView = FormModalView.extend({
 		this._super({
 			id: 'login_view',
 			label: "Login",
-			method: 'lib.py.session.login',
+			method: 'lib.chai.session.login',
 			fields: [
 				{name:'user', label:'User Id',mandatory:true},
 				{name:'password', label:'Password', type:'password',mandatory:true},

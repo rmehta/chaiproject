@@ -99,7 +99,7 @@ var ObjListController = Class.extend({
 		} 
 		// get list of pages
 		$.call({
-			method:"lib.py.query.get",
+			method:"lib.chai.query.get",
 			data: this.make_query(),
 			success: function(data) {
 				me.reset(extend);

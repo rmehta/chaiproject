@@ -27,15 +27,13 @@ logout - delete all sessions of this user
 
 user = None
 
-from lib.py import whitelist, database, objstore
+from lib.chai import whitelist, db, objstore
 
 @whitelist()
 def load(**args):
 	"""load an existing sesion from cookies or start a new guest session"""
-	from lib.py import req, res
-	
-	db = database.get()
-	
+	from lib.chai import req, res
+		
 	if 'sid' in req.cookies and req.cookies['sid']!='guest':
 		sess = objstore.get(type='session', name=req.cookies['sid'])
 		if sess:
@@ -54,8 +52,7 @@ def new_sid():
 @whitelist(allow_guest=True)
 def login(**args):
 	"""login"""
-	from lib.py import res
-	db = database.get()
+	from lib.chai import res
 	
 	import hashlib
 	pwd = db.sql("select password from user where name=%s", (args['user'],))
@@ -74,7 +71,6 @@ def login(**args):
 @whitelist()
 def logout(**args):
 	"""logout"""
-	from lib.py import req
-	db = database.get()
+	from lib.chai import req
 	user = db.sql("""select user from session where name=%s""", req.cookies['sid'])[0]['user']
 	db.sql("delete from session where user=%s", user)
