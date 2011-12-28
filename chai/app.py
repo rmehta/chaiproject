@@ -15,7 +15,8 @@ If there is no method, index.html will be served
 
 the query_string and environ will be passed to the method
 """
-from lib.chai import db, page
+from lib.chai import db
+from lib.chai.cms import page
 import sys
 
 def handle():

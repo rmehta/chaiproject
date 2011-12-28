@@ -30,14 +30,20 @@ from lib.chai import objstore, db, whitelist
 
 def get(name):
 	"""return page html"""
-	with open('_index.html', 'r') as index:
-		template = index.read()
-
+	template = get_template()
 	html = content(name=name)['html']
 	html = """<div class="content active" id="#%s">%s</div>""" % (name, html)
 	
 	return template % {'content': html}
+
+def get_template():
+	from lib.chai import sitepath
 	
+	with open(sitepath('_index.html'), 'r') as index:
+		template = index.read()
+
+	return template
+
 @whitelist(allow_guest=True)
 def content(**args):
 	"""get page html with header and footer"""

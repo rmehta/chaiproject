@@ -96,12 +96,12 @@ def model_class(moduleobj):
 def all():
 	"""get all model objects from 'core' and 'models' folders"""
 	import os
-	from lib.chai import common
+	from lib.chai import common, modelpath
 	
 	common.update_path()
 	dr = common.directory_root()
-	ml = find_models(os.path.join(dr, 'models'), 'models')
-	ml += find_models(os.path.join(dr, 'lib/models'), 'core')
+	ml = find_models(modelspath(), 'models')
+	ml += find_models('lib/models', 'models')
 	return filter(lambda x: x, ml)
 
 def find_models(path, package):

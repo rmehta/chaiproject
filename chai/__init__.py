@@ -52,3 +52,14 @@ def blank():
 	from webob import Request
 	req = Request.blank('server/')
 	sess = {"user":"test"}
+	
+def sitepath(path):
+	import os, conf
+	return os.path.join(conf.sites[site]['path'], path)
+	
+def filespath():
+	return sitepath('files')
+
+def modelspath():
+	return sitepath('models')
+	

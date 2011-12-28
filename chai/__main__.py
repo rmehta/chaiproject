@@ -211,6 +211,8 @@ def main():
 		replacer.replace('.', options.replace[0], options.replace[1], options.replace[2])
 
 if __name__=='__main__':
+	import sys
+	sys.path.append('.')
 	main()
 		
 		

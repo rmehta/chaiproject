@@ -28,7 +28,6 @@ Schema updation:
 """
 
 import MySQLdb
-from conf import dbsettings
 import MySQLdb.constants.ER as ER
 
 conn = None	

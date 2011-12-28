@@ -384,7 +384,7 @@ $.view = {
 	},
 	load_virtual: function(name, callback) {
 		$.call({
-			method: 'lib.chai.page.content',
+			method: 'lib.chai.cms.page.content',
 			data: {
 				name: name,
 			},
