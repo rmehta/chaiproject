@@ -58,16 +58,16 @@ def content(**args):
 def header(obj):
 	"""add page header and breadcrumbs"""
 	head = ''
-	if not '<h1>' in obj['html']:
-		head = '<div class="page-header"><h1>' + obj['label'] + '</h1></div>'
-		
 	if 'ancestors' in obj and obj['ancestors']:
-		head = head + '<ul class="breadcrumb">'
+		head += '<ul class="breadcrumb">'
 		for a in obj['ancestors']:
 			head += """<li><a href="#%(name)s">%(label)s</a>
 				<span class="divider">/</span></li>""" % a
 				
 		head = head + """<li class="active">%(label)s</li></ul>""" % obj
+		
+	if not '<h1>' in obj['html']:
+		head += '<div class="page-header"><h1>' + obj['label'] + '</h1></div>'
 		
 	return head
 	

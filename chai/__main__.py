@@ -23,6 +23,7 @@ dbname = '%(dbname)s'
 
 def newapp():
 	print "Setting up new app..."
+	os.chdir(lib.chai.sitepath())
 	make_dirs()
 	dbinfo = setup_db()
 	create_index()
@@ -41,7 +42,9 @@ def make_dirs():
 		__init__.py
 	views/
 	"""
-	if not os.path.exists('model'):
+	from lib.chai import sitepath
+		
+	if not os.path.exists('models'):
 		os.mkdir('models')
 		os.system('touch models/__init__.py')
 
@@ -84,9 +87,9 @@ def setup_db():
 	cur.execute("create database if not exists `%s`;" % dbname)
 	print "Database created"
 	create_user(cur, dbname, dbuser, dbpassword)
-	make_confpy(dbname=dbname, dbuser=dbuser, dbpassword=dbpassword)
+	print "Please update your settings in conf/__init__.py"
 	sync_tables()
-		
+
 def create_user(cur, dbname, dbuser, dbpassword):
 	"""
 	create a new user and grant all privileges
@@ -101,16 +104,6 @@ def create_user(cur, dbname, dbuser, dbpassword):
 	cur.execute("grant all privileges on `%s`.* to '%s'" % (dbname, dbuser))
 	cur.execute("flush privileges")
 	print "User created"
-
-def make_confpy(**dbinfo):
-	"""setup conf.py"""		
-	# write conf.py template
-	dbinfo['app_name'] = raw_input('Name of your application (title case)')
-	
-	confpy = open('conf/dbsettings.py', 'w')
-	confpy.write(conf_content % dbinfo)
-	confpy.close()
-	print "Wrote conf/dbsettings.py"
 
 def sync_tables():
 	"""sync all core tables, beginning with _parent_child"""
@@ -141,21 +134,6 @@ def publish():
 	"""write pages etc."""
 	from lib.chai.cms.publish import publish
 	publish()
-
-def make_style_css():
-	"""make css/style.css if not exists"""
-	# copy style template
-	if not os.path.exists('css/style.css'):
-		import shutil
-		shutil.copyfile('lib/css/style_template.css', 'css/style.css')
-		print "css/style.css made"
-
-def make_template_html():
-	"""make template.html if not exists"""
-	if not os.path.exists('template.html'):
-		import shutil
-		shutil.copyfile('lib/html/template.html', 'template.html')
-		print "template.html made"
 
 def getparser():
 	"""setup option parser"""

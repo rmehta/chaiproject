@@ -53,9 +53,12 @@ def blank():
 	req = Request.blank('server/')
 	sess = {"user":"test"}
 	
-def sitepath(path):
+def sitepath(path=None):
 	import os, conf
-	return os.path.join(conf.sites[site]['path'], path)
+	if not path:
+		return conf.sites[site]['path']
+	else:
+		return os.path.join(conf.sites[site]['path'], path)
 	
 def filespath():
 	return sitepath('files')

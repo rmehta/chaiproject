@@ -47,7 +47,7 @@ var EditPageFormView = FormView.extend({
 	},
 	set_obj: function() {
 		this.clear();
-		this.opts.method = 'lib.py.objstore.insert';
+		this.opts.method = 'lib.chai.objstore.insert';
 		$('#editpage-header').html('New');
 		
 		var me = this;
@@ -57,7 +57,7 @@ var EditPageFormView = FormView.extend({
 			
 			$.objstore.get("page", editing, function(obj) {
 				me.set_values(obj);
-				me.opts.method = 'lib.py.objstore.update';
+				me.opts.method = 'lib.chai.objstore.update';
 				$('#editpage-header').html(obj.label);
 			});
 		}		
@@ -79,7 +79,7 @@ app.editpage_form = new EditPageFormView({
 		{name:"js", label:"Javascript Code", mandatory: false, type:'textarea'},
 		{name:"css", label:"CSS", mandatory: false, type:'textarea'}
 	],
-	method:'lib.py.objstore.insert',
+	method:'lib.chai.objstore.insert',
 	success: function() {
 		app.editpage_form.set_message('Form Saved', 5000);
 	},
