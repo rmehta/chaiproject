@@ -2,6 +2,26 @@
 Misc views
 */
 
+$.notify = function(txt, type) {
+	if(!type) type='warning';
+	
+	// move up
+	$('.notification').each(function(idx, ele) {
+		var bottom = parseInt($(ele).css('bottom'));
+		$(ele).css('bottom', (bottom + $(ele).height() + 24) + 'px')
+	})
+	
+	$('body').append('<div class="alert-message notification '+type+'">\
+		<a href="#" class="close">×</a><span style="margin-right: 7px">'+txt+'</span></div>');
+	$n = $('body').find('div.notification:last');
+	$n.find('.close').click(function() {
+		$(this).parent().remove();
+		return false;
+	});
+	$n.delay(5000).fadeOut();
+}
+
+
 // show a message
 $.msgprint = function(txt) {
 	$.require('lib/js/bootstrap/bootstrap-modal.js');
@@ -24,25 +44,9 @@ $.msgprint = function(txt) {
 			$('#app_msgprint button.primary').click();
 		});		
 	}
-	$('#app_msgprint modal-body').append('<p>'+txt+'</p>').modal('show');
-}
-
-$.notify = function(txt, type) {
-	if(!type) type='warning';
+	$('#app_msgprint .modal-body').append('<p>'+txt+'</p>');
+	$('#app_msgprint').modal({backdrop:'static', show: true});
 	
-	// move up
-	$('.notification').each(function(idx, ele) {
-		var bottom = parseInt($(ele).css('bottom'));
-		$(ele).css('bottom', (bottom + $(ele).height() + 24) + 'px')
-	})
-	
-	$('body').append('<div class="alert-message notification '+type+'">\
-		<a href="#" class="close">×</a><span style="margin-right: 7px">'+txt+'</span></div>');
-	$n = $('body').find('div.notification:last');
-	$n.find('.close').click(function() {
-		$(this).parent().remove();
-		return false;
-	});
 }
 
 $.confirm = function(txt, yes, no) {
@@ -72,5 +76,6 @@ $.confirm = function(txt, yes, no) {
 			if(no)no();
 		});
 	}
-	$('#app_confirm modal-body').html('<p>'+txt+'</p>').modal('show');
+	$('#app_confirm .modal-body').html('<p>'+txt+'</p>');
+	$('#app_confirm').modal({backdrop: 'static', show: true});
 }
