@@ -2,7 +2,10 @@
 Misc views
 */
 
+
 $.notify = function(txt, type) {
+	if(!$.notify_cnt) $.notify_cnt = 0;
+	$.notify_cnt++;
 	if(!type) type='warning';
 	
 	// move up
@@ -11,14 +14,18 @@ $.notify = function(txt, type) {
 		$(ele).css('bottom', (bottom + $(ele).height() + 24) + 'px')
 	})
 	
-	$('body').append('<div class="alert-message notification '+type+'">\
-		<a href="#" class="close">×</a><span style="margin-right: 7px">'+txt+'</span></div>');
+	$('body').append('<div id="notify'+$.notify_cnt
+			+'" class="alert-message notification '+type
+			+'"><a href="#" class="close">×</a><span style="margin-right: 7px">'
+			+txt+'</span></div>');
 	$n = $('body').find('div.notification:last');
 	$n.find('.close').click(function() {
 		$(this).parent().remove();
 		return false;
 	});
-	$n.delay(5000).fadeOut();
+	// clear after 5sec
+	setTimeout('$("#notify'+$.notify_cnt+'").fadeOut()', 5000);
+	return $n;
 }
 
 

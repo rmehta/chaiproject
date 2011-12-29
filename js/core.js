@@ -239,6 +239,8 @@ app.open_default_page() - open default page on load / fire necessary events
 		}
 		
 		if (!$._require_loaded[file]) {
+			$('.notification').remove();
+			var $n = $.notify('Loading...');
 			xhr = $.ajax({
 				type: "GET",
 				url: file,
@@ -248,6 +250,7 @@ app.open_default_page() - open default page on load / fire necessary events
 				cache: params.cache===false?false:true,
 				async: false
 			});
+			$n && $n.remove();
 			$._require_loaded[file] = true;
 			
 			// js loaded automatically
@@ -482,6 +485,8 @@ var app = {
 	open_default_page: function() {
 		$content = $('.main.container .content.active');
 		if(location.hash && location.hash != '#') {
+			// remove the current content - may overlap
+			$content.remove();
 			$(window).trigger('hashchange');
 		} else {
 			if($content.length) {
