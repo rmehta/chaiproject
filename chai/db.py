@@ -165,8 +165,13 @@ class Database:
 		# update parent-child map
 		if hasattr(m, '_parent'):
 			self.begin()
-			objstore.insert(type="_parent_child", parent=m._parent, child=m._name)
-			self.commit()
+			try:
+				objstore.insert(type="_parent_child", parent=m._parent, child=m._name)
+				self.commit()
+			except Exception, e:
+				self.rollback()
+				if e.args[0]!=1062: # updating
+					raise e
 
 		self.sql("set foreign_key_checks=1")
 

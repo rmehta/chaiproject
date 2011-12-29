@@ -110,7 +110,8 @@ def sync_tables():
 	from lib.chai import db, core_models, site
 	import conf
 	db.get().sync_tables(core_models)
-	db.get().sync_tables(conf.sites[lib.chai.site]['models'])
+	if 'models' in conf.sites[site]:
+		db.get().sync_tables(conf.sites[site]['models'])
 
 def create_index():
 	"""create index page"""
