@@ -2,7 +2,7 @@
 Upload View
 ===========
 
-Usage: UploadView().$modal.modal('show')
+Usage: app.uploadview('show')
 */
 
 $.require('lib/js/bootstrap/bootstrap-modal.js');
@@ -12,6 +12,7 @@ var UploadView = Class.extend({
 	init: function() {
 		this.make_modal();
 		this.bind_events();
+		this.setup_form();
 	},
 	make_modal: function() {
 		$('body').append('<div class="modal hide fade" id="upload">\
@@ -20,7 +21,7 @@ var UploadView = Class.extend({
 				<h3>Upload a File</h3>\
 			</div>\
 			<div class="modal-body">\
-				<form class="form-stacked" method="POST" action="server/" enctype="multipart/form-data">\
+				<form class="form-stacked" method="POST" action="/" enctype="multipart/form-data">\
 					<input name="mimetype" type="hidden" value="json">\
 					<input name="_method" type="hidden" value="lib.chai.files.post">\
 					<div class="clearfix">\
@@ -89,4 +90,10 @@ var UploadView = Class.extend({
 			}
 		});
 	}
-})
+});
+
+app.show_upload = function() {
+	if(!app.uploadview)
+		app.uploadview = new UploadView();
+	app.uploadview.$modal.modal({backdrop:'static', show:true});
+}

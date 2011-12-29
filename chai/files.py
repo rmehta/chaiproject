@@ -52,10 +52,10 @@ def filelist(**args):
 	import os
 	import datetime
 	
-	for wt in os.walk(os.path.join(filespath())):
+	for wt in os.walk(filespath()):
 		for fn in wt[2]:
 			fpath = os.path.join(wt[0], fn)
-			ret.append([os.path.relpath(fpath, filespath()), \
+			ret.append([fpath, \
 				str(datetime.datetime.fromtimestamp(os.stat(fpath).st_mtime)), \
 				os.stat(fpath).st_size])
 
@@ -66,6 +66,6 @@ def delete(**args):
 	"""delete file (user must be logged in)"""
 	from lib.chai import req, sess	
 	import os
-	os.remove(os.path.join(filespath(), args['name']))
+	os.remove(os.path.join(args['name']))
 	return {"message":"ok"}
 	

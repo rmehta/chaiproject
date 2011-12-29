@@ -19,6 +19,57 @@ from lib.chai import db
 from lib.chai.cms import page
 import sys
 
+
+def application(environ, start_response):
+	import json
+
+	setup_request(environ)
+	
+	import lib.chai
+	from lib.chai import db, req, res
+	
+	# start db connection
+	if '_method' in req.params and req.params['_method'] != 'lib.chai.session.login':
+		import lib.chai.session
+		lib.chai.sess = lib.chai.session.load()
+	
+	res.content_type = 'text/html'
+	
+	try:
+		out = handle()
+		if type(out) is dict:
+			lib.chai.out.update(out)
+		else:
+			lib.chai.out = out
+	except Exception, e:
+		from lib.chai.common import traceback
+		lib.chai.out['error'] = str(traceback())
+		
+	if not res.body:
+		if type(lib.chai.out) in (str, unicode):
+			res.body = str(lib.chai.out)
+		else:
+			res.body = json.dumps(lib.chai.out, default=json_type_handler)
+			
+	return res(environ, start_response)
+
+def setup_request(environ):
+	"""setup global req, res"""
+	from webob import Request, Response
+	import lib.chai
+	import conf
+	
+	# clear session
+	lib.chai.sess = {}
+	lib.chai.req = Request(environ)
+	lib.chai.res = Response()
+	lib.chai.out = {}
+	server_name = environ.get('HTTP_HOST', environ.get('SERVER_NAME'))
+	if server_name in conf.sites:
+		lib.chai.site = server_name
+	else:
+		lib.chai.site = conf.default_site
+	
 def handle():
 	from lib.chai import req, site
 	import conf
@@ -31,7 +82,7 @@ def handle():
 		return page.get(name=req.params['page'])
 	else:
 		return page.get(name=conf.sites[site].get('index', 'index'))
-
+		
 def handle_method():
 	"""pass control to a whitelisted method"""
 	from lib.chai import req
@@ -70,50 +121,3 @@ def json_type_handler(obj):
 	"""convert datetime objects to string"""
 	if hasattr(obj, 'strftime'):
 		return str(obj)
-
-def setup_request(environ):
-	"""setup global req, res"""
-	from webob import Request, Response
-	import lib.chai
-	import conf
-	
-	# clear session
-	lib.chai.sess = {}
-	lib.chai.req = Request(environ)
-	lib.chai.res = Response()
-	lib.chai.out = {}
-	lib.chai.site = conf.default_site
-	
-def application(environ, start_response):
-	import json
-
-	setup_request(environ)
-	
-	import lib.chai
-	from lib.chai import db, req, res
-	
-	# start db connection
-	if '_method' in req.params and req.params['_method'] != 'lib.chai.session.login':
-		import lib.chai.session
-		lib.chai.sess = lib.chai.session.load()
-	
-	res.content_type = 'text/html'
-	
-	try:
-		out = handle()
-		if type(out) is dict:
-			lib.chai.out.update(out)
-		else:
-			lib.chai.out = out
-	except Exception, e:
-		from lib.chai.common import traceback
-		lib.chai.out['error'] = str(traceback())
-		
-	if not res.body:
-		if type(lib.chai.out) in (str, unicode):
-			res.body = str(lib.chai.out)
-		else:
-			res.body = json.dumps(lib.chai.out, default=json_type_handler)
-			
-	return res(environ, start_response)
-	

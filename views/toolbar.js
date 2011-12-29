@@ -34,7 +34,7 @@ var TopBar = Class.extend({
 		var user = ($.session && $.session.user) || 'guest';
 
 		// set brand
-		$('.topbar .brand').html(app.title);
+		$('.topbar .brand').html(app.brand);
 
 		// clear out if there is anything
 		$('.topbar .nav.secondary-nav').empty();
@@ -49,7 +49,6 @@ var TopBar = Class.extend({
 			this.make_admin();
 			this.make_profile();
 		}
-		this.make_content();		
 	},
 	
 	make_login: function() {
