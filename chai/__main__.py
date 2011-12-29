@@ -136,6 +136,26 @@ def publish():
 	from lib.chai.cms.publish import publish
 	publish()
 
+def concat():
+	"""concat files from [site]/__init__.py"""
+	from lib.chai import site
+	import conf, os, imp
+	
+	sitepath = conf.sites[site]['path'].strip('/')
+	
+	# the site folder must have an __init__.py
+	moduleobj = imp.load_source(sitepath, os.path.join(sitepath, '__init__.py'))
+	concat = getattr(moduleobj, 'concat', {})
+	for out in concat:
+		with open(os.path.join(sitepath, out), 'w') as outfile:
+			outstr = ''
+			for part in concat[out]:
+				with open(part, 'r') as infile:
+					outstr += '\n' + infile.read()
+					
+			outfile.write(outstr)
+			print 'wrote %s [%.1fk]' % (out, float(len(outstr)) / 1024)
+
 def getparser():
 	"""setup option parser"""
 	from optparse import OptionParser
@@ -148,7 +168,8 @@ def getparser():
 	parser.add_option('--publish', help='Rebuild page tree, write toc', nargs=0)
 	parser.add_option('--adduser', help='Add user', nargs=2)
 	parser.add_option('--uwsgi', help='start/stop/reload uwsgi')
-	parser.add_option('-r', help="Replace string in extenstion", dest='replace', nargs=3)
+	parser.add_option('-r', '--replace', help="Replace string in extenstion", nargs=3)
+	parser.add_option('-c', '--concat', help="concat files from [site]/__init__.py", nargs=0)
 	return parser
 
 def main():
@@ -185,10 +206,13 @@ def main():
 		m = uwsgi_manager.manager('conf/uwsgi.xml')
 		getattr(m, options.uwsgi)(1)
 
-	elif options.replace:
+	elif options.replace is not None:
 		from lib.chai.util import replacer
 		replacer.replace(conf.sites[lib.chai.site]['path'], options.replace[0], \
 			options.replace[1], options.replace[2])
+			
+	elif options.concat is not None:
+		concat()
 
 if __name__=='__main__':
 	import sys

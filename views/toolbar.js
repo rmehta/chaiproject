@@ -1,5 +1,3 @@
-$.require('lib/js/bootstrap/bootstrap-dropdown.js');
-
 var TopBar = Class.extend({
 	init: function() {
 		$('header').append('<div class="topbar">\
@@ -103,6 +101,7 @@ var TopBar = Class.extend({
 
 // activate dropdown events
 $(document).ready(function() {
+	$.require('lib/js/bootstrap/bootstrap-dropdown.js');
 	app.topbar = new TopBar();
 })
 
