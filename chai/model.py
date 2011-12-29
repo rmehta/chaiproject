@@ -67,7 +67,8 @@ class Model(object):
 def get(obj):
 	"""get model instance for object"""
 	import sys, conf
-	from lib.chai import core_models, site
+	from lib.models import core_models
+	from lib.chai import site
 	
 	if not 'type' in obj:
 		return Model(obj)

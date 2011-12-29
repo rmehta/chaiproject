@@ -256,7 +256,10 @@ def delete(**args):
 	"""delete object and its children, if permitted"""
 	from lib.chai import model
 	
-	modelobj = model.get(_get_obj(args['type'], args['name']))
+	obj = _get_obj(args['type'], args['name'])
+	if not obj:
+		return {"message":"ok", "info":"object did not exist"}
+	modelobj = model.get(obj)
 	modelobj.check_allow('delete')
 	hasattr(modelobj, 'before_delete') and modelobj.before_delete()
 	

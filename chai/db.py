@@ -45,6 +45,7 @@ class Database:
 
 	def connect(self, settings):
 		"""connect to mysql db"""
+		self.settings = settings
 		self.conn = MySQLdb.connect('localhost', settings['user'], settings['password'])
 		self.conn.converter[246]=float
 		self.conn.set_character_set('utf8')
@@ -56,7 +57,7 @@ class Database:
 	def sql(self, query, values=(), as_dict=True, debug=False):
 		"""like webnotes.db.sql"""
 		if not self.conn:
-			self.connect()
+			self.connect(self.settings)
 			
 		if debug:
 			from lib.chai import out
@@ -159,8 +160,10 @@ class Database:
 		
 		if not m._name in tables:
 			self.sql(m._create_table)
+			print "Created %s" % m._name
 		else:
 			self.repair_table(m._name, m._create_table)
+			print "Repaired %s" % m._name
 				
 		# update parent-child map
 		if hasattr(m, '_parent'):
@@ -184,6 +187,10 @@ class ConnectionPool(object):
 		if not site:
 			import lib.chai
 			site = lib.chai.site
+			
+			if not site:
+				import conf
+				site = conf.default_site
 		
 		if not self.pool.get(site):
 			self.connect(site)
@@ -217,9 +224,18 @@ def begin():
 	
 def commit():
 	sql("commit")
+
+def rollback():
+	sql("rollback")
 	
 def getvalue(type, name, key):
+	"""get a value"""
 	return pool.get().getvalue(type, name, key)
 	
 def setvalue(type, name, key, value, commit=False):
+	"""set a value"""
 	return pool.get().setvalue(type, name, key, value, commit)
+
+def close():
+	"""close all connections"""
+	pool.close()

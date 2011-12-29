@@ -107,7 +107,8 @@ def create_user(cur, dbname, dbuser, dbpassword):
 
 def sync_tables():
 	"""sync all core tables, beginning with _parent_child"""
-	from lib.chai import db, core_models, site
+	from lib.chai import db, site
+	from lib.models import core_models
 	import conf
 	db.get().sync_tables(core_models)
 	if 'models' in conf.sites[site]:
@@ -180,6 +181,8 @@ def main():
 	import lib.chai
 	lib.chai.site = options.site or conf.default_site
 
+	from lib.chai import db
+
 	if options.newapp is not None:
 		newapp()
 	
@@ -190,6 +193,7 @@ def main():
 		if options.update=='all':
 			sync_tables()
 		else:
+			from lib.chai import db
 			db.get().sync_table(options.update)
 	
 	elif options.publish is not None:
@@ -213,6 +217,8 @@ def main():
 			
 	elif options.concat is not None:
 		concat()
+
+	db.close()
 
 if __name__=='__main__':
 	import sys

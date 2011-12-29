@@ -4,17 +4,17 @@ from lib.chai import objstore, session, db
 
 class TestObjstore(unittest.TestCase):
 	def setUp(self):
-		self.db.begin()
+		db.begin()
 		import lib.chai
 		lib.chai.blank()
 		
 	def tearDown(self):
-		self.db.rollback()
-		self.db.close()
+		db.rollback()
+		db.close()
 		
 	def test_insert(self):
 		objstore.insert(type="user", name="testuser", email="testmail")
-		obj = self.db.sql("""select * from user where name='testuser'""")[0]
+		obj = db.sql("""select * from user where name='testuser'""")[0]
 		self.assertTrue(obj['email'] == 'testmail')
 
 	def test_update(self):
@@ -25,7 +25,7 @@ class TestObjstore(unittest.TestCase):
 	def test_delete(self):
 		self.test_insert()
 		objstore.delete(type="user", name="testuser")
-		self.assertFalse(self.db.sql("""select * from user where name='testuser'"""))
+		self.assertFalse(db.sql("""select * from user where name='testuser'"""))
 
 	def test_update_with_children(self):
 		objstore.insert(type="user", name="testuser", userrole=['Admin', 'Manager'])

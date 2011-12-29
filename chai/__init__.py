@@ -26,7 +26,6 @@ out = {}
 whitelisted = []
 files_path = os.path.join(os.path.dirname(__file__), '../../files')
 max_file_size = 1024**3
-core_models = ['_parent_child', 'page', 'user', 'session', 'userrole']
 
 def whitelist(allow_guest=False):
 	"""
