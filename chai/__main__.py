@@ -165,10 +165,10 @@ def main():
 		setup_db()
 
 	elif options.update is not None:
-		if options.update:
-			db.get().sync_table(options.update)
-		else:
+		if options.update=='all':
 			sync_tables()
+		else:
+			db.get().sync_table(options.update)
 	
 	elif options.publish is not None:
 		publish()
