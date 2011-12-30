@@ -5,7 +5,7 @@ Edit profile
 usage new EditProfileView().show();
 */
 
-$.require('lib/views/form/modal.js');
+$.require('lib/chaijs/form/modal.js');
 
 var EditProfileView = FormModalView.extend({
 	init: function() {

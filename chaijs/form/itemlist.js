@@ -121,7 +121,7 @@ var ItemListController = Class.extend({
 		
 		// autosuggest
 		if(view.opts.range) {
-			$.require('lib/views/form/autocomplete.js');
+			$.require('lib/chaijs/form/autocomplete.js');
 			view.$input.set_autocomplete({type: view.opts.range});
 		}
 		

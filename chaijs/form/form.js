@@ -62,7 +62,7 @@ var FormView = Class.extend({
 		if(!this.opts) return; // not ready
 		this.make_body();
 
-		$.require('lib/views/form/input.js');
+		$.require('lib/chaijs/form/input.js');
 		
 		this.make_form_inputs();
 		this.make_static_inputs();

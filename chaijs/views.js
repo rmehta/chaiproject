@@ -80,7 +80,7 @@ chai.view = {
 		});
 	},
 	make_page: function(obj) {
-		$.require('lib/views/ui/page.js');
+		$.require('lib/chaijs/ui/page.js');
 		new PageView(obj);
 	},
 

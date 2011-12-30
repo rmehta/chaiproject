@@ -1,14 +1,14 @@
 concat = {
-	'lib/js/chai/chai.js': [
-		'lib/views/ui/misc.js',
-		'lib/js/chai/utils.js',
-		'lib/js/chai/require.js',
-		'lib/js/chai/class.js',
-		'lib/js/chai/provide.js',
-		'lib/js/chai/objstore.js',
-		'lib/js/chai/app.js',
-		'lib/views/views.js',
-		'lib/views/view_map.js',
-		'lib/views/ui/toolbar.js'
+	'lib/chaijs/core/core.js': [
+		'lib/chaijs/ui/misc.js',
+		'lib/chaijs/core/utils.js',
+		'lib/chaijs/core/require.js',
+		'lib/chaijs/core/class.js',
+		'lib/chaijs/core/provide.js',
+		'lib/chaijs/core/objstore.js',
+		'lib/chaijs/core/app.js',
+		'lib/chaijs/views.js',
+		'lib/chaijs/view_map.js',
+		'lib/chaijs/ui/toolbar.js'
 	]
 }

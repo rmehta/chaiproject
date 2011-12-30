@@ -22,7 +22,7 @@ app.open_default_page() - open default page on load / fire necessary events
 var app = {	
 	// module views
 	login: function() {
-		$.require('lib/views/user/login.js');
+		$.require('lib/chaijs/user/login.js');
 		if(!app.loginview)
 			app.loginview = new LoginView();
 		app.loginview.show();
@@ -38,13 +38,13 @@ var app = {
 		});
 	},
 	register: function() {
-		$.require('lib/views/user/register.js');
+		$.require('lib/chaijs/user/register.js');
 		if(!app.registerview)
 			app.registerview = new RegisterView();
 		app.registerview.show();		
 	},
 	editprofile: function() {
-		$.require('lib/views/user/editprofile.js');
+		$.require('lib/chaijs/user/editprofile.js');
 		if(!app.editprofileview)
 			app.editprofileview = new EditProfileView();
 		app.editprofileview.show();

@@ -145,7 +145,7 @@ FormInputHTML = FormInput.extend({
 
 FormInputItemList = FormInput.extend({
 	make_input: function() {
-		$.require('lib/views/form/itemlist.js');
+		$.require('lib/chaijs/form/itemlist.js');
 		this.$w.append('<label>'+this.opts.label+'</label>');
 		this.itemlist = new ItemListView({
 			$parent: this.$w,

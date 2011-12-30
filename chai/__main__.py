@@ -211,7 +211,6 @@ def main():
 
 	elif options.replace is not None:
 		from lib.chai.util import replacer
-		print options.replace
 		# in code
 		replacer.replace(conf.sites[lib.chai.site]['path'], options.replace[0], \
 			options.replace[1], options.replace[2])

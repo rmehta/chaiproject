@@ -6,7 +6,7 @@ Usage:
 new RegisterView().show();
 */
 
-$.require('lib/views/form/modal.js');
+$.require('lib/chaijs/form/modal.js');
 
 RegisterView = FormModalView.extend({
 	init: function() {

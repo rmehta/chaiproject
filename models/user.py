@@ -37,7 +37,7 @@ class User(model.Model):
 		
 	def before_post(self):
 		"""save password as sha256 hash"""		
-		if 'password' in self.obj:
+		if 'password' in self.obj and self.obj['password']:
 			self.obj['password'] = self.encrypt_password(self.obj['password']) 
 		
 		# clear re-entered password

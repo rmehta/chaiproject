@@ -6,7 +6,7 @@ Usage:
 new LoginView().modal.show();
 */
 
-$.require('lib/views/form/modal.js');
+$.require('lib/chaijs/form/modal.js');
 
 var LoginView = FormModalView.extend({
 	init: function() {

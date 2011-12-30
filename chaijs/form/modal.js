@@ -21,7 +21,7 @@ hide
 */
 
 $.require('lib/js/bootstrap/bootstrap-modal.js');
-$.require('lib/views/form/form.js');
+$.require('lib/chaijs/form/form.js');
 
 var FormModalView = FormView.extend({
 	init: function(opts) {
