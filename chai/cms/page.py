@@ -32,9 +32,9 @@ def get(name):
 	"""return page html"""
 	template = get_template()
 	html = content(name=name)['html']
-	html = """<div class="content active" id="%s">%s</div>""" % (name, html)
+	html = """<div class="content-wrap active" id="%s">%s</div>""" % (name, html)
 	
-	return template % {'content': html}
+	return template % {'content': html, 'bootjs':bootjs()}
 
 def get_template():
 	from lib.chai import sitepath
@@ -84,5 +84,10 @@ def footer(obj):
 		foot += """</ol></div></p>"""
 		
 	return foot
-			
-		
+
+def bootjs():
+	"""get boot js - cms_settings"""
+	from lib.chai import rdfstore
+	import json
+	return 'app.cms_settings = ' + json.dumps(rdfstore.get(name='cms_settings') or {})
+	

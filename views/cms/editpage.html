@@ -11,9 +11,6 @@ var EditPageFormView = FormView.extend({
 		this._super(opts);
 		this.make_sidebox();
 		this.markdown_to_html();
-		
-		// hide secondary btn
-		this.$wrapper.find('button.btn.secondary').css('display', 'none');		
 	},
 	make_sidebox: function() {
 		this.add_sidebox_item('Save'.bold(), function(me) {
@@ -21,15 +18,15 @@ var EditPageFormView = FormView.extend({
 		});
 
 		this.add_sidebox_item('View Page', function(me) {
-			$.view.open(me.get_value('name'));
+			chai.view.open(me.get_value('name'));
 		});
 
 		this.add_sidebox_item('List Pages', function(me) {
-			$.view.open('pagelist');
+			chai.view.open('pagelist');
 		});
 
 		this.add_sidebox_item('New Page', function(me) {
-			$.view.open('editpage');
+			chai.view.open('editpage');
 		});
 	},
 	markdown_to_html: function() {
@@ -55,14 +52,13 @@ var EditPageFormView = FormView.extend({
 		if(editing.length>1) {
 			editing = editing.slice(-1)[0];
 			
-			$.objstore.get("page", editing, function(obj) {
+			chai.objstore.get("page", editing, function(obj) {
 				me.set_values(obj);
 				me.opts.method = 'lib.chai.objstore.update';
 				$('#editpage-header').html(obj.label);
 			});
 		}		
 	}
-	
 })
 
 

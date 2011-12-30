@@ -5,9 +5,9 @@ var PageView = Class.extend({
 	},
 	make: function() {
 		$('<div>')
-			.addClass('content')
+			.addClass('content-wrap')
 			.attr('id', this.obj.name)
-			.appendTo('.main.container')
+			.appendTo('#main')
 			.html(this.content());
 			
 		if(this.obj.js) $.set_script(this.obj.js);

@@ -97,7 +97,8 @@ def insert(**args):
 		del args['_method']
 		
 	store = Store()
-	store.remove(args['name'], None, None)
+	if store.triples(args['name']):
+		raise Exception, '[rdfstore] Object Exists'
 	store.update(args)
 	return {'message':'ok'}
 
@@ -106,7 +107,9 @@ def update(**args):
 	if '_method' in args:
 		del args['_method']
 		
-	store = Store().update(args)
+	store = Store()
+	store.remove(args['name'], None, None)
+	store.update(args)
 	return {'message':'ok'}
 
 @whitelist()

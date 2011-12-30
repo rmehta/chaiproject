@@ -135,7 +135,7 @@ var FormView = Class.extend({
 
 		this.footer_container().append($.rep('<span class="form-message"></span>\
 			<button class="btn primary">%(primary_btn_label)s</button>\
-			<button class="btn secondary">%(secondary_btn_label)s</button>', this.opts));
+			<button class="btn secondary" style="display: none">%(secondary_btn_label)s</button>', this.opts));
 			
 		this.$primary_btn = this.$wrapper.find('button.btn.primary');
 	},
@@ -203,7 +203,7 @@ var FormView = Class.extend({
 		if(data.message && data.message=='ok') {
 			if(this.opts.success)this.opts.success(data);
 			if(data.obj) {
-				$.objstore.set(data.obj);
+				chai.objstore.set(data.obj);
 			}
 		} else {
 			$.notify('There were errors', 'important');

@@ -1,0 +1,33 @@
+<div class="page-header">
+	<h1>CMS Settings</h1>
+</div>
+<div id="cms-settings-form"></div>
+
+<script>
+$.require('lib/views/form/form.js');
+
+app.cms_settings_form = new FormView({
+	$parent: $('#cms-settings-form'),
+	fields: [
+		{name:'brand', type:'textarea', label:'Brand', help:'will be shown in Top Bar'},
+		{name:'footer', type:'textarea', label:'Footer', help:'HTML'},
+		{name:'topmenu', type:'textarea', label:'Top Menu', help:'Each item on a new line'},
+		{name:'style', type:'textarea', label:'Additional Style'}
+	],
+	method: 'lib.chai.rdfstore.update',
+	static:{name:'cms_settings'},
+	success: function(data) {
+		if(data.message && data.message=='ok') {
+			app.cms_settings = app.cms_settings_form.get_values();
+			$.notify('Settings Updated', 'success');
+		} else {
+			$.notify('There were errors', 'important');
+		}
+	}
+});
+
+$('#cms_settings').bind('_show', function() {
+	if(app.cms_settings)
+		app.cms_settings_form.set_values(app.cms_settings)
+})
+</script>

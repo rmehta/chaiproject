@@ -241,6 +241,6 @@ FormInputText = FormInputWithLabel.extend({
 
 FormInputTextarea = FormInputWithLabel.extend({
 	make_input_element: function() {
-		return $.rep('<textarea name="%(name)s" class="code xxlarge"></textarea>', this.opts);
+		return $.rep('<textarea name="%(name)s" class="code span7"></textarea>', this.opts);
 	},
 });

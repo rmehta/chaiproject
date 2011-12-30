@@ -13,14 +13,6 @@ Set of command line utilities to manage the app
 
 """
 
-
-conf_content = """
-# db settings
-dbuser = '%(dbuser)s'
-dbpassword = '%(dbpassword)s'
-dbname = '%(dbname)s'
-"""
-
 def newapp():
 	print "Setting up new app..."
 	os.chdir(lib.chai.sitepath())
@@ -140,22 +132,29 @@ def publish():
 def concat():
 	"""concat files from [site]/__init__.py"""
 	from lib.chai import site
-	import conf, os, imp
+	import conf, os, imp, lib
 	
 	sitepath = conf.sites[site]['path'].strip('/')
 	
 	# the site folder must have an __init__.py
 	moduleobj = imp.load_source(sitepath, os.path.join(sitepath, '__init__.py'))
 	concat = getattr(moduleobj, 'concat', {})
-	for out in concat:
-		with open(os.path.join(sitepath, out), 'w') as outfile:
-			outstr = ''
-			for part in concat[out]:
-				with open(part, 'r') as infile:
-					outstr += '\n' + infile.read()
-					
-			outfile.write(outstr)
-			print 'wrote %s [%.1fk]' % (out, float(len(outstr)) / 1024)
+
+	def do(concat, startpath):
+		for out in concat:
+			outfile = startpath and os.path.join(startpath, out) or out
+			with open(outfile, 'w') as outfile:
+				outstr = ''
+				for part in concat[out]:
+					with open(part, 'r') as infile:
+						outstr += '\n' + infile.read()
+
+				outfile.write(outstr)
+				print 'wrote %s [%.1fk]' % (out, float(len(outstr)) / 1024)
+
+	do(lib.concat, None)
+	do(concat, sitepath)
+	
 
 def getparser():
 	"""setup option parser"""
@@ -212,9 +211,14 @@ def main():
 
 	elif options.replace is not None:
 		from lib.chai.util import replacer
+		print options.replace
+		# in code
 		replacer.replace(conf.sites[lib.chai.site]['path'], options.replace[0], \
 			options.replace[1], options.replace[2])
-			
+
+		# replace in framework
+		replacer.replace('lib', options.replace[0], options.replace[1], options.replace[2])
+
 	elif options.concat is not None:
 		concat()
 

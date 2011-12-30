@@ -31,9 +31,6 @@ var TopBar = Class.extend({
 	make: function() {
 		var user = ($.session && $.session.user) || 'guest';
 
-		// set brand
-		$('.topbar .brand').html(app.brand);
-
 		// clear out if there is anything
 		$('.topbar .nav.secondary-nav').empty();
 
@@ -62,6 +59,7 @@ var TopBar = Class.extend({
 				<li class="dropdown">\
 					<a class="dropdown-toggle" href="#">Admin</a>\
 					<ul class="dropdown-menu">\
+						<li><a href="#cms_settings">Settings</a></li>\
 						<li><a href="#pagelist">Pages</a></li>\
 						<li><a href="#filelist">Files</a></li>\
 						<li><a href="#userlist">Users</a></li>\
@@ -103,6 +101,10 @@ var TopBar = Class.extend({
 $(document).ready(function() {
 	$.require('lib/js/bootstrap/bootstrap-dropdown.js');
 	app.topbar = new TopBar();
+
+	// set brand
+	if(app.cms_settings.brand)
+		$('.topbar .brand').html(app.cms_settings.brand);
 })
 
 

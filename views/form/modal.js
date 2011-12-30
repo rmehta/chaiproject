@@ -39,9 +39,13 @@ var FormModalView = FormView.extend({
 		this.$form.addClass('form-stacked');
 		
 		var me = this;
+		
 		this.secondary_action = function() {
 			me.$modal.modal('hide')
 		}
+		// show secondary btn
+		this.$wrapper.find('button.btn.secondary').css('display', 'block');		
+
 		
 		// setup modal
 		this.$modal.modal({backdrop:'static', show:false});

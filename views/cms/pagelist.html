@@ -3,7 +3,7 @@
 
 <script>
 
-$.require('lib/views/objlist.js');
+$.require('lib/views/ui/objlist.js');
 $.require('lib/js/prettydate.js');
 
 var PageListView = ObjListView.extend({
@@ -15,12 +15,12 @@ var PageListView = ObjListView.extend({
 			.append('<button class="btn primary objlist-new-btn">New</button>');
 			
 		this.$w.find('.objlist-new-btn').click(function() {
-			$.view.open('editpage');
+			chai.view.open('editpage');
 		});
 		
 		// edit action
 		this.$b.delegate('button.editpage-btn','click',function() {
-			$.view.open('editpage/' + $(this).attr('data-name'));
+			chai.view.open('editpage/' + $(this).attr('data-name'));
 		});
 	},
 	render_result: function(result) {

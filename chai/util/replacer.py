@@ -7,14 +7,12 @@ def replace(start, txt1, txt2, extn):
 		for fn in wt[2]:
 			if fn.split('.')[-1]==extn:
 				fpath = os.path.join(wt[0], fn)
-				f = open(fpath, 'r')
-				content = f.read()
-				f.close()
+				with open(fpath, 'r') as f:
+					content = f.read()
 				
 				if re.search(txt1, content):
 				
-					f = open(fpath, 'w')
-					f.write(re.sub(txt1, txt2, content))
-					f.close()
+					with open(fpath, 'w') as f:
+						f.write(re.sub(txt1, txt2, content))
 				
 					print 'updated in %s' % fpath

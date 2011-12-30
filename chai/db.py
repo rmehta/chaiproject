@@ -63,7 +63,15 @@ class Database:
 			from lib.chai import out
 			out['log'] = query % values
 		
-		self.cur.execute(query, values)
+		try:
+			self.cur.execute(query, values)
+			
+		except MySQLdb.OperationalError, e:
+			# if connection is timed out, reconnect and try again
+			if e.args[0] == 2006:
+				self.connect(self.settings)
+				self.sql(query, values, as_dict, debug)
+			
 		res = self.cur.fetchall()
 
 		if as_dict:

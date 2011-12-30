@@ -27,8 +27,7 @@ Misc views
 		// clear after 5sec
 		setTimeout('$("#notify'+$.notify_cnt+'").fadeOut()', 5000);
 		return $n;
-	}
-
+	};
 
 	// show a message
 	$.msgprint = function(txt) {
@@ -55,7 +54,7 @@ Misc views
 		$('#app_msgprint .modal-body').append('<p>'+txt+'</p>');
 		$('#app_msgprint').modal({backdrop:'static', show: true});
 
-	}
+	};
 
 	$.confirm = function(txt, yes, no) {
 		$.require('lib/js/bootstrap/bootstrap-modal.js');
@@ -86,5 +85,5 @@ Misc views
 		}
 		$('#app_confirm .modal-body').html('<p>'+txt+'</p>');
 		$('#app_confirm').modal({backdrop: 'static', show: true});
-	}	
+	};	
 })(jQuery);
