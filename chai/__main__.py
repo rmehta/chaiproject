@@ -13,12 +13,35 @@ Set of command line utilities to manage the app
 
 """
 
+std_concat = """
+concat = {
+	'all.js': [
+		'lib/js/json2.js',
+		'lib/js/jquery/jquery.min.js',
+		'lib/js/history.min.js',
+		'lib/chaijs/core/core.js'
+	],
+	'all.css': [
+		'lib/css/bootstrap.css',
+		'lib/css/style.css',
+	]
+}"""
+
 def newapp():
 	print "Setting up new app..."
-	os.chdir(lib.chai.sitepath())
+	app_name = raw_input('Enter name of the new app (all lowercase letters):')
+	
+	import os
+	if not os.path.exists(app_name):
+		os.mkdir(app_name)
+	
+	os.chdir(app_name)
 	make_dirs()
 	dbinfo = setup_db()
-	create_index()
+
+	print "Next steps..."
+	print "Please update your settings in conf/__init__.py"
+	print "Run `chai --update all` to create database tables"
 	
 def make_dirs():
 	"""make dirs
@@ -34,8 +57,12 @@ def make_dirs():
 		__init__.py
 	views/
 	"""
-	from lib.chai import sitepath
-		
+	import os
+	
+	if not os.path.exists('__init__.py'):
+		with open('__init__.py', 'w') as f:
+			f.write(std_concat)
+	
 	if not os.path.exists('models'):
 		os.mkdir('models')
 		os.system('touch models/__init__.py')
@@ -43,12 +70,8 @@ def make_dirs():
 	if not os.path.exists('controllers'):
 		os.mkdir('controllers')
 		os.system('touch controllers/__init__.py')
-
-	if not os.path.exists('conf'):
-		os.mkdir('conf')
-		os.system('touch conf/__init__.py')
 	
-	if not os.path.exsists('tests'):
+	if not os.path.exists('tests'):
 		os.mkdir('tests')
 		os.system('touch tests/__init__.py')
 	
@@ -79,8 +102,6 @@ def setup_db():
 	cur.execute("create database if not exists `%s`;" % dbname)
 	print "Database created"
 	create_user(cur, dbname, dbuser, dbpassword)
-	print "Please update your settings in conf/__init__.py"
-	sync_tables()
 
 def create_user(cur, dbname, dbuser, dbpassword):
 	"""
