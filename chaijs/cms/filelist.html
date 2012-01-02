@@ -15,13 +15,7 @@
 <script>
 // get list of pages
 $.require('lib/js/prettydate.js');
-$.require('lib/js/common.js');
-$.require('lib/chaijs/upload.js');
-
-// delete
-$("#filelist").delete_table_row({
-	method:'lib.chai.files.delete'
-});
+$.require('lib/chaijs/cms/upload.js');
 
 $.call({
 	method:'lib.chai.files.filelist', 

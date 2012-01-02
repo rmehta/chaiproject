@@ -20,6 +20,11 @@ section {
 
 textarea.code {
 	height: 20em;
+	font-family: "Courier", Fixed;
+}
+
+code {
+	background-color: transparent !important; 
 }
 
 .shadow {
@@ -101,10 +106,6 @@ textarea.code {
 
 .item-box-item {
 	padding-bottom: 7px;
-}
-
-code {
-	background-color: transparent !important; 
 }
 
 .notification {

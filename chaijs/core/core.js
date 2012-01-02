@@ -605,6 +605,11 @@ chai.view = {
 			},
 			success: function(data) {
 				chai.view.make_page({name:name, html:data.html, virtual:true});
+
+				// execute js / css
+				if(data.js)$.set_js(data.js);
+				if(data.css)$.set_css(data.css);
+
 				callback();
 			}
 		});

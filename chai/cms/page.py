@@ -31,8 +31,11 @@ from lib.chai import objstore, db, whitelist
 def get(name):
 	"""return page html"""
 	template = get_template()
-	html = content(name=name)['html']
-	html = """<div class="content-wrap active" id="%s">%s</div>""" % (name, html)
+	obj = content(name=name)
+	html = """<div class="content-wrap active" id="%s">%s</div>""" % (name, obj['html'])
+	
+	if obj.get('js'):
+		html += """<script type="text/javascript">%s</script>""" % obj['js']
 	
 	return template % {'content': html, 'bootjs':bootjs()}
 
@@ -53,7 +56,8 @@ def content(**args):
 		obj['html'] = """<h1>Not Found</h1><p>This link is not active. 
 			<a href="#index">Go back to Home Page</a></p>"""
 		
-	return {'html': header(obj) + obj["html"] + footer(obj)}
+	return {'html': header(obj) + obj["html"] + footer(obj), 
+		'js': obj.get('js', ''), 'css':obj.get('css', '')}
 	
 def header(obj):
 	"""add page header and breadcrumbs"""
