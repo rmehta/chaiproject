@@ -90,7 +90,7 @@ var app = {
 				} else {
 					// active content is already loaded, 
 					// (for static content)
-					$content.trigger('_show');					
+					$content.trigger('page_show');					
 				}
 			} else {
 				// no location, open index
@@ -109,7 +109,9 @@ var app = {
 		})		
 	},
 	setup_cms: function() {
-		
+		if(app.cms_settings.footer) {
+			$('.footer .container').html(app.cms_settings.footer);
+		}
 	}
 };
 

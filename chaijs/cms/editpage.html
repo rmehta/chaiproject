@@ -13,19 +13,20 @@ var EditPageFormView = FormView.extend({
 		this.markdown_to_html();
 	},
 	make_sidebox: function() {
-		this.add_sidebox_item('Save'.bold(), function(me) {
-			me.primary_action();
+		var me = this;
+		this.sidebar.add_item('Save'.bold(), function(me) {
+			me.view.controller.primary_action();
 		});
 
-		this.add_sidebox_item('View Page', function(me) {
-			chai.view.open(me.get_value('name'));
+		this.sidebar.add_item('View Page', function(me) {
+			chai.view.open(me.view.get_value('name'));
 		});
 
-		this.add_sidebox_item('List Pages', function(me) {
+		this.sidebar.add_item('List Pages', function(me) {
 			chai.view.open('pagelist');
 		});
 
-		this.add_sidebox_item('New Page', function(me) {
+		this.sidebar.add_item('New Page', function(me) {
 			chai.view.open('editpage');
 		});
 	},
@@ -85,7 +86,7 @@ app.editpage_form = new EditPageFormView({
 })
 
 // show from fragment
-$("#editpage").bind('_show', function() {
+$("#editpage").bind('page_show', function() {
 	app.editpage_form.set_obj();
 })
 </script>

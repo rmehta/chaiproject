@@ -25,10 +25,9 @@ chai.view = {
 
 		// go to home if not "index"
 		if(viewid=='index' && $.index!='index') {
-			chai.view.open($.index);
-			return;
+			viewid = $.index;
 		}
-		if(route==chai.view.current_route) {
+		if(route==chai.view.route) {
 			// no change
 			return;
 		}
@@ -40,32 +39,30 @@ chai.view = {
 	show: function(name, path) {
 		chai.view.load(name, path, function() {
 			// make page active
-			if($("#main .content-wrap.active").length) {
-				$("#main .content-wrap.active").removeClass('active');
+			var curpage = $("#main .content-wrap.active");
+			if(curpage.length) {
+				chai.view.pages[curpage.attr('id')].hide();
 			}
-			$("#"+name).addClass('active').trigger('_show');
+			app.cur_page = chai.view.pages[name];
+			app.cur_page.show();
+			
 			window.scroll(0, 0);
 		});
 	},
 	load: function(name, path, callback) {
-		if(!$('#'+name).length) {
+		if(chai.view.pages[name]) {
+			callback();
+		} else {
 			if(path) 
 				chai.view.load_files(name, path, callback);
 			else
-				chai.view.load_virtual(name, callback);
+				chai.view.load_virtual(name, callback);			
 		}
-		callback();
 	},
 	load_files: function(name, path, callback) {
-		var extn = path.split('.').splice(-1)[0];
-		if(extn=='js') {
-			$.getScript(path, callback);
-		} else {
-			$.get(path, function(html) {
-				chai.view.make_page({name:name, html:html});
-				callback();
-			});
-		}
+		$.get(path, function(html) {
+			chai.view.make_page({name:name, html:html}, callback);
+		});
 	},
 	load_virtual: function(name, callback) {
 		$.call({
@@ -74,18 +71,15 @@ chai.view = {
 				name: name,
 			},
 			success: function(data) {
-				chai.view.make_page({name:name, html:data.html, virtual:true});
-
-				// execute js / css
-				if(data.js)$.set_js(data.js);
-				if(data.css)$.set_css(data.css);
-
-				callback();
+				data.virtual = true;
+				data.name = name;
+				chai.view.make_page(data, callback);
 			}
 		});
 	},
-	make_page: function(obj) {
-		new PageView(obj);
+	make_page: function(obj, callback) {
+		chai.view.pages[obj.name] = new PageView(obj);
+		callback();
 	},
 
 	// get view id from the given route
@@ -103,7 +97,7 @@ chai.view = {
 	is_same: function(name) {
 		if(name[0]!='#') name = '#' + name;
 		return name==location.hash;
-	},
+	}
 }
 
 // shortcut

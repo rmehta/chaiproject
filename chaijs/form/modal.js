@@ -40,7 +40,7 @@ var FormModalView = FormView.extend({
 		
 		var me = this;
 		
-		this.secondary_action = function() {
+		this.controller.secondary_action = function() {
 			me.$modal.modal('hide')
 		}
 		// show secondary btn

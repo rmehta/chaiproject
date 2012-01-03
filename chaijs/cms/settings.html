@@ -26,7 +26,7 @@ app.cms_settings_form = new FormView({
 	}
 });
 
-$('#cms_settings').bind('_show', function() {
+$('#cms_settings').bind('page_show', function() {
 	if(app.cms_settings)
 		app.cms_settings_form.set_values(app.cms_settings)
 })

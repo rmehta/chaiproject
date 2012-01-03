@@ -4,17 +4,40 @@ var PageView = Class.extend({
 		this.make();
 	},
 	make: function() {
-		$('<div>')
+		this.$body = $('<div>')
 			.addClass('content-wrap')
 			.attr('id', this.obj.name)
-			.appendTo('#main')
-			.html(this.content());
-			
+			.appendTo('#main')		
+		this.make_sidebar();
+		
+		// html
+		this.$body.html(this.content());
+		
+		// js & css
 		if(this.obj.js) $.set_script(this.obj.js);
 		if(this.obj.css) $.set_style(this.obj.css);
 		
-		$("#"+name).trigger('_make');		
-		
+		this.$body.trigger('page_make');
+	},
+	// if the layout has a #sidebar, make a .sidebar-section under .sections
+	// with id as #sidebar-(name)
+	// this div will be automatically shown / hidden with the page
+	make_sidebar: function() {
+		if($('#sidebar').length) {
+			$('#sidebar .sections').append($.rep('<div class="sidebar-section"\
+			 	id="sidebar-%(name)s"></div>', this.obj));
+			this.$sidebar = $('#sidebar-' + this.obj.name);
+		}
+	},
+	hide: function() {
+		this.$body.removeClass('active');
+		this.$sidebar && this.$sidebar.removeClass('active');
+		this.$body.trigger('page_hide');
+	},
+	show: function() {
+		this.$body.addClass('active');
+		this.$sidebar && this.$sidebar.addClass('active');
+		this.$body.trigger('page_show');
 	},
 	content: function() {		
 		return this.obj.html + this.footer();

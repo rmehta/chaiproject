@@ -69,9 +69,6 @@ code {
 	border-right: 1px solid #eee;
 }
 
-.sidebar {
-	padding: 20px;
-}
 .content-wrap {
 	padding: 20px;
 	display: none;
@@ -95,6 +92,29 @@ code {
 	margin-right: 8px; 
 	float:right; 
 	margin-top: 6px;
+}
+
+/*
+sidebar
+- there will be only one active sidebar session at a time
+- all other sections if permanent, but be set a display: block
+*/
+#sidebar .sections {
+	padding: 20px;
+}
+
+.sidebar-section {
+	margin-bottom: 20px;
+	display: none;
+}
+
+.sidebar-section h5 {
+	line-height: 1em;
+	margin-bottom: 17px;
+}
+
+.sidebar-section.active {
+	display: block;
 }
 
 .item-box {
@@ -125,9 +145,10 @@ form .clearfix:after {
 /* Footer
 -------------------------------------------------- */
 .footer {
-  min-width: 940px;
-  padding: 20px 0;
-*/}
-.footer p {
-  color: #555;
+	text-shadow: 0 1px 0 #FFFFFF;
+	color: #555;
+}
+.footer .container {
+	padding-left: 40px;
+	padding-bottom: 20px;
 }

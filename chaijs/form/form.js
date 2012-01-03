@@ -68,7 +68,8 @@ var FormView = Class.extend({
 		this.make_static_inputs();
 		this.make_message();
 		this.make_footer();
-		this.bind_events();		
+		this.controller = new FormController(this);
+		this.sidebar = new FormSidebarView(this);
 	},
 	make_body: function() {
 		this.opts.$parent.append('<div class="form-wrapper">\
@@ -84,7 +85,6 @@ var FormView = Class.extend({
 			? $('#' + this.opts.id) 
 			: this.opts.$parent.find('.form-wrapper:last');
 		this.$form = this.$wrapper.find('form');
-		this.$sidebox = this.$wrapper.find('.form-item-box');
 	},
 	make_form_inputs: function() {
 		// create inputs
@@ -139,77 +139,6 @@ var FormView = Class.extend({
 			
 		this.$primary_btn = this.$wrapper.find('button.btn.primary');
 	},
-	bind_events: function() {
-		var me = this;
-		this.$primary_btn.click(function() {
-			return me.primary_action();
-		});
-		this.$wrapper.find('button.btn.secondary').click(function() {
-			return me.secondary_action();
-		});
-		
-		// enter on last input is primary action
-		if(this.opts.submit_from_last_input) {
-			this.$wrapper.find('input:last[type!="hidden"]').bind('keydown', function(event) {
-				if(event.which==13) {
-					me.$primary_btn.click();
-				}
-			});			
-		}
-	},
-	primary_action: function() {
-		this.disable_actions();
-		this.$primary_btn.text(this.opts.primary_btn_working_label);
-
-		var obj = this.getdata();
-		if(!obj) return false;
-
-		$.set_default(this.opts, 'method', 'lib.chai.objstore.insert')
-
-		var me = this;
-		$.call({
-			method: this.opts.method,
-			data: obj,
-			type: 'POST',
-			success: function(data) { 
-				me.$primary_btn.text(me.opts.primary_btn_label);
-				me.enable_actions();
-				me.success(data); 
-			}
-		});
-		return false;
-	},
-	getdata: function() {
-		var obj = this.get_values();
-		for(k in obj) {
-			if(typeof obj[k] == 'object') {
-				return {obj: JSON.stringify(obj)}
-			}
-		}
-		return obj
-	},
-	disable_actions: function() {
-		this.$wrapper.find('button.btn').attr('disabled', true);
-	},
-	enable_actions: function() {
-		this.$wrapper.find('button.btn').attr('disabled', false);
-	},
-	validate: function() {
-		$.each(this.inputlist, function(i, input) {
-			input.validate();
-		});
-	},
-	success: function(data) {
-		if(data.message && data.message=='ok') {
-			if(this.opts.success)this.opts.success(data);
-			if(data.obj) {
-				chai.objstore.set(data.obj);
-			}
-		} else {
-			$.notify('There were errors', 'important');
-			if(this.opts.error) this.opts.error(data);
-		}			
-	},
 	get_values: function() {
 		this.clear_message();
 		if(this.$wrapper.find('.error').length) {
@@ -262,14 +191,113 @@ var FormView = Class.extend({
 		if(fadeOutIn) {
 			this.$message.fadeOut(fadeOutIn);
 		}
+	}	
+});
+
+/*
+
+Form sidebar will either be the global sidebar or will be generated from 
+the form
+
+*/
+var FormSidebarView = Class.extend({
+	init: function(view) {
+		this.view = view;
+
+		var pageid = view.$wrapper.closest('.content-wrap').attr('id');
+		var $sidebar = $('#sidebar-' + pageid);
+		
+		if(!view.ismodal && $sidebar.length) {
+			this.$sidebox = $sidebar;
+		} else {
+			this.$sidebox = view.$wrapper.find('.form-item-box');
+		}
 	},
-	add_sidebox_item: function(label, action) {
+	add_item: function(label, action) {
 		var me = this;
 		this.$sidebox.append($.rep('<div class="item-box-item">\
 			<a href="#" onclick="return false">%(label)s</a></div>', {label:label}))
-			.css('display', 'block');
 		this.$sidebox.find('.item-box-item:last').click(function() {
 			action(me);
 		});
+	}
+});
+
+var FormController = Class.extend({
+	init: function(view) {
+		this.view = view;
+		this.opts = view.opts;
+		this.bind_events();
+	},
+	bind_events: function() {
+		var me = this;
+		this.view.$primary_btn.click(function() {
+			return me.primary_action();
+		});
+		this.view.$wrapper.find('button.btn.secondary').click(function() {
+			return me.secondary_action();
+		});
+		
+		// enter on last input is primary action
+		if(this.opts.submit_from_last_input) {
+			this.view.$wrapper.find('input:last[type!="hidden"]').bind('keydown', function(event) {
+				if(event.which==13) {
+					me.view.$primary_btn.click();
+				}
+			});
+		}
+	},
+	primary_action: function() {
+		this.disable_actions();
+		this.view.$primary_btn.text(this.opts.primary_btn_working_label);
+
+		var obj = this.getdata();
+		if(!obj) return false;
+
+		$.set_default(this.opts, 'method', 'lib.chai.objstore.insert')
+
+		var me = this;
+		$.call({
+			method: this.opts.method,
+			data: obj,
+			type: 'POST',
+			success: function(data) { 
+				me.view.$primary_btn.text(me.opts.primary_btn_label);
+				me.enable_actions();
+				me.success(data); 
+			}
+		});
+		return false;
+	},
+	getdata: function() {
+		var obj = this.view.get_values();
+		for(k in obj) {
+			if(typeof obj[k] == 'object') {
+				return {obj: JSON.stringify(obj)}
+			}
+		}
+		return obj
+	},
+	disable_actions: function() {
+		this.view.$wrapper.find('button.btn').attr('disabled', true);
+	},
+	enable_actions: function() {
+		this.view.$wrapper.find('button.btn').attr('disabled', false);
+	},
+	validate: function() {
+		$.each(this.view.inputlist, function(i, input) {
+			input.validate();
+		});
+	},
+	success: function(data) {
+		if(data.message && data.message=='ok') {
+			if(this.opts.success)this.opts.success(data);
+			if(data.obj) {
+				chai.objstore.set(data.obj);
+			}
+		} else {
+			$.notify('There were errors', 'important');
+			if(this.opts.error) this.opts.error(data);
+		}			
 	}
 });
