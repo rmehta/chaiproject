@@ -481,15 +481,9 @@ var app = {
 		} else {
 			if($content.length) {
 				var cid = $content.attr('id');
-				if(app.views[cid]) {
-					// loading a view by default
-					$content.remove();
-					chai.view.open(cid);
-				} else {
-					// active content is already loaded, 
-					// (for static content)
-					$content.trigger('page_show');					
-				}
+				$content.remove();
+				console.log(cid);
+				chai.view.open(cid);
 			} else {
 				// no location, open index
 				chai.view.open($.index);
