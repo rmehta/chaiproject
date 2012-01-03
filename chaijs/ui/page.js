@@ -14,8 +14,8 @@ var PageView = Class.extend({
 		this.$body.html(this.content());
 		
 		// js & css
-		if(this.obj.js) $.set_script(this.obj.js);
-		if(this.obj.css) $.set_style(this.obj.css);
+		if(this.obj.js) $.set_js(this.obj.js);
+		if(this.obj.css) $.set_css(this.obj.css);
 		
 		this.$body.trigger('page_make');
 	},
