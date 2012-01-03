@@ -56,8 +56,12 @@ var UploadView = Class.extend({
 		// trigger post on click
 		$('#upload button.btn.primary').click(function() {
 			$('#upload form').trigger('submit');
-		})
-		
+		});
+
+		// close on secondary
+		$('#upload button.btn.secondary').click(function() {
+			$('#upload').modal('hide');
+		});
 	},
 	
 	// reset form
@@ -65,7 +69,6 @@ var UploadView = Class.extend({
 		$('#upload form .message').html('');
 		$('#upload form input[name=filedata]').css('display', 'inline').val('');
 		$('#upload button.primary').attr('disabled', true).css('display','inline');
-		$('#upload').modal({backdrop:'static', show: false});
 	},
 	
 	// validate form
@@ -81,11 +84,12 @@ var UploadView = Class.extend({
 				data = JSON.parse(data);
 				$('#upload button.primary').css('display','none');
 				if(data.message && data.message=='ok') {
-					$('#upload form .message').html('<span class="label success">'+
+					$('#upload form .message').html('<span class="alert-message block-message success">'+
 						data.fname + ' uploaded</span>');
+					$(document).trigger('upload_done');
 				} else {
-					$('#upload form .message').html('<span class="label important">'+
-						data.error + '</span>');			
+					$('#upload form .message').html('<span class="alert-message block-message important">'+
+						data.error + '</span>');	
 				}
 			}
 		});

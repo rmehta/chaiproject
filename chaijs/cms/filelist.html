@@ -17,17 +17,55 @@
 $.require('lib/js/prettydate.js');
 $.require('lib/chaijs/cms/upload.js');
 
-$.call({
-	method:'lib.chai.files.filelist', 
-	success: function(data) {
-		// no pages?
-		if(!data.files.length) {
-			$('#filelist_table tbody').append($.rep('<tr>\
-				<td><div class="help-block">No Files Uploaded...</div>\
-				</td><td></td></tr>'));
-			return;
-		}
+var FileUploadList = Class.extend({
+	init: function() {
+		this.setup_events();
+		this.run();
+	},
+	setup_events: function() {
+		// setup delete
+		$('#filelist_table').delegate('button.delete-row-btn', 'click', function() {
+			var fname = $(this).attr('data-name');
+			var self = this;
+			$.call({
+				method: 'lib.chai.files.delete',
+				data: {name:fname},
+				success: function(data) {
+					if(data.message && data.message=='ok') {
+						$(self).parent().parent().remove();
+					}
+				}
+			});
+		});
 		
+		// refresh on upload
+		var self = this;
+		$(document).bind('upload_done', function() {
+			self.run();
+		});
+	},
+	run: function() {
+		$('#filelist_table tbody').empty();
+		var self = this;
+		$.call({
+			method:'lib.chai.files.filelist', 
+			success: function(data) { self.render(data); }
+		});	
+	},
+	render: function(data) {
+		if(!data.files.length) {
+			this.no_data();
+		} else {
+			this.show_files(data);
+		}
+	},
+	no_data: function() {
+		// no pages?
+		$('#filelist_table tbody').append($.rep('<tr>\
+			<td><div class="help-block">No Files Uploaded...</div>\
+			</td><td></td></tr>'));
+	},
+	show_files: function(data) {
 		// list pages
 		$.each(data.files, function(i, f) {		
 			$('#filelist_table tbody').append($.rep('<tr>\
@@ -40,9 +78,12 @@ $.call({
 					name: f[0],
 					size: (f[2] / 1024).toFixed(2),
 					ts: prettyDate(f[1])
-				}))
+				}));
 		});
 	}
-});
+})
+
+app.fileuploadlist = new FileUploadList();
+
 
 </script>

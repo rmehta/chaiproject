@@ -70,7 +70,7 @@ def header(obj):
 				
 		head = head + """<li class="active">%(label)s</li></ul>""" % obj
 		
-	if not '<h1>' in obj['html']:
+	if not '</h1>' in obj['html']:
 		head += '<div class="page-header"><h1>' + obj['label'] + '</h1></div>'
 		
 	return head
