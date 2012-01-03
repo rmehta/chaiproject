@@ -9,6 +9,8 @@ concat = {
 		'lib/chaijs/core/app.js',
 		'lib/chaijs/views.js',
 		'lib/chaijs/view_map.js',
-		'lib/chaijs/ui/toolbar.js'
+		'lib/js/bootstrap/bootstrap-dropdown.js',
+		'lib/chaijs/ui/toolbar.js',
+		'lib/chaijs/ui/page.js'
 	]
 }

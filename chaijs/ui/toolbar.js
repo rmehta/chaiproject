@@ -99,7 +99,6 @@ var TopBar = Class.extend({
 
 // activate dropdown events
 $(document).ready(function() {
-	$.require('lib/js/bootstrap/bootstrap-dropdown.js');
 	app.topbar = new TopBar();
 
 	// set brand
